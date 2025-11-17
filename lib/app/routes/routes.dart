@@ -1,0 +1,78 @@
+import 'dart:developer';
+import 'package:vendr/app/routes/routes_name.dart';
+import 'package:vendr/app/routes/unknown_page.dart';
+import 'package:flutter/material.dart';
+import 'package:vendr/view/auth/forgot_password/forgot_password.dart';
+import 'package:vendr/view/auth/forgot_password/new_password.dart';
+import 'package:vendr/view/auth/login.dart';
+import 'package:vendr/view/auth/profile_type.dart';
+import 'package:vendr/view/auth/user/user_signup.dart';
+import 'package:vendr/view/auth/vendor/vendor_signup.dart';
+import 'package:vendr/view/auth/welcome.dart';
+import 'package:vendr/view/home/user/user_home.dart';
+import 'package:vendr/view/home/vendor/vendor_home.dart';
+import 'package:vendr/view/profile/vendor/my_menu.dart';
+import 'package:vendr/view/profile/vendor/vendor_profile.dart';
+
+class Routes {
+  // static String initialRoute() => RoutesName.welcome;
+  static String initialRoute() => RoutesName.vendorMyMenu;
+
+  static final Map<String, WidgetBuilder> _routes = {
+    RoutesName.welcome: (_) => const WelcomeScreen(),
+    RoutesName.profileTypeSelection: (_) => const ProfileTypeSelectionScreen(),
+    RoutesName.userSignup: (_) => const UserSignupScreen(),
+    RoutesName.vendorSignup: (_) => const VendorSignupScreen(),
+    RoutesName.forgotPassword: (_) => const ForgotPasswordScreen(),
+    RoutesName.newPassword: (_) => const NewPasswordScreen(),
+    RoutesName.vendorHome: (_) => const VendorHomeScreen(),
+    RoutesName.userHome: (_) => const UserHomeScreen(),
+    RoutesName.vendorProfile: (_) => const VendorProfileScreen(),
+    RoutesName.vendorMyMenu: (_) => const VendorMyMenuScreen(),
+  };
+
+  static Route<dynamic> generateRoute(RouteSettings settings) {
+    log(
+      'Navigating to: ${settings.name}\t - ${settings.arguments}',
+      name: 'RouteGenerator',
+    );
+    switch (settings.name) {
+      // case RoutesName.doctorOnboarding:
+      //   final args = _getArgs(settings, requiredKeys: ['showBack']);
+      //   return MaterialPageRoute(
+      //     builder: (_) =>
+      //         DoctorOnboardingFlowScreen(showBack: args['showBack'] as bool),
+      //   );
+
+      case RoutesName.login:
+        final args = _getArgs(settings, requiredKeys: ['isVendor']);
+        return MaterialPageRoute(
+          builder: (_) => LoginScreen(isVendor: args['isVendor'] as bool),
+        );
+
+      default:
+        final builder = _routes[settings.name];
+        if (builder != null) {
+          return MaterialPageRoute(builder: builder, settings: settings);
+        }
+        return MaterialPageRoute(builder: (_) => const UnknownRouteScreen());
+    }
+  }
+
+  static Map<String, dynamic> _getArgs(
+    RouteSettings settings, {
+    required List<String> requiredKeys,
+  }) {
+    try {
+      final args = settings.arguments! as Map<String, dynamic>;
+      for (final key in requiredKeys) {
+        if (!args.containsKey(key)) {
+          throw ArgumentError('Missing required key: $key');
+        }
+      }
+      return args;
+    } catch (e) {
+      throw ArgumentError('Invalid arguments for route ${settings.name}');
+    }
+  }
+}
