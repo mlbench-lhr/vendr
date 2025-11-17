@@ -5,4 +5,12 @@ class VendorProfileService {
   static void gotoVendorMyMenu(BuildContext context) {
     Navigator.pushNamed(context, RoutesName.vendorMyMenu);
   }
+
+  static void gotoVendorAddProduct(BuildContext context, bool isEdit) {
+    Navigator.pushNamed(
+      context,
+      arguments: {'isEdit': isEdit},
+      RoutesName.vendorAddEditProduct,
+    );
+  }
 }

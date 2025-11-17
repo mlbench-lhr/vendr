@@ -15,4 +15,5 @@ class RoutesName {
   //Profile
   static const String vendorProfile = 'vendor_profile_screen';
   static const String vendorMyMenu = 'vendor_my_menu_screen';
+  static const String vendorAddEditProduct = 'vendor_add_edit_product_screen';
 }

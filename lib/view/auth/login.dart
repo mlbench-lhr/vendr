@@ -3,8 +3,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:vendr/app/components/my_button.dart';
 import 'package:vendr/app/components/my_scaffold.dart';
 import 'package:vendr/app/components/my_text_field.dart';
-import 'package:vendr/app/routes/routes_name.dart';
-import 'package:vendr/app/styles/app_radiuses.dart';
 import 'package:vendr/app/utils/extensions/context_extensions.dart';
 import 'package:vendr/services/common/auth_service.dart';
 import 'package:vendr/view/auth/widgets/language_menu.dart';

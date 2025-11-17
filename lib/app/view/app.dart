@@ -6,7 +6,6 @@ import 'package:vendr/provider/auth/locale_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
-import 'package:vendr/view/auth/welcome.dart';
 
 class App extends StatelessWidget {
   const App({super.key});

@@ -11,12 +11,13 @@ import 'package:vendr/view/auth/vendor/vendor_signup.dart';
 import 'package:vendr/view/auth/welcome.dart';
 import 'package:vendr/view/home/user/user_home.dart';
 import 'package:vendr/view/home/vendor/vendor_home.dart';
+import 'package:vendr/view/profile/vendor/add_edit_product.dart';
 import 'package:vendr/view/profile/vendor/my_menu.dart';
 import 'package:vendr/view/profile/vendor/vendor_profile.dart';
 
 class Routes {
-  // static String initialRoute() => RoutesName.welcome;
-  static String initialRoute() => RoutesName.vendorMyMenu;
+  static String initialRoute() => RoutesName.welcome;
+  // static String initialRoute() => RoutesName.vendorAddEditProduct;
 
   static final Map<String, WidgetBuilder> _routes = {
     RoutesName.welcome: (_) => const WelcomeScreen(),
@@ -44,10 +45,18 @@ class Routes {
       //         DoctorOnboardingFlowScreen(showBack: args['showBack'] as bool),
       //   );
 
+      //login
       case RoutesName.login:
         final args = _getArgs(settings, requiredKeys: ['isVendor']);
         return MaterialPageRoute(
           builder: (_) => LoginScreen(isVendor: args['isVendor'] as bool),
+        );
+
+      //add or edit product
+      case RoutesName.vendorAddEditProduct:
+        final args = _getArgs(settings, requiredKeys: ['isEdit']);
+        return MaterialPageRoute(
+          builder: (_) => AddEditProductScreen(isEdit: args['isEdit'] as bool),
         );
 
       default:

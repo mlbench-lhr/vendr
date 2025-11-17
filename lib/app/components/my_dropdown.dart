@@ -55,25 +55,19 @@ class MyDropdown<T> extends StatelessWidget {
               ? InputBorder.none
               : OutlineInputBorder(
                   borderSide: BorderSide(color: context.colors.inputBorder),
-                  borderRadius: BorderRadius.circular(
-                    AppRadiuses.hundredRadius,
-                  ),
+                  borderRadius: BorderRadius.circular(AppRadiuses.mediumRadius),
                 ),
           focusedBorder: noBackground
               ? InputBorder.none
               : OutlineInputBorder(
                   borderSide: BorderSide(color: context.colors.inputBorder),
-                  borderRadius: BorderRadius.circular(
-                    AppRadiuses.hundredRadius,
-                  ),
+                  borderRadius: BorderRadius.circular(AppRadiuses.mediumRadius),
                 ),
           errorBorder: noBackground
               ? InputBorder.none
               : OutlineInputBorder(
                   borderSide: BorderSide(color: context.colors.error),
-                  borderRadius: BorderRadius.circular(
-                    AppRadiuses.hundredRadius,
-                  ),
+                  borderRadius: BorderRadius.circular(AppRadiuses.mediumRadius),
                 ),
           focusedErrorBorder: noBackground
               ? InputBorder.none

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:vendr/app/components/menu_item_tile.dart';
 import 'package:vendr/app/components/my_scaffold.dart';
 import 'package:vendr/app/components/my_text_button.dart';
 import 'package:vendr/app/styles/app_radiuses.dart';
@@ -457,71 +458,6 @@ class ReviewsSectionHeading extends StatelessWidget {
         const Spacer(),
         MyTextButton(label: 'View All', isDark: true, fontSize: 14.sp),
       ],
-    );
-  }
-}
-
-class MenuItemTile extends StatelessWidget {
-  const MenuItemTile({
-    super.key,
-    required this.name,
-    required this.price,
-    this.imageUrl,
-  });
-  final String name;
-  final String price;
-  final String? imageUrl;
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      alignment: Alignment.bottomCenter,
-      height: 200.h,
-      child: Stack(
-        clipBehavior: Clip.none,
-        alignment: Alignment.topCenter,
-        children: [
-          Positioned(
-            top: -40,
-            child: CircleAvatar(
-              radius: 45.r,
-              backgroundColor: Colors.white,
-              backgroundImage: imageUrl != null
-                  ? NetworkImage(imageUrl!)
-                  : null,
-            ),
-          ),
-          Container(
-            width: 110.w,
-            height: 150.h,
-            padding: EdgeInsets.all(8.w),
-            decoration: BoxDecoration(
-              color: Colors.white12,
-              borderRadius: BorderRadius.circular(AppRadiuses.mediumRadius),
-            ),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.end,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  name,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  textAlign: TextAlign.center,
-                  style: context.typography.body.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                Text(
-                  price,
-                  style: context.typography.body.copyWith(
-                    color: context.colors.buttonPrimary,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
     );
   }
 }
