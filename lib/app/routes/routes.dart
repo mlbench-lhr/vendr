@@ -11,13 +11,19 @@ import 'package:vendr/view/auth/vendor/vendor_signup.dart';
 import 'package:vendr/view/auth/welcome.dart';
 import 'package:vendr/view/home/user/user_home.dart';
 import 'package:vendr/view/home/vendor/vendor_home.dart';
+import 'package:vendr/view/profile/languages.dart';
 import 'package:vendr/view/profile/vendor/add_edit_product.dart';
+import 'package:vendr/view/profile/vendor/change_email.dart';
+import 'package:vendr/view/profile/vendor/change_phone.dart';
+import 'package:vendr/view/profile/vendor/edit_profile.dart';
+import 'package:vendr/view/profile/vendor/location.dart';
 import 'package:vendr/view/profile/vendor/my_menu.dart';
+import 'package:vendr/view/profile/vendor/vendor_hours.dart';
 import 'package:vendr/view/profile/vendor/vendor_profile.dart';
 
 class Routes {
   static String initialRoute() => RoutesName.welcome;
-  // static String initialRoute() => RoutesName.vendorAddEditProduct;
+  // static String initialRoute() => RoutesName.vendorChangeEmail;
 
   static final Map<String, WidgetBuilder> _routes = {
     RoutesName.welcome: (_) => const WelcomeScreen(),
@@ -30,6 +36,12 @@ class Routes {
     RoutesName.userHome: (_) => const UserHomeScreen(),
     RoutesName.vendorProfile: (_) => const VendorProfileScreen(),
     RoutesName.vendorMyMenu: (_) => const VendorMyMenuScreen(),
+    RoutesName.vendorEditProfile: (_) => const VendorEditProfileScreen(),
+    RoutesName.vendorHours: (_) => const VendorHoursScreen(),
+    RoutesName.vendorLocation: (_) => const VendorLocationScreen(),
+    RoutesName.languages: (_) => const LanguagesScreen(),
+    RoutesName.vendorChangePhoneNumber: (_) => const ChangePhoneNumberScreen(),
+    RoutesName.vendorChangeEmail: (_) => const ChangeEmailScreen(),
   };
 
   static Route<dynamic> generateRoute(RouteSettings settings) {

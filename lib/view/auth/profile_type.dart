@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:vendr/app/components/my_scaffold.dart';
-import 'package:vendr/app/routes/routes_name.dart';
 import 'package:vendr/app/styles/app_radiuses.dart';
 import 'package:vendr/app/utils/extensions/context_extensions.dart';
 import 'package:vendr/generated/assets/assets.gen.dart';
@@ -22,6 +21,7 @@ class _ProfileTypeSelectionScreenState
     return MyScaffold(
       appBar: AppBar(
         centerTitle: false,
+        automaticallyImplyLeading: false, //don't show back button here
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -29,7 +29,7 @@ class _ProfileTypeSelectionScreenState
             Text(
               'Profile Type',
               style: context.typography.title.copyWith(
-                fontSize: 24.sp,
+                fontSize: 20.sp,
                 fontWeight: FontWeight.w700,
               ),
             ),

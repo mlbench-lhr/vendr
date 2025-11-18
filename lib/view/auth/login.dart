@@ -16,6 +16,7 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+  bool hidePassword = true;
   @override
   Widget build(BuildContext context) {
     return MyScaffold(
@@ -82,16 +83,23 @@ class _LoginScreenState extends State<LoginScreen> {
               style: context.typography.title.copyWith(fontSize: 18.sp),
             ),
             SizedBox(height: 6.h),
-            MyTextField(suffixIcon: Icon(Icons.visibility_off)),
+            MyTextField(
+              obscureText: hidePassword,
+              suffixIcon: GestureDetector(
+                onTap: () {
+                  setState(() {
+                    hidePassword = !hidePassword;
+                  });
+                },
+                child: Icon(
+                  hidePassword ? Icons.visibility_off : Icons.visibility,
+                ),
+              ),
+            ),
             SizedBox(height: 8.h),
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                // MyTextButton(
-                //   label: 'Forgot password?',
-                //   isDark: true,
-                //   fontSize: 12.sp,
-                // ),
                 GestureDetector(
                   onTap: () {
                     AuthService.gotoForgotPassword(context);

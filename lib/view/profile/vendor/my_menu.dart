@@ -64,7 +64,7 @@ class _VendorMyMenuScreenState extends State<VendorMyMenuScreen> {
         title: Text(
           'My Menu',
           style: context.typography.title.copyWith(
-            fontSize: 24.sp,
+            fontSize: 20.sp,
             fontWeight: FontWeight.w600,
           ),
         ),
@@ -89,7 +89,6 @@ class _VendorMyMenuScreenState extends State<VendorMyMenuScreen> {
           spacing: 14.w,
           runSpacing: 14.w,
           children: [
-            //
             ...items.map((item) {
               return MenuItemTile(
                 onTap: () {

@@ -21,9 +21,9 @@ class $AssetsIconsGen {
   /// File path: assets/icons/cart_logo.svg
   SvgGenImage get cartLogo => const SvgGenImage('assets/icons/cart_logo.svg');
 
-  /// File path: assets/icons/google_logo.svg
-  SvgGenImage get googleLogo =>
-      const SvgGenImage('assets/icons/google_logo.svg');
+  /// File path: assets/icons/google_icon.svg
+  SvgGenImage get googleIcon =>
+      const SvgGenImage('assets/icons/google_icon.svg');
 
   /// File path: assets/icons/profile.svg
   SvgGenImage get profile => const SvgGenImage('assets/icons/profile.svg');
@@ -43,7 +43,7 @@ class $AssetsIconsGen {
   List<SvgGenImage> get values => [
     appleLogo,
     cartLogo,
-    googleLogo,
+    googleIcon,
     profile,
     shop,
     vendrTextLogo,
@@ -58,12 +58,8 @@ class $AssetsImagesGen {
   AssetGenImage get blocksPattern =>
       const AssetGenImage('assets/images/blocks_pattern.png');
 
-  /// File path: assets/images/test_image.jpeg
-  AssetGenImage get testImage =>
-      const AssetGenImage('assets/images/test_image.jpeg');
-
   /// List of all assets
-  List<AssetGenImage> get values => [blocksPattern, testImage];
+  List<AssetGenImage> get values => [blocksPattern];
 }
 
 class Assets {

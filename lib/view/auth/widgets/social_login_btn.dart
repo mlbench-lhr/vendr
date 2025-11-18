@@ -22,8 +22,8 @@ class SocialLoginBtn extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             type == 'apple'
-                ? Assets.icons.appleLogo.svg()
-                : Assets.icons.googleLogo.svg(),
+                ? Assets.icons.appleLogo.svg(height: 24.h)
+                : Assets.icons.googleIcon.svg(height: 24.h),
             SizedBox(width: 8.w),
             Text(
               type == 'apple' ? 'Apple' : 'Google',

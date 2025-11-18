@@ -21,7 +21,7 @@ import 'package:vendr/app/routes/routes_name.dart';
 
 class AuthService {
   static void gotoProfileTypeSelection(BuildContext context) {
-    Navigator.pushNamed(context, RoutesName.profileTypeSelection);
+    Navigator.pushReplacementNamed(context, RoutesName.profileTypeSelection);
   }
 
   static void gotoLogin(BuildContext context, bool isVendor) {
@@ -59,6 +59,14 @@ class AuthService {
     Navigator.pushNamedAndRemoveUntil(
       context,
       RoutesName.userHome,
+      (route) => false,
+    );
+  }
+
+  static void logout(BuildContext context) {
+    Navigator.pushNamedAndRemoveUntil(
+      context,
+      RoutesName.profileTypeSelection,
       (route) => false,
     );
   }

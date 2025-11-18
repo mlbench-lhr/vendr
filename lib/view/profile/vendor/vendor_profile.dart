@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:vendr/app/components/my_button.dart';
 import 'package:vendr/app/components/my_scaffold.dart';
 import 'package:vendr/app/utils/extensions/context_extensions.dart';
+import 'package:vendr/services/common/auth_service.dart';
 import 'package:vendr/services/vendor/vendor_profile_service.dart';
 
 class VendorProfileScreen extends StatefulWidget {
@@ -20,7 +21,7 @@ class _VendorProfileScreenState extends State<VendorProfileScreen> {
         title: Text(
           'Profile',
           style: context.typography.title.copyWith(
-            fontSize: 24.sp,
+            fontSize: 20.sp,
             fontWeight: FontWeight.w600,
           ),
         ),
@@ -53,22 +54,30 @@ class _VendorProfileScreenState extends State<VendorProfileScreen> {
               ProfileMenuTile(
                 title: 'Edit Profile',
                 icon: Icons.person_outline,
-                onTap: () {},
+                onTap: () {
+                  VendorProfileService.gotoVendorEditProfile(context);
+                },
               ),
               ProfileMenuTile(
                 title: 'Location',
                 icon: Icons.my_location_outlined,
-                onTap: () {},
+                onTap: () {
+                  VendorProfileService.gotoVendorLocation(context);
+                },
               ),
               ProfileMenuTile(
                 title: 'Vendor Hours',
                 icon: Icons.alarm_outlined,
-                onTap: () {},
+                onTap: () {
+                  VendorProfileService.gotoVendorHours(context);
+                },
               ),
               ProfileMenuTile(
                 title: 'Language',
                 icon: Icons.language_outlined,
-                onTap: () {},
+                onTap: () {
+                  VendorProfileService.gotoLanguagesScreen(context);
+                },
               ),
               ProfileMenuTile(
                 title: 'My Menu',
@@ -80,12 +89,16 @@ class _VendorProfileScreenState extends State<VendorProfileScreen> {
               ProfileMenuTile(
                 title: 'Change Phone Number',
                 icon: Icons.phone_outlined,
-                onTap: () {},
+                onTap: () {
+                  VendorProfileService.gotoChangePhoneNumber(context);
+                },
               ),
               ProfileMenuTile(
                 title: 'Change Email',
                 icon: Icons.mail_outline,
-                onTap: () {},
+                onTap: () {
+                  VendorProfileService.gotoChangeEmail(context);
+                },
               ),
               ProfileMenuTile(
                 title: 'Change Password',
@@ -104,6 +117,7 @@ class _VendorProfileScreenState extends State<VendorProfileScreen> {
                   label: 'Log Out',
                   onPressed: () {
                     debugPrint('Logout button pressed');
+                    AuthService.logout(context);
                   },
                 ),
               ),

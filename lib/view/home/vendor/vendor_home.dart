@@ -6,6 +6,7 @@ import 'package:vendr/app/components/my_scaffold.dart';
 import 'package:vendr/app/components/my_text_button.dart';
 import 'package:vendr/app/styles/app_radiuses.dart';
 import 'package:vendr/app/utils/extensions/context_extensions.dart';
+import 'package:vendr/app/utils/extensions/general_extensions.dart';
 import 'package:vendr/services/vendor/vendor_home_service.dart';
 
 class VendorHomeScreen extends StatefulWidget {
@@ -91,7 +92,7 @@ class _VendorHomeScreenState extends State<VendorHomeScreen> {
   Widget build(BuildContext context) {
     return MyScaffold(
       body: Padding(
-        padding: EdgeInsets.symmetric(vertical: 16.w),
+        padding: EdgeInsets.only(top: 16.w),
         child: Center(
           child: ListView(
             children: [

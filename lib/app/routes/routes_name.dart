@@ -13,7 +13,16 @@ class RoutesName {
   static const String userHome = 'user_home_screen';
 
   //Profile
+  //Vendor
   static const String vendorProfile = 'vendor_profile_screen';
   static const String vendorMyMenu = 'vendor_my_menu_screen';
   static const String vendorAddEditProduct = 'vendor_add_edit_product_screen';
+  static const String vendorEditProfile = 'vendor_edit_profile_screen';
+  static const String vendorHours = 'vendor_hours_screen';
+  static const String vendorLocation = 'vendor_location_screen';
+  static const String vendorChangePhoneNumber =
+      'vendor_change_phone_number_screen';
+  static const String vendorChangeEmail = 'vendor_change_email_screen';
+  //Common
+  static const String languages = 'languages_screen';
 }

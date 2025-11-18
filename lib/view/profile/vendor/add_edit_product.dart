@@ -24,7 +24,7 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
         title: Text(
           widget.isEdit ? 'Edit Product' : 'Upload Product',
           style: context.typography.title.copyWith(
-            fontSize: 24.sp,
+            fontSize: 20.sp,
             fontWeight: FontWeight.w600,
           ),
         ),

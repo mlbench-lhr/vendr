@@ -32,56 +32,70 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
       body: Padding(
         padding: EdgeInsets.all(16.w),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            SizedBox(height: 36.h),
-            Text(
-              'Forgot Password?',
-              style: context.typography.title.copyWith(
-                fontSize: 20.sp,
-                fontWeight: FontWeight.w800,
-              ),
-            ),
-            SizedBox(height: 6.h),
-            Text(
-              'Nothing to worry. Just enter your email address so we can send you a verification code to continue.',
-              style: context.typography.body.copyWith(fontSize: 14.sp),
-            ),
-            SizedBox(height: 36.h),
-            Text(
-              'Email',
-              style: context.typography.title.copyWith(
-                fontSize: 16.sp,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            SizedBox(height: 10.h),
-            MyTextField(
-              keyboardType: TextInputType.emailAddress,
-              suffixIcon: Icon(Icons.email_outlined),
-            ),
-            SizedBox(height: 6.h),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                Text(
-                  'Resend OTP',
-                  style: context.typography.title.copyWith(
-                    color: context.colors.buttonPrimary,
-                    fontSize: 14.sp,
-                    fontWeight: FontWeight.w800,
-                  ),
+            Expanded(
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SizedBox(height: 36.h),
+                    Text(
+                      'Forgot Password?',
+                      style: context.typography.title.copyWith(
+                        fontSize: 20.sp,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    SizedBox(height: 6.h),
+                    Text(
+                      'Nothing to worry. Just enter your email address so we can send you a verification code to continue.',
+                      style: context.typography.body.copyWith(fontSize: 14.sp),
+                    ),
+                    SizedBox(height: 36.h),
+                    Text(
+                      'Email',
+                      style: context.typography.title.copyWith(
+                        fontSize: 16.sp,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    SizedBox(height: 10.h),
+                    MyTextField(
+                      keyboardType: TextInputType.emailAddress,
+                      suffixIcon: Icon(Icons.email_outlined),
+                    ),
+                    SizedBox(height: 6.h),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        Text(
+                          'Resend OTP',
+                          style: context.typography.title.copyWith(
+                            color: context.colors.buttonPrimary,
+                            fontSize: 14.sp,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 32.h),
+                    Center(child: MyPinput(controller: pinController)),
+                  ],
                 ),
-              ],
+              ),
             ),
-            SizedBox(height: 32.h),
-            Center(child: MyPinput(controller: pinController)),
-            const Spacer(),
-            MyButton(
-              label: 'Submit',
-              onPressed: () {
-                AuthService.gotoNewPassword(context);
-              },
+            SafeArea(
+              top: false,
+              child: Padding(
+                padding: const EdgeInsets.only(top: 20),
+                child: MyButton(
+                  label: 'Submit',
+                  onPressed: () {
+                    AuthService.gotoNewPassword(context);
+                  },
+                ),
+              ),
             ),
           ],
         ),

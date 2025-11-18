@@ -20,6 +20,7 @@ class MyTextField extends StatelessWidget {
     this.borderRadius = 16,
     this.onChanged,
     this.maxLines,
+    this.onSubmitted,
   });
 
   final TextEditingController? controller;
@@ -36,11 +37,13 @@ class MyTextField extends StatelessWidget {
   final int? maxLength;
   final double borderRadius;
   final void Function(String)? onChanged;
+  final void Function(String)? onSubmitted;
   final int? maxLines;
 
   @override
   Widget build(BuildContext context) {
     return TextField(
+      onSubmitted: onSubmitted,
       controller: controller,
       cursorColor: context.colors.inputIcon,
       cursorErrorColor: context.colors.error,
