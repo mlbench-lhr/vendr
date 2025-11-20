@@ -20,6 +20,7 @@ import 'package:vendr/view/profile/vendor/location.dart';
 import 'package:vendr/view/profile/vendor/my_menu.dart';
 import 'package:vendr/view/profile/vendor/vendor_hours.dart';
 import 'package:vendr/view/profile/vendor/vendor_profile.dart';
+import 'package:vendr/view/reviews/reviews.dart';
 
 class Routes {
   static String initialRoute() => RoutesName.welcome;
@@ -42,6 +43,7 @@ class Routes {
     RoutesName.languages: (_) => const LanguagesScreen(),
     RoutesName.vendorChangePhoneNumber: (_) => const ChangePhoneNumberScreen(),
     RoutesName.vendorChangeEmail: (_) => const ChangeEmailScreen(),
+    RoutesName.reviews: (_) => const ReviewsScreen(),
   };
 
   static Route<dynamic> generateRoute(RouteSettings settings) {

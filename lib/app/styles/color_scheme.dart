@@ -175,7 +175,8 @@ class AppColorScheme extends ThemeExtension<AppColorScheme> {
     nonSelectionIndicator: Color(0xFF3C4554),
 
     // Cards & Chips
-    cardPrimary: Color(0xFFF4E9DC),
+    // cardPrimary: Color(0xFFF4E9DC),
+    cardPrimary: Color.fromARGB(255, 226, 236, 251),
     cardPrimaryText: Color(0xFF16263D),
     cardSecondary: Color(0xFFFAF9F7),
     cardSecondaryText: Color(0x9916263D), // 60% opacity

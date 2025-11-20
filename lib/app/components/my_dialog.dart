@@ -52,6 +52,7 @@ class _MyDialogState extends State<MyDialog> {
       canPop: !_isLoading,
       child: Dialog(
         backgroundColor: context.colors.cardPrimary,
+        // backgroundColor: const Color.fromARGB(255, 203, 225, 255),
         alignment: Alignment.bottomCenter,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppRadiuses.extraLargeRadius),

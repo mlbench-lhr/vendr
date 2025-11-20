@@ -33,12 +33,13 @@ class MyOutlinedButton extends StatelessWidget {
         onPressed: onPressed,
         style: OutlinedButton.styleFrom(
           foregroundColor: textColor,
-          padding: EdgeInsets.symmetric(vertical: 12.h),
+          // padding: EdgeInsets.symmetric(vertical: 12.h),
+          padding: EdgeInsets.symmetric(vertical: 14.h),
           side: BorderSide(
             color: isEnabled ? borderColor : context.colors.buttonDisabled,
           ),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(AppRadiuses.hundredRadius),
+            borderRadius: BorderRadius.circular(AppRadiuses.largeRadius),
           ),
         ),
         child: icon != null

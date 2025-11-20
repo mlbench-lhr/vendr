@@ -132,7 +132,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 SizedBox(width: 10.w),
                 Text(
-                  'Log in With',
+                  'Log In With',
                   style: context.typography.bodySmall.copyWith(
                     fontWeight: FontWeight.w500,
                   ),

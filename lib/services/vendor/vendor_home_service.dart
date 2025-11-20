@@ -5,4 +5,8 @@ class VendorHomeService {
   static void gotoVendorProfile(BuildContext context) {
     Navigator.pushNamed(context, RoutesName.vendorProfile);
   }
+
+  static void gotoVendorReviews(BuildContext context) {
+    Navigator.pushNamed(context, RoutesName.reviews);
+  }
 }

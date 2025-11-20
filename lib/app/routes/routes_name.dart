@@ -25,4 +25,5 @@ class RoutesName {
   static const String vendorChangeEmail = 'vendor_change_email_screen';
   //Common
   static const String languages = 'languages_screen';
+  static const String reviews = 'reviews_screen';
 }

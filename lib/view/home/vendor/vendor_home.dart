@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:vendr/app/components/menu_item_tile.dart';
 import 'package:vendr/app/components/my_scaffold.dart';
 import 'package:vendr/app/components/my_text_button.dart';
+import 'package:vendr/app/components/review_tile.dart';
 import 'package:vendr/app/styles/app_radiuses.dart';
 import 'package:vendr/app/utils/extensions/context_extensions.dart';
 import 'package:vendr/app/utils/extensions/general_extensions.dart';
@@ -95,29 +96,43 @@ class _VendorHomeScreenState extends State<VendorHomeScreen> {
         padding: EdgeInsets.only(top: 16.w),
         child: Center(
           child: ListView(
+            shrinkWrap: true,
             children: [
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: 16.w),
                 child: Column(
+                  mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [VendorAvatar(), NotificationsBtn()],
-                    ),
-                    SizedBox(height: 16.h),
-                    Text(
-                      'Harry Brook',
-                      style: context.typography.title.copyWith(
-                        fontWeight: FontWeight.w700,
-                        fontSize: 20.sp,
-                      ),
-                    ),
-                    SizedBox(height: 4.h),
-                    Text(
-                      'Food Vendor',
-                      style: context.typography.body.copyWith(fontSize: 14.sp),
+                      children: [
+                        VendorAvatar(),
+                        12.width,
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            8.height,
+                            Text(
+                              'Harry Brook',
+                              style: context.typography.title.copyWith(
+                                fontWeight: FontWeight.w700,
+                                fontSize: 20.sp,
+                              ),
+                            ),
+                            SizedBox(height: 4.h),
+                            Text(
+                              'Food Vendor',
+                              style: context.typography.body.copyWith(
+                                fontSize: 14.sp,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const Spacer(),
+                        NotificationsBtn(),
+                      ],
                     ),
                     SizedBox(height: 24.h),
                     LocationSection(),
@@ -136,6 +151,7 @@ class _VendorHomeScreenState extends State<VendorHomeScreen> {
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: 16.w),
                 child: Column(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     VendorHoursHeading(),
                     SizedBox(height: 16.h),
@@ -181,6 +197,7 @@ class _VendorHomeScreenState extends State<VendorHomeScreen> {
                     SizedBox(height: 16.h),
                     //Reviews
                     _buildReviewsList(reviews),
+                    SizedBox(height: 16.h),
                   ],
                 ),
               ),
@@ -191,9 +208,9 @@ class _VendorHomeScreenState extends State<VendorHomeScreen> {
     );
   }
 
-  SizedBox _buildMenuItems(List<Map<String, dynamic>> menuItems) {
+  Widget _buildMenuItems(List<Map<String, dynamic>> menuItems) {
     return SizedBox(
-      height: 200.h,
+      height: 200,
       child: ListView.separated(
         padding: EdgeInsets.only(left: 16.w),
         scrollDirection: Axis.horizontal,
@@ -216,7 +233,6 @@ class _VendorHomeScreenState extends State<VendorHomeScreen> {
 
 SizedBox _buildReviewsList(List<Map<String, dynamic>> reviews) {
   return SizedBox(
-    height: 200.h,
     child: ListView.separated(
       physics: const NeverScrollableScrollPhysics(),
       shrinkWrap: true,
@@ -234,65 +250,6 @@ SizedBox _buildReviewsList(List<Map<String, dynamic>> reviews) {
       },
     ),
   );
-}
-
-class ReviewTile extends StatelessWidget {
-  const ReviewTile({
-    super.key,
-    required this.name,
-    required this.rating,
-    required this.timeStamp,
-    required this.content,
-  });
-  final String name;
-  final double rating;
-  final String timeStamp;
-  final String content;
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      child: Column(
-        children: [
-          Row(
-            children: [
-              //image
-              CircleAvatar(radius: 20.r, backgroundColor: Colors.white60),
-              SizedBox(width: 8.w),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  //name
-                  Text(
-                    'Cameron Williomson',
-                    style: context.typography.title.copyWith(),
-                  ),
-                  //stars
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      RatingBarIndicator(
-                        itemPadding: EdgeInsets.only(right: 3.w),
-                        rating: 4,
-                        itemSize: 17.w,
-                        itemBuilder: (context, _) =>
-                            const Icon(Icons.star, color: Colors.amber),
-                      ),
-                      Text('2 mins ago'),
-                    ],
-                  ),
-                ],
-              ),
-            ],
-          ),
-          SizedBox(height: 8.h),
-          Text(
-            'Consequat velit qui adipisicing sunt do rependerit ad laborum tempor ullamco.',
-            style: context.typography.body.copyWith(fontSize: 14.sp),
-          ),
-        ],
-      ),
-    );
-  }
 }
 
 class VendorHoursCard extends StatelessWidget {
@@ -316,6 +273,7 @@ class VendorHoursCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(AppRadiuses.mediumRadius),
       ),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
           Text(
             day,
@@ -337,6 +295,7 @@ class VendorHoursCard extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Column(
+                      mainAxisSize: MainAxisSize.min,
                       children: [
                         CircleAvatar(
                           radius: 4.r,
@@ -352,6 +311,7 @@ class VendorHoursCard extends StatelessWidget {
                     ),
                     SizedBox(width: 4.w),
                     Column(
+                      mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(
                           startTime ?? '',
@@ -457,7 +417,14 @@ class ReviewsSectionHeading extends StatelessWidget {
           ),
         ),
         const Spacer(),
-        MyTextButton(label: 'View All', isDark: true, fontSize: 14.sp),
+        MyTextButton(
+          label: 'View All',
+          isDark: true,
+          fontSize: 14.sp,
+          onPressed: () {
+            VendorHomeService.gotoVendorReviews(context);
+          },
+        ),
       ],
     );
   }
@@ -474,7 +441,8 @@ class LocationSection extends StatelessWidget {
           radius: 18.r,
           backgroundColor: Colors.white24,
           child: Icon(
-            Icons.my_location_outlined,
+            // Icons.my_location_outlined,
+            Icons.location_on_outlined,
             color: Colors.white,
             size: 20.w,
           ),

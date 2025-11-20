@@ -2,9 +2,11 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:vendr/app/components/my_button.dart';
+import 'package:vendr/app/components/my_form_text_field.dart';
 import 'package:vendr/app/components/my_scaffold.dart';
 import 'package:vendr/app/components/my_text_field.dart';
 import 'package:vendr/app/utils/extensions/context_extensions.dart';
+import 'package:vendr/app/utils/extensions/flush_bar_extension.dart';
 import 'package:vendr/view/profile/widgets/location_chip.dart';
 
 class VendorLocationScreen extends StatefulWidget {
@@ -133,6 +135,8 @@ class _VendorLocationScreenState extends State<VendorLocationScreen> {
         locations.add(addLocationController.text);
         addLocationController.clear();
       });
+    } else {
+      context.flushBarErrorMessage(message: 'Please enter a valid address.');
     }
   }
 }

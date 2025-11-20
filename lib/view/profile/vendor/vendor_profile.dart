@@ -5,6 +5,7 @@ import 'package:vendr/app/components/my_scaffold.dart';
 import 'package:vendr/app/utils/extensions/context_extensions.dart';
 import 'package:vendr/services/common/auth_service.dart';
 import 'package:vendr/services/vendor/vendor_profile_service.dart';
+import 'package:vendr/view/profile/widgets/delete_account_dialog.dart';
 
 class VendorProfileScreen extends StatefulWidget {
   const VendorProfileScreen({super.key});
@@ -25,6 +26,7 @@ class _VendorProfileScreenState extends State<VendorProfileScreen> {
             fontWeight: FontWeight.w600,
           ),
         ),
+        centerTitle: true,
       ),
       body: Center(
         child: Padding(
@@ -60,7 +62,7 @@ class _VendorProfileScreenState extends State<VendorProfileScreen> {
               ),
               ProfileMenuTile(
                 title: 'Location',
-                icon: Icons.my_location_outlined,
+                icon: Icons.location_on_outlined,
                 onTap: () {
                   VendorProfileService.gotoVendorLocation(context);
                 },
@@ -108,7 +110,14 @@ class _VendorProfileScreenState extends State<VendorProfileScreen> {
               ProfileMenuTile(
                 title: 'Delete Account',
                 icon: Icons.delete_outline,
-                onTap: () {},
+                onTap: () {
+                  //
+                  showDialog<void>(
+                    context: context,
+                    builder: (_) => DeleteAccountDialog(),
+                  );
+                },
+                showArrow: false,
               ),
               SizedBox(height: 24.h),
               Padding(
@@ -135,10 +144,12 @@ class ProfileMenuTile extends StatelessWidget {
     required this.title,
     required this.icon,
     required this.onTap,
+    this.showArrow = true,
   });
   final String title;
   final IconData icon;
   final VoidCallback onTap;
+  final bool showArrow;
   @override
   Widget build(BuildContext context) {
     return InkWell(
@@ -156,7 +167,7 @@ class ProfileMenuTile extends StatelessWidget {
             SizedBox(width: 12.w),
             Text(title, style: context.typography.title.copyWith()),
             const Spacer(),
-            Icon(Icons.arrow_forward_ios, size: 22.w),
+            if (showArrow) Icon(Icons.arrow_forward_ios, size: 22.w),
           ],
         ),
       ),
