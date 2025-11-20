@@ -11,20 +11,20 @@ import 'package:vendr/view/auth/vendor/vendor_signup.dart';
 import 'package:vendr/view/auth/welcome.dart';
 import 'package:vendr/view/home/user/user_home.dart';
 import 'package:vendr/view/home/vendor/vendor_home.dart';
-import 'package:vendr/view/profile/languages.dart';
-import 'package:vendr/view/profile/vendor/add_edit_product.dart';
-import 'package:vendr/view/profile/vendor/change_email.dart';
-import 'package:vendr/view/profile/vendor/change_phone.dart';
-import 'package:vendr/view/profile/vendor/edit_profile.dart';
-import 'package:vendr/view/profile/vendor/location.dart';
+import 'package:vendr/view/language/user/user_language.dart';
+import 'package:vendr/view/notifications/user/notification_prefernces.dart';
+import 'package:vendr/view/notifications/user/notifications_screen.dart';
+import 'package:vendr/view/profile/user/user_edit_profile.dart';
+import 'package:vendr/view/favourites/user/user_favourits.dart';
+import 'package:vendr/view/profile/user/user_profile.dart';
+import 'package:vendr/view/auth/change_password.dart/change_user_password.dart';
 import 'package:vendr/view/profile/vendor/my_menu.dart';
-import 'package:vendr/view/profile/vendor/vendor_hours.dart';
 import 'package:vendr/view/profile/vendor/vendor_profile.dart';
-import 'package:vendr/view/reviews/reviews.dart';
+import 'package:vendr/view/reviews/user/user_review.dart';
+import 'package:vendr/view/search/user/user_search.dart';
 
 class Routes {
   static String initialRoute() => RoutesName.welcome;
-  // static String initialRoute() => RoutesName.vendorChangeEmail;
 
   static final Map<String, WidgetBuilder> _routes = {
     RoutesName.welcome: (_) => const WelcomeScreen(),
@@ -36,14 +36,17 @@ class Routes {
     RoutesName.vendorHome: (_) => const VendorHomeScreen(),
     RoutesName.userHome: (_) => const UserHomeScreen(),
     RoutesName.vendorProfile: (_) => const VendorProfileScreen(),
+    RoutesName.userProfile: (_) => const UserProfileScreen(),
+    RoutesName.userEditProfile: (_) => const UserEditProfile(),
     RoutesName.vendorMyMenu: (_) => const VendorMyMenuScreen(),
-    RoutesName.vendorEditProfile: (_) => const VendorEditProfileScreen(),
-    RoutesName.vendorHours: (_) => const VendorHoursScreen(),
-    RoutesName.vendorLocation: (_) => const VendorLocationScreen(),
-    RoutesName.languages: (_) => const LanguagesScreen(),
-    RoutesName.vendorChangePhoneNumber: (_) => const ChangePhoneNumberScreen(),
-    RoutesName.vendorChangeEmail: (_) => const ChangeEmailScreen(),
-    RoutesName.reviews: (_) => const ReviewsScreen(),
+    RoutesName.userFavourites: (_) => const UserFavouritsScreen(),
+    RoutesName.changeUserPassword: (_) => const ChangeUserPassword(),
+    RoutesName.notificationScreen: (_) => const NotificationsScreen(),
+    RoutesName.userSearch: (_) => const UserSearchScreen(),
+    RoutesName.notificationPerefrences: (_) =>
+        const NotificationPreferncesScreen(),
+    RoutesName.selectLanguage: (_) => const UserLanguageScreen(),
+    RoutesName.userReview: (_) => const UserReviewScreen(),
   };
 
   static Route<dynamic> generateRoute(RouteSettings settings) {
@@ -59,18 +62,10 @@ class Routes {
       //         DoctorOnboardingFlowScreen(showBack: args['showBack'] as bool),
       //   );
 
-      //login
       case RoutesName.login:
         final args = _getArgs(settings, requiredKeys: ['isVendor']);
         return MaterialPageRoute(
           builder: (_) => LoginScreen(isVendor: args['isVendor'] as bool),
-        );
-
-      //add or edit product
-      case RoutesName.vendorAddEditProduct:
-        final args = _getArgs(settings, requiredKeys: ['isEdit']);
-        return MaterialPageRoute(
-          builder: (_) => AddEditProductScreen(isEdit: args['isEdit'] as bool),
         );
 
       default:

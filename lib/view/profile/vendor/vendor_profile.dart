@@ -34,16 +34,12 @@ class _VendorProfileScreenState extends State<VendorProfileScreen> {
           child: ListView(
             children: [
               CircleAvatar(
+                backgroundColor: context.colors.buttonPrimary,
                 radius: 40.r,
-                backgroundColor: Colors.white70,
-                child: CircleAvatar(
-                  backgroundColor: context.colors.buttonPrimary,
-                  radius: 38.r,
-                  backgroundImage: NetworkImage(
-                    'https://cdn.cpdonline.co.uk/wp-content/uploads/2021/10/28122626/What-is-a-chef-hierarchy.jpg',
-                  ),
-                  // child: Icon(Icons.person, color: Colors.white, size: 40.w),
+                backgroundImage: NetworkImage(
+                  'https://cdn.cpdonline.co.uk/wp-content/uploads/2021/10/28122626/What-is-a-chef-hierarchy.jpg',
                 ),
+                // child: Icon(Icons.person, color: Colors.white, size: 40.w),
               ),
               SizedBox(height: 16.h),
               Text(
