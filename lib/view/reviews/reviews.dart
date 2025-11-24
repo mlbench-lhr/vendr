@@ -18,7 +18,7 @@ class ReviewsScreen extends StatefulWidget {
 class _ReviewsScreenState extends State<ReviewsScreen> {
   //Sample rating analysis
   final Map<String, dynamic> _ratingAnalysis = {
-    "averageRating": 4.3,
+    "averageRating": 3.2,
     "totalReviews": 120,
 
     // distribution keys must be like "1.0", "2.0", ..., "5.0"

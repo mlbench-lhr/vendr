@@ -20,6 +20,7 @@ class MyBottomSheet extends StatelessWidget {
     Color? backgroundColor,
   }) {
     return showModalBottomSheet<T>(
+      backgroundColor: backgroundColor,
       context: context,
       isDismissible: isDismissible,
       enableDrag: enableDrag,

@@ -12,6 +12,7 @@ class RoutesName {
   //Home
   static const String vendorHome = 'vendor_home_screen';
   static const String userHome = 'user_home_screen';
+  static const String userMenu = 'user_menu_screen';
 
   //Profile
   //Vendor
@@ -29,9 +30,6 @@ class RoutesName {
 
   // Search
   static const String userSearch = 'user_search';
-
-  // Language
-  static const String selectLanguage = 'select_language';
 
   //Ratings
   static const String userReview = 'user_review';

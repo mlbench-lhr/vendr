@@ -151,19 +151,19 @@ class ProfileMenuTile extends StatelessWidget {
     return InkWell(
       onTap: onTap,
       child: Container(
-        margin: EdgeInsets.symmetric(vertical: 8.h, horizontal: 16.w),
+        margin: EdgeInsets.symmetric(vertical: 6.h, horizontal: 16.w),
         color: Colors.transparent,
         child: Row(
           children: [
             CircleAvatar(
-              radius: 20.r,
+              radius: 18.r,
               backgroundColor: Colors.white24,
-              child: Icon(icon, color: Colors.white),
+              child: Icon(icon, color: Colors.white, size: 20.w),
             ),
             SizedBox(width: 12.w),
             Text(title, style: context.typography.title.copyWith()),
             const Spacer(),
-            if (showArrow) Icon(Icons.arrow_forward_ios, size: 22.w),
+            if (showArrow) Icon(Icons.arrow_forward_ios, size: 18.w),
           ],
         ),
       ),

@@ -26,6 +26,7 @@ class AppColorScheme extends ThemeExtension<AppColorScheme> {
     required this.buttonSecondaryText,
     required this.buttonDisabled,
     required this.buttonDisabledText,
+    required this.bottomSheetPrimary,
 
     // Input fields
     required this.inputBackground,
@@ -67,7 +68,7 @@ class AppColorScheme extends ThemeExtension<AppColorScheme> {
   factory AppColorScheme.light() => const AppColorScheme(
     // Core colors
     primary: Color(0xff00195a),
-    background: Color(0xFFFFFFFF),
+    background: Color(0xFF161B25), //update
     surface: Color(0xFFF1F5F9),
     onSurface: Color(0xFF0F172A),
     onSurfaceVariant: Color(0xFF64748B),
@@ -83,12 +84,13 @@ class AppColorScheme extends ThemeExtension<AppColorScheme> {
     textOnLight: Color(0xFF0F172A),
 
     // Button colors
-    buttonPrimary: Color(0xFF0F172A),
+    buttonPrimary: Color(0xFF226BF7),
     buttonPrimaryText: Color(0xFFFFFFFF),
     buttonSecondary: Color(0xFFF1F5F9),
     buttonSecondaryText: Color(0xFF0F172A),
     buttonDisabled: Color(0xFFE2E8F0),
     buttonDisabledText: Color(0xFF94A3B8),
+    bottomSheetPrimary: Color(0xFF2E233D),
 
     // Input fields
     inputBackground: Color(0xFFF1F5F9),
@@ -153,6 +155,7 @@ class AppColorScheme extends ThemeExtension<AppColorScheme> {
     buttonSecondaryText: Color(0xFF16263D),
     buttonDisabled: Color(0xFF334155),
     buttonDisabledText: Color(0xFF64748B),
+    bottomSheetPrimary: Color(0xFF2E323D),
 
     // Input fields
     inputBackground: Color(0xFF3C4554),
@@ -217,6 +220,7 @@ class AppColorScheme extends ThemeExtension<AppColorScheme> {
   final Color buttonSecondaryText;
   final Color buttonDisabled;
   final Color buttonDisabledText;
+  final Color bottomSheetPrimary;
 
   // Input fields
   final Color inputBackground;
@@ -277,6 +281,7 @@ class AppColorScheme extends ThemeExtension<AppColorScheme> {
     Color? buttonSecondaryText,
     Color? buttonDisabled,
     Color? buttonDisabledText,
+    Color? bottomSheetPrimary,
     Color? inputBackground,
     Color? inputText,
     Color? inputBorder,
@@ -326,6 +331,7 @@ class AppColorScheme extends ThemeExtension<AppColorScheme> {
       buttonSecondaryText: buttonSecondaryText ?? this.buttonSecondaryText,
       buttonDisabled: buttonDisabled ?? this.buttonDisabled,
       buttonDisabledText: buttonDisabledText ?? this.buttonDisabledText,
+      bottomSheetPrimary: bottomSheetPrimary ?? this.bottomSheetPrimary,
       inputBackground: inputBackground ?? this.inputBackground,
       inputText: inputText ?? this.inputText,
       inputBorder: inputBorder ?? this.inputBorder,
@@ -487,6 +493,7 @@ class AppColorScheme extends ThemeExtension<AppColorScheme> {
         t,
       )!,
       unselectedCard: Color.lerp(unselectedCard, other.unselectedCard, t)!,
+      bottomSheetPrimary: bottomSheetPrimary,
       //selectedCard: Color.lerp(//selectedCard, other.//selectedCard, t)!,
     );
   }

@@ -32,7 +32,7 @@ class _UserFavouritsScreenState extends State<UserFavouritsScreen> {
           children: [
             FavouriteChip(
               name: 'Harry Brook',
-              venderType: 'Proudct Vender',
+              venderType: 'Product Vender',
               imageUrl:
                   'https://images.unsplash.com/photo-1580489944761-15a19d654956?q=80&w=761&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
             ),
@@ -45,7 +45,7 @@ class _UserFavouritsScreenState extends State<UserFavouritsScreen> {
             ),
             SizedBox(height: 15.h),
             FavouriteChip(
-              name: 'Willim Persons',
+              name: 'William Persons',
               venderType: 'Fruit Vender',
               imageUrl:
                   'https://media.istockphoto.com/id/2209841249/photo/refrigeration-chamber-with-close-up-of-fruits-and-vegetables-in-the-crates.jpg?s=2048x2048&w=is&k=20&c=mGv4KJiTGVTTSdi6RJoDKz6bZe5BaMPMu8WdjJcXiro=',

@@ -3,7 +3,9 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:vendr/app/components/my_button.dart';
 import 'package:vendr/app/components/my_scaffold.dart';
 import 'package:vendr/app/utils/extensions/context_extensions.dart';
+import 'package:vendr/services/common/auth_service.dart';
 import 'package:vendr/view/profile/vendor/vendor_profile.dart';
+import 'package:vendr/view/profile/widgets/delete_account_dialog.dart';
 
 class UserProfileScreen extends StatefulWidget {
   const UserProfileScreen({super.key});
@@ -17,20 +19,18 @@ class _UserProfileState extends State<UserProfileScreen> {
   Widget build(BuildContext context) {
     return MyScaffold(
       appBar: AppBar(
-        title: Center(
-          child: Text(
-            textAlign: TextAlign.center,
-            'Profile',
-            style: context.typography.title.copyWith(
-              fontSize: 20.sp,
-              fontWeight: FontWeight.w600,
-            ),
+        title: Text(
+          'Profile',
+          style: context.typography.title.copyWith(
+            fontSize: 20.sp,
+            fontWeight: FontWeight.w600,
           ),
         ),
+        centerTitle: true,
       ),
-      body: Padding(
-        padding: EdgeInsets.all(16.w),
-        child: Center(
+      body: Center(
+        child: Padding(
+          padding: EdgeInsets.symmetric(vertical: 16.w),
           child: ListView(
             children: [
               CircleAvatar(
@@ -46,11 +46,12 @@ class _UserProfileState extends State<UserProfileScreen> {
               ),
               SizedBox(height: 16.h),
               Text(
-                'Joey Tribbiani',
                 textAlign: TextAlign.center,
+                'Joey Tribbiani',
                 style: context.typography.title.copyWith(fontSize: 20.sp),
               ),
-              SizedBox(height: 20.h),
+              SizedBox(height: 12.h),
+              //Menus
               ProfileMenuTile(
                 title: 'Edit Profile',
                 icon: Icons.person_2_outlined,
@@ -90,7 +91,14 @@ class _UserProfileState extends State<UserProfileScreen> {
               ProfileMenuTile(
                 title: 'Delete Account',
                 icon: Icons.delete_outline,
-                onTap: () {},
+                onTap: () {
+                  //
+                  showDialog<void>(
+                    context: context,
+                    builder: (_) => DeleteAccountDialog(),
+                  );
+                },
+                showArrow: false,
               ),
               SizedBox(height: 24.h),
               Padding(
@@ -99,6 +107,7 @@ class _UserProfileState extends State<UserProfileScreen> {
                   label: 'Log Out',
                   onPressed: () {
                     debugPrint('Logout button pressed');
+                    AuthService.logout(context);
                   },
                 ),
               ),
