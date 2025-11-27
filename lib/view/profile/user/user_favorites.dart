@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:vendr/app/components/my_scaffold.dart';
 import 'package:vendr/app/utils/extensions/context_extensions.dart';
-import 'package:vendr/view/favourites/user/widgets/favourite_chip.dart';
+import 'package:vendr/view/profile/user/widgets/favorite_chip.dart';
 
 class UserFavouritsScreen extends StatefulWidget {
   const UserFavouritsScreen({super.key});
@@ -18,7 +18,7 @@ class _UserFavouritsScreenState extends State<UserFavouritsScreen> {
       appBar: AppBar(
         title: Center(
           child: Text(
-            'Favourite Venders',
+            'Favorite Venders',
             style: context.typography.title.copyWith(
               fontSize: 20.sp,
               fontWeight: FontWeight.w600,
@@ -30,21 +30,21 @@ class _UserFavouritsScreenState extends State<UserFavouritsScreen> {
         padding: EdgeInsets.all(16.w),
         child: ListView(
           children: [
-            FavouriteChip(
+            FavoriteChip(
               name: 'Harry Brook',
               venderType: 'Product Vender',
               imageUrl:
                   'https://images.unsplash.com/photo-1580489944761-15a19d654956?q=80&w=761&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
             ),
-            SizedBox(height: 15.h),
-            FavouriteChip(
+            SizedBox(height: 16.h),
+            FavoriteChip(
               name: 'James Smith',
               venderType: 'Fast food vender',
               imageUrl:
                   'https://images.unsplash.com/photo-1716068107414-fad614ac83a3?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
             ),
-            SizedBox(height: 15.h),
-            FavouriteChip(
+            SizedBox(height: 16.h),
+            FavoriteChip(
               name: 'William Persons',
               venderType: 'Fruit Vender',
               imageUrl:

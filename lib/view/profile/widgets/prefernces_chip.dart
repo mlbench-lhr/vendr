@@ -30,7 +30,7 @@ class PreferncesChip extends StatelessWidget {
           value: value,
           onChanged: onChange,
           activeColor: Colors.white,
-          activeTrackColor: Colors.grey,
+          activeTrackColor: context.colors.buttonPrimary,
           inactiveThumbColor: Colors.white,
           inactiveTrackColor: Colors.white70,
         ),

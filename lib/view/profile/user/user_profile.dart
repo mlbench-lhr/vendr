@@ -4,8 +4,10 @@ import 'package:vendr/app/components/my_button.dart';
 import 'package:vendr/app/components/my_scaffold.dart';
 import 'package:vendr/app/utils/extensions/context_extensions.dart';
 import 'package:vendr/services/common/auth_service.dart';
-import 'package:vendr/view/profile/vendor/vendor_profile.dart';
+import 'package:vendr/services/user/user_profile_service.dart';
+import 'package:vendr/services/vendor/vendor_profile_service.dart';
 import 'package:vendr/view/profile/widgets/delete_account_dialog.dart';
+import 'package:vendr/view/profile/widgets/profile_menu_tile.dart';
 
 class UserProfileScreen extends StatefulWidget {
   const UserProfileScreen({super.key});
@@ -31,7 +33,7 @@ class _UserProfileState extends State<UserProfileScreen> {
       body: Center(
         child: Padding(
           padding: EdgeInsets.symmetric(vertical: 16.w),
-          child: ListView(
+          child: Column(
             children: [
               CircleAvatar(
                 radius: 40.r,
@@ -50,44 +52,46 @@ class _UserProfileState extends State<UserProfileScreen> {
                 'Joey Tribbiani',
                 style: context.typography.title.copyWith(fontSize: 20.sp),
               ),
-              SizedBox(height: 12.h),
               //Menus
               ProfileMenuTile(
                 title: 'Edit Profile',
                 icon: Icons.person_2_outlined,
-                onTap: () {},
+                onTap: () {
+                  UserProfileService.gotoUserEditProfile(context);
+                },
               ),
-              SizedBox(height: 12.h),
-              ProfileMenuTile(
+              LocationMenuTile(
                 title: 'Location',
                 icon: Icons.my_location_outlined,
-                onTap: () {},
               ),
-              SizedBox(height: 12.h),
               ProfileMenuTile(
-                title: 'Favourite Venders',
+                title: 'Favorite Venders',
                 icon: Icons.star_border_outlined,
-                onTap: () {},
+                onTap: () {
+                  UserProfileService.gotoUserFavorites(context);
+                },
               ),
-              SizedBox(height: 12.h),
               ProfileMenuTile(
                 title: 'Change Password',
                 icon: Icons.password_outlined,
-                onTap: () {},
+                onTap: () {
+                  AuthService.gotoChangePassword(context);
+                },
               ),
-              SizedBox(height: 12.h),
               ProfileMenuTile(
                 title: 'Notification Preferences',
                 icon: Icons.notifications_outlined,
-                onTap: () {},
+                onTap: () {
+                  UserProfileService.gotoNotificationPreferences(context);
+                },
               ),
-              SizedBox(height: 12.h),
               ProfileMenuTile(
                 title: 'Language',
                 icon: Icons.language_outlined,
-                onTap: () {},
+                onTap: () {
+                  VendorProfileService.gotoLanguagesScreen(context);
+                },
               ),
-              SizedBox(height: 12.h),
               ProfileMenuTile(
                 title: 'Delete Account',
                 icon: Icons.delete_outline,
@@ -100,7 +104,7 @@ class _UserProfileState extends State<UserProfileScreen> {
                 },
                 showArrow: false,
               ),
-              SizedBox(height: 24.h),
+              const Spacer(),
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: 16.w),
                 child: MyButton(
@@ -114,6 +118,51 @@ class _UserProfileState extends State<UserProfileScreen> {
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+class LocationMenuTile extends StatefulWidget {
+  const LocationMenuTile({super.key, required this.title, required this.icon});
+  final String title;
+  final IconData icon;
+
+  @override
+  State<LocationMenuTile> createState() => _LocationMenuTileState();
+}
+
+class _LocationMenuTileState extends State<LocationMenuTile> {
+  bool switchValue = true;
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: EdgeInsets.symmetric(vertical: 6.h, horizontal: 16.w),
+      color: Colors.transparent,
+      child: Row(
+        children: [
+          CircleAvatar(
+            radius: 18.r,
+            backgroundColor: Colors.white24,
+            child: Icon(widget.icon, color: Colors.white, size: 20.w),
+          ),
+          SizedBox(width: 12.w),
+          Text(widget.title, style: context.typography.title.copyWith()),
+          const Spacer(),
+          Switch(
+            value: switchValue,
+            onChanged: (value) {
+              setState(() {
+                switchValue = value;
+                debugPrint('Location set to: $switchValue');
+              });
+            },
+            activeColor: Colors.white,
+            activeTrackColor: context.colors.buttonPrimary,
+            inactiveThumbColor: Colors.white,
+            inactiveTrackColor: Colors.white70,
+          ),
+        ],
       ),
     );
   }

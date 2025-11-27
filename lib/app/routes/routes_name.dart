@@ -7,7 +7,7 @@ class RoutesName {
   static const String vendorSignup = 'vendor_signup_screen';
   static const String forgotPassword = 'forgot_password_screen';
   static const String newPassword = 'new_password_screen';
-  static const String changeUserPassword = 'changeUserPassword';
+  static const String changePassword = 'changeUserPassword';
 
   //Home
   static const String vendorHome = 'vendor_home_screen';
@@ -21,8 +21,8 @@ class RoutesName {
   static const String userEditProfile = 'user_edit_profile_screen';
   static const String vendorMyMenu = 'vendor_my_menu_screen';
 
-  //Favourites
-  static const String userFavourites = 'user_favourites_screen';
+  //Favorites
+  static const String userFavorites = 'user_favorites_screen';
 
   //Notification
   static const String notificationScreen = 'notifications_screen';

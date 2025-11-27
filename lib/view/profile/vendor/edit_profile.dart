@@ -37,10 +37,18 @@ class _VendorEditProfileScreenState extends State<VendorEditProfileScreen> {
               Center(
                 child: CircleAvatar(
                   radius: 45.r,
-                  child: Icon(
-                    Icons.camera_enhance_outlined,
-                    color: Colors.white.withValues(alpha: 0.6),
-                    size: 36.w,
+                  backgroundColor: context.colors.buttonPrimary,
+                  child: CircleAvatar(
+                    radius: 43.r,
+                    backgroundColor: Colors.white70,
+                    backgroundImage: NetworkImage(
+                      'https://cdn.cpdonline.co.uk/wp-content/uploads/2021/10/28122626/What-is-a-chef-hierarchy.jpg',
+                    ),
+                    child: Icon(
+                      Icons.camera_enhance_outlined,
+                      color: Colors.white.withValues(alpha: 0.6),
+                      size: 36.w,
+                    ),
                   ),
                 ),
               ),

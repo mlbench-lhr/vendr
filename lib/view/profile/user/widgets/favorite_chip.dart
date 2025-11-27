@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:vendr/app/utils/extensions/context_extensions.dart';
 
-class FavouriteChip extends StatelessWidget {
+class FavoriteChip extends StatelessWidget {
   final String imageUrl;
   final String name;
   final String venderType;
-  const FavouriteChip({
+  const FavoriteChip({
     super.key,
     required this.imageUrl,
     required this.name,
@@ -20,9 +20,9 @@ class FavouriteChip extends StatelessWidget {
       children: [
         CircleAvatar(
           radius: 25.r,
-          backgroundColor: Colors.white70,
+          backgroundColor: context.colors.buttonPrimary,
           child: CircleAvatar(
-            backgroundColor: context.colors.primary,
+            backgroundColor: Colors.white,
             radius: 23.r,
             backgroundImage: NetworkImage(imageUrl),
           ),
@@ -49,7 +49,7 @@ class FavouriteChip extends StatelessWidget {
         CircleAvatar(
           radius: 18.r,
           backgroundColor: Colors.white24,
-          child: Icon(Icons.star_rounded, size: 30.w, color: Colors.white),
+          child: Icon(Icons.star_rounded, size: 24.w, color: Colors.white),
         ),
       ],
     );

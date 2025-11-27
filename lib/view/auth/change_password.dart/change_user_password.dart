@@ -5,15 +5,16 @@ import 'package:vendr/app/components/my_scaffold.dart';
 import 'package:vendr/app/components/my_text_field.dart';
 import 'package:vendr/app/utils/extensions/context_extensions.dart';
 
-class ChangeUserPassword extends StatefulWidget {
-  const ChangeUserPassword({super.key});
+class ChangePasswordScreen extends StatefulWidget {
+  const ChangePasswordScreen({super.key});
 
   @override
-  State<ChangeUserPassword> createState() => _ChangeUserPasswordState();
+  State<ChangePasswordScreen> createState() => _ChangePasswordScreenState();
 }
 
-class _ChangeUserPasswordState extends State<ChangeUserPassword> {
+class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
   final pinController = TextEditingController();
+  bool hideOldPassword = true;
   bool hidePassword = true;
   bool hideConfirmPassword = true;
 
@@ -25,8 +26,8 @@ class _ChangeUserPasswordState extends State<ChangeUserPassword> {
         title: Text(
           'Change Password',
           style: context.typography.title.copyWith(
-            fontSize: 32.sp,
-            fontWeight: FontWeight.w800,
+            fontSize: 20.sp,
+            fontWeight: FontWeight.w600,
           ),
         ),
       ),
@@ -45,15 +46,15 @@ class _ChangeUserPasswordState extends State<ChangeUserPassword> {
             ),
             SizedBox(height: 10.h),
             MyTextField(
-              obscureText: hidePassword,
+              obscureText: hideOldPassword,
               suffixIcon: GestureDetector(
                 onTap: () {
                   setState(() {
-                    hidePassword = !hidePassword;
+                    hideOldPassword = !hideOldPassword;
                   });
                 },
                 child: Icon(
-                  hidePassword ? Icons.visibility_off : Icons.visibility,
+                  hideOldPassword ? Icons.visibility_off : Icons.visibility,
                 ),
               ),
             ),
@@ -81,7 +82,7 @@ class _ChangeUserPasswordState extends State<ChangeUserPassword> {
             ),
             SizedBox(height: 24.h),
             Text(
-              'Retry New Password',
+              'Retype New Password',
               style: context.typography.title.copyWith(
                 fontSize: 16.sp,
                 fontWeight: FontWeight.w600,

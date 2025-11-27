@@ -71,6 +71,10 @@ class AuthService {
     );
   }
 
+  static void gotoChangePassword(BuildContext context) {
+    Navigator.pushNamed(context, RoutesName.changePassword);
+  }
+
   // final UserAuthRepository _userAuth = UserAuthRepository();
   // final DoctorAuthRepository _docAuth = DoctorAuthRepository();
   // final SessionController _session = SessionController();

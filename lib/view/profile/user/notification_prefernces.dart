@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:vendr/app/components/my_scaffold.dart';
 import 'package:vendr/app/utils/extensions/context_extensions.dart';
-import 'package:vendr/view/notifications/user/widgets/prefernces_chip.dart';
+import 'package:vendr/view/profile/widgets/prefernces_chip.dart';
 
 class NotificationPreferncesScreen extends StatefulWidget {
   const NotificationPreferncesScreen({super.key});
@@ -14,17 +14,20 @@ class NotificationPreferncesScreen extends StatefulWidget {
 
 class _NotificationPreferncesScreenState
     extends State<NotificationPreferncesScreen> {
-  bool newVendorAlert = true; // 👈 state variable
+  bool newVendorAlert = true;
+  bool distanceBasedAlerts = true;
+  bool favoriteVendorNotifications = true;
 
   @override
   Widget build(BuildContext context) {
     return MyScaffold(
       appBar: AppBar(
-        title: Center(
-          child: Text(
-            'Notification Preferences',
-            textAlign: TextAlign.center,
-            style: context.typography.title.copyWith(fontSize: 20.sp),
+        centerTitle: true,
+        title: Text(
+          'Notification Preferences',
+          style: context.typography.title.copyWith(
+            fontSize: 20.sp,
+            fontWeight: FontWeight.w600,
           ),
         ),
       ),
@@ -44,20 +47,20 @@ class _NotificationPreferncesScreenState
             SizedBox(height: 15.h),
             PreferncesChip(
               label: 'Distance-based Alerts',
-              value: newVendorAlert,
+              value: distanceBasedAlerts,
               onChange: (bool newValue) {
                 setState(() {
-                  newVendorAlert = newValue;
+                  distanceBasedAlerts = newValue;
                 });
               },
             ),
             SizedBox(height: 15.h),
             PreferncesChip(
               label: 'Favorite Vendor Notifications',
-              value: newVendorAlert,
+              value: favoriteVendorNotifications,
               onChange: (bool newValue) {
                 setState(() {
-                  newVendorAlert = newValue;
+                  favoriteVendorNotifications = newValue;
                 });
               },
             ),

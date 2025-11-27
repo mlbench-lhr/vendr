@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:vendr/app/components/my_scaffold.dart';
 import 'package:vendr/app/utils/extensions/context_extensions.dart';
-import 'package:vendr/view/notifications/user/widgets/notifications_chip.dart';
+import 'package:vendr/view/notifications/widgets/notifications_chip.dart';
 
 class NotificationsScreen extends StatefulWidget {
   const NotificationsScreen({super.key});
@@ -51,7 +51,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                   'https://media.istockphoto.com/id/1165683221/photo/chef-presents-something-on-a-black-background.jpg?s=2048x2048&w=is&k=20&c=ApuI0WnwG7GcVjB1hUDfJhNUeybcJa8P6hmYRrMav6Y=',
               title: 'Favorite Vendor Update',
               description:
-                  'Your favourite vendor Harry Brook is nearby, Go Check them out!',
+                  'Your favorite vendor Harry Brook is nearby, Go Check them out!',
             ),
             SizedBox(height: 30.h),
             NotificationsChip(
@@ -59,7 +59,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                   'https://media.istockphoto.com/id/1165683221/photo/chef-presents-something-on-a-black-background.jpg?s=2048x2048&w=is&k=20&c=ApuI0WnwG7GcVjB1hUDfJhNUeybcJa8P6hmYRrMav6Y=',
               title: 'Favorite Vendor Update',
               description:
-                  'Your favourite vendor Harry Brook updated their menu, Check new available options!',
+                  'Your favorite vendor Harry Brook updated their menu, Check new available options!',
             ),
           ],
         ),

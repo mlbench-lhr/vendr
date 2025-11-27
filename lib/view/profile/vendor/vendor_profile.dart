@@ -6,6 +6,7 @@ import 'package:vendr/app/utils/extensions/context_extensions.dart';
 import 'package:vendr/services/common/auth_service.dart';
 import 'package:vendr/services/vendor/vendor_profile_service.dart';
 import 'package:vendr/view/profile/widgets/delete_account_dialog.dart';
+import 'package:vendr/view/profile/widgets/profile_menu_tile.dart';
 
 class VendorProfileScreen extends StatefulWidget {
   const VendorProfileScreen({super.key});
@@ -101,7 +102,9 @@ class _VendorProfileScreenState extends State<VendorProfileScreen> {
               ProfileMenuTile(
                 title: 'Change Password',
                 icon: Icons.password_outlined,
-                onTap: () {},
+                onTap: () {
+                  AuthService.gotoChangePassword(context);
+                },
               ),
               ProfileMenuTile(
                 title: 'Delete Account',
@@ -128,43 +131,6 @@ class _VendorProfileScreenState extends State<VendorProfileScreen> {
               ),
             ],
           ),
-        ),
-      ),
-    );
-  }
-}
-
-class ProfileMenuTile extends StatelessWidget {
-  const ProfileMenuTile({
-    super.key,
-    required this.title,
-    required this.icon,
-    required this.onTap,
-    this.showArrow = true,
-  });
-  final String title;
-  final IconData icon;
-  final VoidCallback onTap;
-  final bool showArrow;
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      child: Container(
-        margin: EdgeInsets.symmetric(vertical: 6.h, horizontal: 16.w),
-        color: Colors.transparent,
-        child: Row(
-          children: [
-            CircleAvatar(
-              radius: 18.r,
-              backgroundColor: Colors.white24,
-              child: Icon(icon, color: Colors.white, size: 20.w),
-            ),
-            SizedBox(width: 12.w),
-            Text(title, style: context.typography.title.copyWith()),
-            const Spacer(),
-            if (showArrow) Icon(Icons.arrow_forward_ios, size: 18.w),
-          ],
         ),
       ),
     );

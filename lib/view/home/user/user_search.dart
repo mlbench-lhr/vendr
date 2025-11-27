@@ -3,7 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:vendr/app/components/my_scaffold.dart';
 import 'package:vendr/app/components/my_text_field.dart';
 import 'package:vendr/app/utils/extensions/context_extensions.dart';
-import 'package:vendr/view/search/user/widgets/search_chip.dart';
+import 'package:vendr/view/home/user/widgets/search_chip.dart';
 
 class UserSearchScreen extends StatelessWidget {
   const UserSearchScreen({super.key});

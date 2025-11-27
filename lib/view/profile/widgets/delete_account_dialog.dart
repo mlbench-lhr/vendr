@@ -9,8 +9,8 @@ class DeleteAccountDialog extends StatelessWidget {
     return MyDialog(
       title: 'Delete Account?',
       subtitle:
-          'Are you sure you want to delete your account? you will lost all your data and you couldn\'t restore this later.',
-      confirmLabel: 'Yes Delete',
+          'Are you sure you want to delete your account? All the account details will be deleted Permanently.',
+      confirmLabel: 'Delete',
       onConfirm: () async {
         Navigator.of(context).pop();
       },
