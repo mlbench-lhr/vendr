@@ -30,8 +30,8 @@ import 'package:vendr/view/profile/vendor/vendor_profile.dart';
 import 'package:vendr/view/reviews/reviews.dart';
 
 class Routes {
-  static String initialRoute() => RoutesName.welcome;
-  // static String initialRoute() => RoutesName.userSearch;
+  // static String initialRoute() => RoutesName.welcome;
+  static String initialRoute() => RoutesName.userHome;
 
   static final Map<String, WidgetBuilder> _routes = {
     RoutesName.welcome: (_) => const WelcomeScreen(),
@@ -58,7 +58,7 @@ class Routes {
     RoutesName.languages: (_) => const LanguagesScreen(),
     RoutesName.vendorChangePhoneNumber: (_) => const ChangePhoneNumberScreen(),
     RoutesName.vendorChangeEmail: (_) => const ChangeEmailScreen(),
-    RoutesName.reviews: (_) => const ReviewsScreen(),
+
     RoutesName.userMenu: (_) => const UserMenuScreen(),
   };
 
@@ -80,7 +80,11 @@ class Routes {
         return MaterialPageRoute(
           builder: (_) => LoginScreen(isVendor: args['isVendor'] as bool),
         );
-
+      case RoutesName.reviews:
+        final args = _getArgs(settings, requiredKeys: ['isVendor']);
+        return MaterialPageRoute(
+          builder: (_) => ReviewsScreen(isVendor: args['isVendor'] as bool),
+        );
       default:
         final builder = _routes[settings.name];
         if (builder != null) {

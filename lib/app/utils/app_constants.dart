@@ -171,3 +171,7 @@ class ExternalLinks {
   static const String appleTermsOfService =
       'https://www.apple.com/legal/internet-services/itunes/dev/stdeula'; //apple End User License Agreement (EULA) or Terms of Service
 }
+
+class MyConstants {
+  static const String googleApiKey = 'AIzaSyAMj6W5geB39FBWm2qlzfDlL4_hw2L0rSY';
+}

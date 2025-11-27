@@ -5,6 +5,7 @@ import 'package:vendr/app/components/my_bottom_sheet.dart';
 import 'package:vendr/app/components/my_scaffold.dart';
 import 'package:vendr/app/utils/extensions/context_extensions.dart';
 import 'package:vendr/view/home/user/widgets/menu_bottom_sheet.dart';
+import 'package:vendr/view/reviews/widgets/add_review_bottom_sheet.dart';
 
 class UserMenuScreen extends StatefulWidget {
   const UserMenuScreen({super.key});
@@ -88,6 +89,7 @@ class _UserMenuScreenState extends State<UserMenuScreen> {
                     isScrollControlled: true,
                     backgroundColor: context.colors.primary,
                     child: MenuBottomSheet(),
+                    // child: AddReviewBottomSheet(),
                   );
                 },
                 name: item['name'],

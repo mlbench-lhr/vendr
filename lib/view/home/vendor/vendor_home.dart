@@ -422,7 +422,10 @@ class ReviewsSectionHeading extends StatelessWidget {
           isDark: true,
           fontSize: 14.sp,
           onPressed: () {
-            VendorHomeService.gotoVendorReviews(context);
+            VendorHomeService.gotoReviews(
+              context,
+              isVendor: false,
+            ); //TODO: change to true
           },
         ),
       ],
@@ -506,7 +509,7 @@ class NotificationsBtn extends StatelessWidget {
   Widget build(BuildContext context) {
     return CircleAvatar(
       radius: 20.r,
-      backgroundColor: Colors.white24,
+      backgroundColor: context.colors.primary.withValues(alpha: 0.8),
       child: Icon(Icons.notifications_outlined, color: Colors.white),
     );
   }

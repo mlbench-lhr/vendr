@@ -2,15 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
+import 'package:vendr/app/components/my_bottom_sheet.dart';
+import 'package:vendr/app/components/my_button.dart';
 import 'package:vendr/app/components/my_scaffold.dart';
 import 'package:vendr/app/components/review_tile.dart';
 import 'package:vendr/app/styles/app_radiuses.dart';
 import 'package:vendr/app/utils/extensions/context_extensions.dart';
 import 'package:vendr/app/utils/extensions/general_extensions.dart';
+import 'package:vendr/view/reviews/widgets/add_review_bottom_sheet.dart';
 
 class ReviewsScreen extends StatefulWidget {
-  const ReviewsScreen({super.key});
-
+  const ReviewsScreen({super.key, required this.isVendor});
+  final bool isVendor;
   @override
   State<ReviewsScreen> createState() => _ReviewsScreenState();
 }
@@ -92,41 +95,71 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
         centerTitle: true,
       ),
       body: Padding(
-        padding: EdgeInsets.all(16.w),
+        padding: EdgeInsets.only(top: 16.w, right: 16.w, left: 16.w),
         child: Center(
-          child: ListView(
+          child: Stack(
             children: [
-              Container(
-                width: double.infinity,
-                padding: EdgeInsets.symmetric(vertical: 12.h, horizontal: 8.w),
-                decoration: BoxDecoration(
-                  color: Colors.white12,
-                  borderRadius: BorderRadius.circular(AppRadiuses.mediumRadius),
-                  border: Border.all(color: Colors.white38),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    _buildRatingDistribution(context),
-                    _buildAverageRating(
-                      context,
-                      //  reviewsResponse,
+              ListView(
+                children: [
+                  Container(
+                    width: double.infinity,
+                    padding: EdgeInsets.symmetric(
+                      vertical: 12.h,
+                      horizontal: 8.w,
                     ),
-                  ],
-                ),
-              ),
-              if (reviews.isNotEmpty) ...[
-                24.height,
-                _buildReviewsList(reviews),
-              ] else
-                Padding(
-                  padding: EdgeInsets.only(top: 200.h),
-                  child: Center(
-                    child: Text(
-                      'No reviews found',
-                      style: context.typography.body.copyWith(),
+                    decoration: BoxDecoration(
+                      color: Colors.white12,
+                      borderRadius: BorderRadius.circular(
+                        AppRadiuses.mediumRadius,
+                      ),
+                      border: Border.all(color: Colors.white38),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        _buildRatingDistribution(context),
+                        _buildAverageRating(
+                          context,
+                          //  reviewsResponse,
+                        ),
+                      ],
                     ),
                   ),
+                  if (reviews.isNotEmpty) ...[
+                    24.height,
+                    _buildReviewsList(reviews),
+                    if (!widget.isVendor) 100.height,
+                  ] else
+                    Padding(
+                      padding: EdgeInsets.only(top: 200.h),
+                      child: Center(
+                        child: Text(
+                          'No reviews found',
+                          style: context.typography.body.copyWith(),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+              if (!widget.isVendor)
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    MyButton(
+                      onPressed: () {
+                        MyBottomSheet.show(
+                          context,
+                          isDismissible: true,
+                          isScrollControlled: true,
+                          enableDrag: true,
+                          backgroundColor: context.colors.primary,
+                          child: AddReviewBottomSheet(),
+                        );
+                      },
+                      label: 'Write Review',
+                    ),
+                    24.height,
+                  ],
                 ),
             ],
           ),
@@ -138,7 +171,6 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
   //build reviews list
   SizedBox _buildReviewsList(List<Map<String, dynamic>> reviews) {
     return SizedBox(
-      // height: 200.h,
       child: ListView.separated(
         physics: const NeverScrollableScrollPhysics(),
         shrinkWrap: true,

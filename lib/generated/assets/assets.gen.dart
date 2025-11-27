@@ -62,11 +62,29 @@ class $AssetsImagesGen {
   List<AssetGenImage> get values => [blocksPattern];
 }
 
+class $AssetsJsonGen {
+  const $AssetsJsonGen();
+
+  /// Directory path: assets/json/map_styles
+  $AssetsJsonMapStylesGen get mapStyles => const $AssetsJsonMapStylesGen();
+}
+
+class $AssetsJsonMapStylesGen {
+  const $AssetsJsonMapStylesGen();
+
+  /// File path: assets/json/map_styles/night_theme.json
+  String get nightTheme => 'assets/json/map_styles/night_theme.json';
+
+  /// List of all assets
+  List<String> get values => [nightTheme];
+}
+
 class Assets {
   const Assets._();
 
   static const $AssetsIconsGen icons = $AssetsIconsGen();
   static const $AssetsImagesGen images = $AssetsImagesGen();
+  static const $AssetsJsonGen json = $AssetsJsonGen();
 }
 
 class AssetGenImage {

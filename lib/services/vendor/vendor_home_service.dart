@@ -6,7 +6,11 @@ class VendorHomeService {
     Navigator.pushNamed(context, RoutesName.vendorProfile);
   }
 
-  static void gotoVendorReviews(BuildContext context) {
-    Navigator.pushNamed(context, RoutesName.reviews);
+  static void gotoReviews(BuildContext context, {bool isVendor = true}) {
+    Navigator.pushNamed(
+      context,
+      arguments: {'isVendor': isVendor},
+      RoutesName.reviews,
+    );
   }
 }

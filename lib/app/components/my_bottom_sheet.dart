@@ -1,7 +1,5 @@
 import 'package:vendr/app/components/global_unfocus_keyboard.dart';
 import 'package:vendr/app/styles/app_radiuses.dart';
-import 'package:vendr/app/utils/extensions/context_extensions.dart';
-import 'package:vendr/generated/assets/assets.gen.dart';
 import 'package:flutter/material.dart';
 
 class MyBottomSheet extends StatelessWidget {
