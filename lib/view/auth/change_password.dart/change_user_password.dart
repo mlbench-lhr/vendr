@@ -46,6 +46,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
             ),
             SizedBox(height: 10.h),
             MyTextField(
+              hint: 'Enter password',
               obscureText: hideOldPassword,
               suffixIcon: GestureDetector(
                 onTap: () {
@@ -69,6 +70,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
             SizedBox(height: 10.h),
             MyTextField(
               obscureText: hidePassword,
+              hint: 'Enter password',
               suffixIcon: GestureDetector(
                 onTap: () {
                   setState(() {
@@ -90,6 +92,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
             ),
             SizedBox(height: 10.h),
             MyTextField(
+              hint: 'Enter password',
               obscureText: hideConfirmPassword,
               suffixIcon: GestureDetector(
                 onTap: () {

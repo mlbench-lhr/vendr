@@ -8,6 +8,7 @@ import 'package:vendr/app/components/review_tile.dart';
 import 'package:vendr/app/styles/app_radiuses.dart';
 import 'package:vendr/app/utils/extensions/context_extensions.dart';
 import 'package:vendr/app/utils/extensions/general_extensions.dart';
+import 'package:vendr/services/user/user_home_service.dart';
 import 'package:vendr/services/vendor/vendor_home_service.dart';
 
 class VendorHomeScreen extends StatefulWidget {
@@ -131,7 +132,14 @@ class _VendorHomeScreenState extends State<VendorHomeScreen> {
                           ],
                         ),
                         const Spacer(),
-                        NotificationsBtn(),
+                        GestureDetector(
+                          onTap: () {
+                            UserHomeService.gotoNotifications(
+                              context,
+                            ); //TODO: Change with VendorHomeService
+                          },
+                          child: NotificationsBtn(),
+                        ),
                       ],
                     ),
                     SizedBox(height: 24.h),
@@ -509,7 +517,7 @@ class NotificationsBtn extends StatelessWidget {
   Widget build(BuildContext context) {
     return CircleAvatar(
       radius: 20.r,
-      backgroundColor: context.colors.primary.withValues(alpha: 0.8),
+      backgroundColor: Colors.white24,
       child: Icon(Icons.notifications_outlined, color: Colors.white),
     );
   }

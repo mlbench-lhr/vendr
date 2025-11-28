@@ -9,4 +9,8 @@ class UserHomeService {
   static void gotoSearch(BuildContext context) {
     Navigator.pushNamed(context, RoutesName.userSearch);
   }
+
+  static void gotoVendorMenu(BuildContext context) {
+    Navigator.pushNamed(context, RoutesName.userMenu);
+  }
 }

@@ -107,7 +107,7 @@ class _UserEditProfileScreenState extends State<UserEditProfileScreen> {
                 style: context.typography.title.copyWith(fontSize: 18.sp),
               ),
               SizedBox(height: 10.h),
-              MyTextField(),
+              MyTextField(hint: 'Enter your name'),
               const Spacer(),
               MyButton(
                 label: 'Save',

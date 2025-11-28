@@ -27,7 +27,11 @@ class UserSearchScreen extends StatelessWidget {
         padding: EdgeInsets.all(16.w),
         child: ListView(
           children: [
-            MyTextField(prefixIcon: Icon(Icons.search), borderRadius: 30),
+            MyTextField(
+              prefixIcon: Icon(Icons.search),
+              borderRadius: 30,
+              hint: 'e.g., Food Vendor',
+            ),
             SizedBox(height: 30.h),
             SearchChip(label: 'Fruite Vendor'),
             SizedBox(height: 20.h),

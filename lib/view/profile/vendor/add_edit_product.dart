@@ -61,14 +61,14 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
               style: context.typography.title.copyWith(fontSize: 18.sp),
             ),
             10.height,
-            MyTextField(),
+            MyTextField(hint: 'Enter your name'),
             16.height,
             Text(
               'Description',
               style: context.typography.title.copyWith(fontSize: 18.sp),
             ),
             10.height,
-            MyTextField(maxLines: 5),
+            MyTextField(maxLines: 5, hint: 'Add product description here...'),
             16.height,
             ...(servings.map((serving) {
               return ServingSection(

@@ -57,7 +57,8 @@ class _MyDialogState extends State<MyDialog> {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppRadiuses.extraLargeRadius),
         ),
-        insetPadding: EdgeInsets.all(12.w),
+        // insetPadding: EdgeInsets.all(12.w),
+        insetPadding: EdgeInsets.symmetric(horizontal: 6.w),
         child: Padding(
           padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 20.h),
           child: Column(

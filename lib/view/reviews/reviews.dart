@@ -9,6 +9,7 @@ import 'package:vendr/app/components/review_tile.dart';
 import 'package:vendr/app/styles/app_radiuses.dart';
 import 'package:vendr/app/utils/extensions/context_extensions.dart';
 import 'package:vendr/app/utils/extensions/general_extensions.dart';
+import 'package:vendr/generated/assets/assets.gen.dart';
 import 'package:vendr/view/reviews/widgets/add_review_bottom_sheet.dart';
 
 class ReviewsScreen extends StatefulWidget {
@@ -99,48 +100,39 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
         child: Center(
           child: Stack(
             children: [
-              ListView(
-                children: [
-                  Container(
-                    width: double.infinity,
-                    padding: EdgeInsets.symmetric(
-                      vertical: 12.h,
-                      horizontal: 8.w,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.white12,
-                      borderRadius: BorderRadius.circular(
-                        AppRadiuses.mediumRadius,
-                      ),
-                      border: Border.all(color: Colors.white38),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              reviews.isNotEmpty
+                  ? ListView(
                       children: [
-                        _buildRatingDistribution(context),
-                        _buildAverageRating(
-                          context,
-                          //  reviewsResponse,
+                        Container(
+                          width: double.infinity,
+                          padding: EdgeInsets.symmetric(
+                            vertical: 12.h,
+                            horizontal: 8.w,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.white12,
+                            borderRadius: BorderRadius.circular(
+                              AppRadiuses.mediumRadius,
+                            ),
+                            border: Border.all(color: Colors.white38),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              _buildRatingDistribution(context),
+                              _buildAverageRating(
+                                context,
+                                //  reviewsResponse,
+                              ),
+                            ],
+                          ),
                         ),
+                        24.height,
+                        _buildReviewsList(reviews),
+                        if (!widget.isVendor) 100.height,
                       ],
-                    ),
-                  ),
-                  if (reviews.isNotEmpty) ...[
-                    24.height,
-                    _buildReviewsList(reviews),
-                    if (!widget.isVendor) 100.height,
-                  ] else
-                    Padding(
-                      padding: EdgeInsets.only(top: 200.h),
-                      child: Center(
-                        child: Text(
-                          'No reviews found',
-                          style: context.typography.body.copyWith(),
-                        ),
-                      ),
-                    ),
-                ],
-              ),
+                    )
+                  : _buildEmptyReviews(context),
               if (!widget.isVendor)
                 Column(
                   mainAxisAlignment: MainAxisAlignment.end,
@@ -164,6 +156,24 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildEmptyReviews(BuildContext context) {
+    return Center(
+      child: Column(
+        children: [
+          150.height,
+          Image.asset(Assets.images.disconnected.path),
+          24.height,
+          Text(
+            'No reviews added yet!',
+            style: context.typography.body.copyWith(
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
       ),
     );
   }

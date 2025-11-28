@@ -16,13 +16,12 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
   Widget build(BuildContext context) {
     return MyScaffold(
       appBar: AppBar(
-        title: Center(
-          child: Text(
-            'Notifications',
-            style: context.typography.title.copyWith(
-              fontSize: 24.sp,
-              fontWeight: FontWeight.w600,
-            ),
+        centerTitle: true,
+        title: Text(
+          'Notifications',
+          style: context.typography.title.copyWith(
+            fontSize: 20.sp,
+            fontWeight: FontWeight.w600,
           ),
         ),
       ),
@@ -37,7 +36,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
               description:
                   'A new vendor registered available in your vicinity, Explore Now',
             ),
-            SizedBox(height: 30.h),
+            SizedBox(height: 20.h),
             NotificationsChip(
               // imageUrl:
               //     'https://images.pexels.com/photos/135620/pexels-photo-135620.jpeg',
@@ -45,7 +44,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
               description:
                   '10 new vendors available in your vicinity, Explore Now',
             ),
-            SizedBox(height: 30.h),
+            SizedBox(height: 20.h),
             NotificationsChip(
               imageUrl:
                   'https://media.istockphoto.com/id/1165683221/photo/chef-presents-something-on-a-black-background.jpg?s=2048x2048&w=is&k=20&c=ApuI0WnwG7GcVjB1hUDfJhNUeybcJa8P6hmYRrMav6Y=',
@@ -53,7 +52,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
               description:
                   'Your favorite vendor Harry Brook is nearby, Go Check them out!',
             ),
-            SizedBox(height: 30.h),
+            SizedBox(height: 20.h),
             NotificationsChip(
               imageUrl:
                   'https://media.istockphoto.com/id/1165683221/photo/chef-presents-something-on-a-black-background.jpg?s=2048x2048&w=is&k=20&c=ApuI0WnwG7GcVjB1hUDfJhNUeybcJa8P6hmYRrMav6Y=',

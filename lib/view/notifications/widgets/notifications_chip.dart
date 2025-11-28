@@ -21,10 +21,10 @@ class NotificationsChip extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
         CircleAvatar(
-          radius: 25.r,
-          backgroundColor: Colors.white70,
+          radius: 20.r,
+          backgroundColor: Colors.white54,
           child: CircleAvatar(
-            radius: 24.r,
+            radius: 19.r,
             backgroundColor: context.colors.primary,
             backgroundImage: hasImage ? NetworkImage(imageUrl!) : null,
             child: hasImage
@@ -32,7 +32,7 @@ class NotificationsChip extends StatelessWidget {
                 : Icon(Icons.home_outlined, color: Colors.white, size: 35.r),
           ),
         ),
-        SizedBox(width: 10.w),
+        SizedBox(width: 12.w),
         Expanded(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -40,13 +40,13 @@ class NotificationsChip extends StatelessWidget {
             children: [
               Text(
                 title,
-                style: context.typography.label.copyWith(fontSize: 15.sp),
+                style: context.typography.title.copyWith(fontSize: 16.sp),
               ),
               Text(
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
                 description,
-                style: context.typography.label.copyWith(fontSize: 10.sp),
+                style: context.typography.label.copyWith(fontSize: 12.sp),
               ),
             ],
           ),

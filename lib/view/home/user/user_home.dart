@@ -9,7 +9,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:provider/provider.dart';
 import 'package:vendr/app/components/loading_widget.dart';
-import 'package:vendr/app/components/my_scaffold.dart';
+import 'package:vendr/app/components/my_bottom_sheet.dart';
 import 'package:vendr/app/components/my_text_field.dart';
 import 'package:vendr/app/styles/app_radiuses.dart';
 import 'package:vendr/app/utils/app_constants.dart';
@@ -19,6 +19,7 @@ import 'package:vendr/generated/assets/assets.gen.dart';
 import 'package:vendr/provider/user_home_provider.dart';
 import 'package:vendr/services/user/user_home_service.dart';
 import 'package:vendr/services/user/user_profile_service.dart';
+import 'package:vendr/view/home/user/widgets/location_permission_required.dart';
 import 'package:vendr/view/home/user/widgets/vendor_card.dart';
 import 'package:vendr/view/home/vendor/vendor_home.dart';
 
@@ -48,6 +49,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
   @override
   void initState() {
     super.initState();
+    checkLocationPermission();
     _loadAssets();
     _polylinePoints = PolylinePoints(apiKey: MyConstants.googleApiKey);
 
@@ -55,6 +57,38 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
 
     // Get user location after the first frame
     WidgetsBinding.instance.addPostFrameCallback((_) => _getUserLocation());
+  }
+
+  bool permissionGranted = false;
+  LocationPermission _locationPermissionStatus = LocationPermission.denied;
+  Future<void> checkLocationPermission() async {
+    var status = await Geolocator.checkPermission();
+    setState(() => _locationPermissionStatus = status);
+    permissionGranted =
+        _locationPermissionStatus == LocationPermission.always ||
+        _locationPermissionStatus == LocationPermission.whileInUse;
+
+    debugPrint('Location Status: $permissionGranted');
+    if (!permissionGranted) {
+      //show bottom sheet here
+      await _showLocationPermissionSheet();
+    }
+  }
+
+  Future<void> _showLocationPermissionSheet() async {
+    //show bottom sheet here
+    if (mounted) {
+      await MyBottomSheet.show(
+        context,
+        isDismissible: true,
+        isScrollControlled: true,
+        enableDrag: true,
+        useSafeArea: false,
+        backgroundColor: context.colors.primary.withOpacity(0.0),
+        child: LocationPermissionRequired(),
+      );
+      checkLocationPermission();
+    }
   }
 
   /// Load map style and custom marker assets
@@ -83,7 +117,8 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
     double imageSize = 60,
   }) async {
     try {
-      final data = await rootBundle.load('assets/images/home.png');
+      // final data = await rootBundle.load('assets/images/home.png');
+      final data = await rootBundle.load(Assets.icons.shop.path);
       final bytes = data.buffer.asUint8List();
 
       final ui.Codec codec = await ui.instantiateImageCodec(bytes);
@@ -158,7 +193,11 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
     final controller = await _controller.future;
     controller.animateCamera(
       CameraUpdate.newCameraPosition(
-        CameraPosition(target: provider.userLocation!, zoom: 15),
+        CameraPosition(
+          // target: provider.userLocation!,
+          target: const LatLng(31.4645193, 74.2540502),
+          zoom: 15,
+        ),
       ),
     );
   }
@@ -302,18 +341,21 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
 
   /// Main stack containing map, search, distance, and vendor card
   Widget _buildMapStack(UserHomeProvider provider) {
-    return Stack(
-      children: [
-        _buildGoogleMap(provider),
-        Align(
-          alignment: Alignment.topCenter,
-          child: GradientOverlay(height: 250.h),
-        ),
-        _buildHeader(),
-        if (_distanceInKm != null && provider.selectedVendor != null)
-          _buildDistanceBox(),
-        if (provider.selectedVendor != null) _buildUserVendorCard(provider),
-      ],
+    return SizedBox(
+      height: MediaQuery.sizeOf(context).height,
+      child: Stack(
+        children: [
+          _buildGoogleMap(provider),
+          Align(
+            alignment: Alignment.topCenter,
+            child: GradientOverlay(height: 250.h),
+          ),
+          _buildHeader(),
+          if (_distanceInKm != null && provider.selectedVendor != null)
+            _buildVendorProfileBox(),
+          if (provider.selectedVendor != null) _buildUserVendorCard(provider),
+        ],
+      ),
     );
   }
 
@@ -354,18 +396,18 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
   /// Google Map widget
   Widget _buildGoogleMap(UserHomeProvider provider) {
     return GoogleMap(
+      padding: EdgeInsets.symmetric(vertical: 20.w, horizontal: 16.w),
       initialCameraPosition: CameraPosition(
         // target: provider.userLocation ?? const LatLng(31.50293, 74.34801),
-        target: provider.userLocation ?? const LatLng(31.47124, 74.35593),
-        // zoom: 14.4,
-        zoom: 16,
+        target: provider.userLocation ?? const LatLng(31.4645193, 74.2540502),
+        zoom: 14.4,
       ),
       markers: provider.buildMarkers(customMarker: _customMarker),
       polylines: provider.polylines,
       myLocationEnabled: true,
-      zoomControlsEnabled: true,
+      zoomControlsEnabled: false,
       mapToolbarEnabled: false,
-      myLocationButtonEnabled: false,
+      myLocationButtonEnabled: true,
       onMapCreated: (controller) async {
         if (!_controller.isCompleted) _controller.complete(controller);
         await Future.delayed(const Duration(milliseconds: 200));
@@ -391,14 +433,14 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
         child: MyTextField(
           borderRadius: 40.r,
           prefixIcon: const Icon(Icons.search, color: Colors.white),
-          hint: 'Search Vendor',
+          hint: 'Search Vendors',
         ),
       ),
     );
   }
 
   /// Distance box displayed above vendor card
-  Widget _buildDistanceBox() {
+  Widget _buildVendorProfileBox() {
     return Positioned(
       top: 480.h,
       left: 15.w,

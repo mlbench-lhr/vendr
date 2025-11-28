@@ -72,7 +72,11 @@ class _AddReviewBottomSheetState extends State<AddReviewBottomSheet> {
             ),
           ),
           SizedBox(height: 10.h),
-          MyTextField(maxLines: 5, controller: feedbackController),
+          MyTextField(
+            maxLines: 5,
+            controller: feedbackController,
+            hint: 'Enter your feedback...',
+          ),
           SizedBox(height: 40.w),
           MyButton(
             isLoading: isLoading,

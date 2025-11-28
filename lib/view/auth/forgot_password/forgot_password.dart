@@ -62,6 +62,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                     ),
                     SizedBox(height: 10.h),
                     MyTextField(
+                      hint: 'Enter your email',
                       keyboardType: TextInputType.emailAddress,
                       suffixIcon: Icon(Icons.email_outlined),
                     ),

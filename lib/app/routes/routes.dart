@@ -20,6 +20,7 @@ import 'package:vendr/view/profile/user/notification_prefernces.dart';
 import 'package:vendr/view/profile/user/user_favorites.dart';
 import 'package:vendr/view/profile/user/user_profile.dart';
 import 'package:vendr/view/auth/change_password.dart/change_user_password.dart';
+import 'package:vendr/view/profile/vendor/add_edit_product.dart';
 import 'package:vendr/view/profile/vendor/change_email.dart';
 import 'package:vendr/view/profile/vendor/change_phone.dart';
 import 'package:vendr/view/profile/vendor/edit_profile.dart';
@@ -30,8 +31,8 @@ import 'package:vendr/view/profile/vendor/vendor_profile.dart';
 import 'package:vendr/view/reviews/reviews.dart';
 
 class Routes {
-  // static String initialRoute() => RoutesName.welcome;
-  static String initialRoute() => RoutesName.userHome;
+  static String initialRoute() => RoutesName.welcome;
+  // static String initialRoute() => RoutesName.userHome;
 
   static final Map<String, WidgetBuilder> _routes = {
     RoutesName.welcome: (_) => const WelcomeScreen(),
@@ -79,6 +80,11 @@ class Routes {
         final args = _getArgs(settings, requiredKeys: ['isVendor']);
         return MaterialPageRoute(
           builder: (_) => LoginScreen(isVendor: args['isVendor'] as bool),
+        );
+      case RoutesName.vendorAddEditProduct:
+        final args = _getArgs(settings, requiredKeys: ['isEdit']);
+        return MaterialPageRoute(
+          builder: (_) => AddEditProductScreen(isEdit: args['isEdit'] as bool),
         );
       case RoutesName.reviews:
         final args = _getArgs(settings, requiredKeys: ['isVendor']);

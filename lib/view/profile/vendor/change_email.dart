@@ -50,6 +50,7 @@ class _ChangeEmailScreenState extends State<ChangeEmailScreen> {
             ),
             10.height,
             MyTextField(
+              hint: 'Enter your email',
               suffixIcon: Icon(Icons.email_outlined),
               keyboardType: TextInputType.emailAddress,
               controller: _emailController,

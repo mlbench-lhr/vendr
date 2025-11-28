@@ -75,7 +75,10 @@ class _LoginScreenState extends State<LoginScreen> {
               style: context.typography.title.copyWith(fontSize: 18.sp),
             ),
             SizedBox(height: 6.h),
-            MyTextField(suffixIcon: Icon(Icons.mail_outline)),
+            MyTextField(
+              suffixIcon: Icon(Icons.mail_outline),
+              hint: 'Enter your email',
+            ),
 
             SizedBox(height: 24.h),
             Text(
@@ -85,6 +88,7 @@ class _LoginScreenState extends State<LoginScreen> {
             SizedBox(height: 6.h),
             MyTextField(
               obscureText: hidePassword,
+              hint: 'Enter your password',
               suffixIcon: GestureDetector(
                 onTap: () {
                   setState(() {

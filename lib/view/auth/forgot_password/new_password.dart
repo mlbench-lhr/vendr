@@ -62,6 +62,7 @@ class _NewPasswordScreenState extends State<NewPasswordScreen> {
                     SizedBox(height: 10.h),
                     MyTextField(
                       obscureText: hidePassword,
+                      hint: 'Enter password',
                       suffixIcon: GestureDetector(
                         onTap: () {
                           setState(() {
@@ -86,6 +87,7 @@ class _NewPasswordScreenState extends State<NewPasswordScreen> {
                     SizedBox(height: 10.h),
                     MyTextField(
                       obscureText: hideConfirmPassword,
+                      hint: 'Enter password',
                       suffixIcon: GestureDetector(
                         onTap: () {
                           setState(() {

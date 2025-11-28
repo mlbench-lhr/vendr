@@ -58,8 +58,20 @@ class $AssetsImagesGen {
   AssetGenImage get blocksPattern =>
       const AssetGenImage('assets/images/blocks_pattern.png');
 
+  /// File path: assets/images/disconnected.png
+  AssetGenImage get disconnected =>
+      const AssetGenImage('assets/images/disconnected.png');
+
+  /// File path: assets/images/location_permission_required.png
+  AssetGenImage get locationPermissionRequired =>
+      const AssetGenImage('assets/images/location_permission_required.png');
+
   /// List of all assets
-  List<AssetGenImage> get values => [blocksPattern];
+  List<AssetGenImage> get values => [
+    blocksPattern,
+    disconnected,
+    locationPermissionRequired,
+  ];
 }
 
 class $AssetsJsonGen {

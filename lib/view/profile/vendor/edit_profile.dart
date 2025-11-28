@@ -58,7 +58,7 @@ class _VendorEditProfileScreenState extends State<VendorEditProfileScreen> {
                 style: context.typography.title.copyWith(fontSize: 18.sp),
               ),
               SizedBox(height: 10.h),
-              MyTextField(),
+              MyTextField(hint: 'Enter your name'),
 
               SizedBox(height: 16.h),
               Text(

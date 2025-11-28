@@ -75,7 +75,10 @@ class _VendorSignupScreenState extends State<VendorSignupScreen> {
               style: context.typography.title.copyWith(fontSize: 18.sp),
             ),
             SizedBox(height: 6.h),
-            MyTextField(suffixIcon: Icon(Icons.person_2_outlined)),
+            MyTextField(
+              hint: 'Enter your name',
+              suffixIcon: Icon(Icons.person_2_outlined),
+            ),
 
             SizedBox(height: 24.h),
             Text(
@@ -84,6 +87,7 @@ class _VendorSignupScreenState extends State<VendorSignupScreen> {
             ),
             SizedBox(height: 6.h),
             MyTextField(
+              hint: 'Enter your email',
               keyboardType: TextInputType.emailAddress,
               suffixIcon: Icon(Icons.mail_outline),
             ),
@@ -94,6 +98,7 @@ class _VendorSignupScreenState extends State<VendorSignupScreen> {
             ),
             SizedBox(height: 6.h),
             MyTextField(
+              hint: 'Enter phone number',
               keyboardType: TextInputType.phone,
               suffixIcon: Icon(Icons.phone_outlined),
             ),
@@ -115,6 +120,7 @@ class _VendorSignupScreenState extends State<VendorSignupScreen> {
             ),
             SizedBox(height: 6.h),
             MyTextField(
+              hint: 'Enter password',
               obscureText: hidePassword,
               suffixIcon: GestureDetector(
                 onTap: () {
@@ -134,8 +140,8 @@ class _VendorSignupScreenState extends State<VendorSignupScreen> {
             ),
             SizedBox(height: 6.h),
             MyTextField(
+              hint: 'Enter password',
               obscureText: hideConfirmPassword,
-
               suffixIcon: GestureDetector(
                 onTap: () {
                   setState(() {

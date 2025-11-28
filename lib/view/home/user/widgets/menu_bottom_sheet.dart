@@ -13,21 +13,21 @@ class MenuBottomSheet extends StatelessWidget {
     return Container(
       padding: EdgeInsets.symmetric(vertical: 16.w),
       height: 500.h,
-      child: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 80.w,
-              height: 6.h,
-              decoration: BoxDecoration(
-                color: Colors.white54,
-                borderRadius: BorderRadius.circular(AppRadiuses.hundredRadius),
-              ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 80.w,
+            height: 6.h,
+            decoration: BoxDecoration(
+              color: Colors.white54,
+              borderRadius: BorderRadius.circular(AppRadiuses.hundredRadius),
             ),
-            SizedBox(height: 16.w),
-            //Category
-            ListView(
+          ),
+          SizedBox(height: 16.w),
+          //Category
+          Expanded(
+            child: ListView(
               shrinkWrap: true,
               children: [
                 Padding(
@@ -95,8 +95,8 @@ class MenuBottomSheet extends StatelessWidget {
                 ),
               ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

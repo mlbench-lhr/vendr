@@ -39,8 +39,9 @@ class _VendorLocationScreenState extends State<VendorLocationScreen> {
       ),
       body: Padding(
         padding: EdgeInsets.all(16.w),
-        child: Center(
+        child: SingleChildScrollView(
           child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
             children: [
               LocationTypeSwitch(
                 onChanged: (bool value) {
@@ -119,12 +120,13 @@ class _VendorLocationScreenState extends State<VendorLocationScreen> {
                         ),
                       ],
                     ),
-
-              const Spacer(),
-              MyButton(label: 'Update', onPressed: () {}),
             ],
           ),
         ),
+      ),
+      bottomNavigationBar: Padding(
+        padding: EdgeInsets.only(left: 16.w, right: 16.w, bottom: 32.w),
+        child: MyButton(label: 'Update', onPressed: () {}),
       ),
     );
   }

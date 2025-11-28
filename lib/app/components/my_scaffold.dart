@@ -1,6 +1,5 @@
 import 'package:vendr/app/components/global_unfocus_keyboard.dart';
 import 'package:vendr/app/utils/extensions/context_extensions.dart';
-import 'package:vendr/generated/assets/assets.gen.dart';
 import 'package:flutter/material.dart';
 
 class MyScaffold extends StatefulWidget {
@@ -18,6 +17,7 @@ class MyScaffold extends StatefulWidget {
     this.primary,
     this.extendBody,
     this.extendBodyBehindAppBar,
+    this.removeSafeAreaBottom,
   });
   final Widget? body;
   final PreferredSizeWidget? appBar;
@@ -31,6 +31,7 @@ class MyScaffold extends StatefulWidget {
   final bool? primary;
   final bool? extendBody;
   final bool? extendBodyBehindAppBar;
+  final bool? removeSafeAreaBottom;
 
   @override
   State<MyScaffold> createState() => _MyScaffoldState();
@@ -58,7 +59,14 @@ class _MyScaffoldState extends State<MyScaffold> {
                     widget.extendBodyBehindAppBar! == true))
             ? (widget.body ?? const SizedBox.shrink())
             : GlobalUnfocusKeyboard(
-                child: SafeArea(child: widget.body ?? const SizedBox.shrink()),
+                child: SafeArea(
+                  bottom:
+                      widget.removeSafeAreaBottom != null &&
+                          widget.removeSafeAreaBottom == true
+                      ? false
+                      : true,
+                  child: widget.body ?? const SizedBox.shrink(),
+                ),
               ),
         appBar: widget.appBar,
         drawer: widget.drawer,
