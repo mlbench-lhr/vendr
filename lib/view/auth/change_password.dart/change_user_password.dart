@@ -4,6 +4,7 @@ import 'package:vendr/app/components/my_button.dart';
 import 'package:vendr/app/components/my_scaffold.dart';
 import 'package:vendr/app/components/my_text_field.dart';
 import 'package:vendr/app/utils/extensions/context_extensions.dart';
+import 'package:vendr/l10n/l10n.dart';
 
 class ChangePasswordScreen extends StatefulWidget {
   const ChangePasswordScreen({super.key});
@@ -24,7 +25,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
       appBar: AppBar(
         centerTitle: true,
         title: Text(
-          'Change Password',
+          context.l10n.auth_change_password,
           style: context.typography.title.copyWith(
             fontSize: 20.sp,
             fontWeight: FontWeight.w600,

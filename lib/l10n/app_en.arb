@@ -2,6 +2,10 @@
   "@@locale": "en",
   "@_GENERAL": {},
   "vendr": "Vendr",
+  "unknown_oops": "Oops!",
+  "unknown_page_not_found": "Page Not Found",
+  "unknown_page_does_not_exist": "The page you're looking for doesn't seem to exist.",
+  "done": "Done",
   "@_AUTH": {},
   "auth_forgot_password": "Forgot Password?",
   "auth_forgot_password_instruction": "Nothing to worry. Just enter your email address so we can send you a verification code to continue.",
@@ -35,5 +39,12 @@
   "welcome_discover_track_savour": "Discover Track, Savour, ",
   "welcome_your_guide_to_local_flavours": "Your Guide to Local Flavours!",
   "welcome_get_started": "Get Started",
-
+  "auth_change_password": "Change Password",
+  "@_Dialogs": {},
+  "dialog_cancel": "Cancel",
+  "dialog_yes_delete": "Yes Delete",
+  "@_NEW_STRINGS": {},
+  "exception_check_internet_connection": "We're unable to show results.\nPlease check your data\nconnection.",
+  "exception_retry": "RETRY",
+  "test_done": "Done"
 }

@@ -430,10 +430,7 @@ class ReviewsSectionHeading extends StatelessWidget {
           isDark: true,
           fontSize: 14.sp,
           onPressed: () {
-            VendorHomeService.gotoReviews(
-              context,
-              isVendor: false,
-            ); //TODO: change to true
+            VendorHomeService.gotoReviews(context, isVendor: true);
           },
         ),
       ],

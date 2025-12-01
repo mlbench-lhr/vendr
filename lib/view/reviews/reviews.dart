@@ -164,7 +164,7 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
     return Center(
       child: Column(
         children: [
-          150.height,
+          180.height,
           Image.asset(Assets.images.disconnected.path),
           24.height,
           Text(

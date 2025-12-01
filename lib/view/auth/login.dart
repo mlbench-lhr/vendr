@@ -4,6 +4,7 @@ import 'package:vendr/app/components/my_button.dart';
 import 'package:vendr/app/components/my_scaffold.dart';
 import 'package:vendr/app/components/my_text_field.dart';
 import 'package:vendr/app/utils/extensions/context_extensions.dart';
+import 'package:vendr/l10n/l10n.dart';
 import 'package:vendr/services/common/auth_service.dart';
 import 'package:vendr/view/auth/widgets/language_menu.dart';
 import 'package:vendr/view/auth/widgets/social_login_btn.dart';

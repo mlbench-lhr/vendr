@@ -1,6 +1,10 @@
-import 'package:vendr/l10n/arb/app_localizations.dart';
+import 'package:vendr/l10n/app_localizations.dart';
 import 'package:flutter/widgets.dart';
 
+// extension AppLocalizationsX on BuildContext {
+//   AppLocalizations get l10n => AppLocalizations.of(this);
+// }
+
 extension AppLocalizationsX on BuildContext {
-  AppLocalizations get l10n => AppLocalizations.of(this);
+  AppLocalizations get l10n => AppLocalizations.of(this)!;
 }

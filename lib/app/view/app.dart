@@ -1,7 +1,7 @@
 import 'package:vendr/app/routes/routes.dart';
 import 'package:vendr/app/styles/app_dimensions.dart';
 import 'package:vendr/app/styles/theme_factory.dart';
-import 'package:vendr/l10n/arb/app_localizations.dart';
+import 'package:vendr/l10n/app_localizations.dart';
 import 'package:vendr/provider/auth/locale_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
