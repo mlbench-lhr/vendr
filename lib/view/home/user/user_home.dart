@@ -118,7 +118,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
   }) async {
     try {
       // final data = await rootBundle.load('assets/images/home.png');
-      final data = await rootBundle.load(Assets.icons.shop.path);
+      final data = await rootBundle.load(Assets.images.shopMarker.path);
       final bytes = data.buffer.asUint8List();
 
       final ui.Codec codec = await ui.instantiateImageCodec(bytes);

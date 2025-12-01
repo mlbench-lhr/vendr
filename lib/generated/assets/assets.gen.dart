@@ -66,11 +66,16 @@ class $AssetsImagesGen {
   AssetGenImage get locationPermissionRequired =>
       const AssetGenImage('assets/images/location_permission_required.png');
 
+  /// File path: assets/images/shop_marker.png
+  AssetGenImage get shopMarker =>
+      const AssetGenImage('assets/images/shop_marker.png');
+
   /// List of all assets
   List<AssetGenImage> get values => [
     blocksPattern,
     disconnected,
     locationPermissionRequired,
+    shopMarker,
   ];
 }
 
