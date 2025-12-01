@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:vendr/app/styles/app_radiuses.dart';
 import 'package:vendr/app/utils/extensions/context_extensions.dart';
-import 'package:vendr/generated/assets/assets.gen.dart';
 
 class MyChip extends StatelessWidget {
   const MyChip({required this.label, required this.onDelete, super.key});

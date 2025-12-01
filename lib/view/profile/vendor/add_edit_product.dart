@@ -33,7 +33,7 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
     return MyScaffold(
       appBar: AppBar(
         title: Text(
-          widget.isEdit ? 'Edit Product' : 'Upload Product',
+          widget.isEdit ? 'Edit Menu Item' : 'Upload Menu Item',
           style: context.typography.title.copyWith(
             fontSize: 20.sp,
             fontWeight: FontWeight.w600,

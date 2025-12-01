@@ -87,6 +87,14 @@ extension AddressValidatorExtension on String {
   }
 }
 
+extension PhoneNumberValidatorExtension on String {
+  bool phoneNumberValidator() {
+    final phone = this;
+    final regex = RegExp(r'^\+?[0-9]{7,15}$');
+    return regex.hasMatch(phone);
+  }
+}
+
 extension StripeAccountIdValidator on String {
   bool stripeAccountIdValidator() {
     final accountIdValid = RegExp(

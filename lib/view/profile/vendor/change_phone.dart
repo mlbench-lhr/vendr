@@ -52,7 +52,7 @@ class _ChangePhoneNumberScreenState extends State<ChangePhoneNumberScreen> {
             10.height,
             MyTextField(
               keyboardType: TextInputType.number,
-              hint: 'Enter your phone number',
+              hint: 'Enter new phone number',
               suffixIcon: Icon(Icons.phone_outlined),
               controller: _phoneController,
             ),

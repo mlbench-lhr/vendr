@@ -2,9 +2,7 @@ import 'dart:io';
 
 /// Abstract class for defining base API services.
 abstract class BaseApiServices {
-  Future<Map<String, dynamic>> get({
-    required String url,
-  });
+  Future<Map<String, dynamic>> get({required String url});
   Future<Map<String, dynamic>> post({
     required String url,
     required Map<String, dynamic> data,

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:vendr/app/components/menu_item_tile.dart';
 import 'package:vendr/app/components/my_scaffold.dart';

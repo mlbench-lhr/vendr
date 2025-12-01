@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:vendr/app/components/my_button.dart';
-import 'package:vendr/app/components/my_dropdown.dart';
 import 'package:vendr/app/components/my_scaffold.dart';
 import 'package:vendr/app/utils/extensions/context_extensions.dart';
 
@@ -13,56 +12,6 @@ class VendorHoursScreen extends StatefulWidget {
 }
 
 class _VendorHoursScreenState extends State<VendorHoursScreen> {
-  List<String> hours = [
-    '00:00',
-    '00:30',
-    '01:00',
-    '01:30',
-    '02:00',
-    '02:30',
-    '03:00',
-    '03:30',
-    '04:00',
-    '04:30',
-    '05:00',
-    '05:30',
-    '06:00',
-    '06:30',
-    '07:00',
-    '07:30',
-    '08:00',
-    '08:30',
-    '09:00',
-    '09:30',
-    '10:00',
-    '10:30',
-    '11:00',
-    '11:30',
-    '12:00',
-    '12:30',
-    '13:00',
-    '13:30',
-    '14:00',
-    '14:30',
-    '15:00',
-    '15:30',
-    '16:00',
-    '16:30',
-    '17:00',
-    '17:30',
-    '18:00',
-    '18:30',
-    '19:00',
-    '19:30',
-    '20:00',
-    '20:30',
-    '21:00',
-    '21:30',
-    '22:00',
-    '22:30',
-    '23:00',
-    '23:30',
-  ];
   @override
   Widget build(BuildContext context) {
     return MyScaffold(
@@ -84,41 +33,13 @@ class _VendorHoursScreenState extends State<VendorHoursScreen> {
               child: SingleChildScrollView(
                 child: Column(
                   children: [
-                    HourSelectionSwitch(
-                      context: context,
-                      hours: hours,
-                      day: 'Monday',
-                    ),
-                    HourSelectionSwitch(
-                      context: context,
-                      hours: hours,
-                      day: 'Tuesday',
-                    ),
-                    HourSelectionSwitch(
-                      context: context,
-                      hours: hours,
-                      day: 'Wednesday',
-                    ),
-                    HourSelectionSwitch(
-                      context: context,
-                      hours: hours,
-                      day: 'Thursday',
-                    ),
-                    HourSelectionSwitch(
-                      context: context,
-                      hours: hours,
-                      day: 'Friday',
-                    ),
-                    HourSelectionSwitch(
-                      context: context,
-                      hours: hours,
-                      day: 'Saturday',
-                    ),
-                    HourSelectionSwitch(
-                      context: context,
-                      hours: hours,
-                      day: 'Sunday',
-                    ),
+                    HourSelectionSwitch(context: context, day: 'Monday'),
+                    HourSelectionSwitch(context: context, day: 'Tuesday'),
+                    HourSelectionSwitch(context: context, day: 'Wednesday'),
+                    HourSelectionSwitch(context: context, day: 'Thursday'),
+                    HourSelectionSwitch(context: context, day: 'Friday'),
+                    HourSelectionSwitch(context: context, day: 'Saturday'),
+                    HourSelectionSwitch(context: context, day: 'Sunday'),
                     SizedBox(height: 20),
                   ],
                 ),
@@ -144,11 +65,9 @@ class HourSelectionSwitch extends StatefulWidget {
   const HourSelectionSwitch({
     super.key,
     required this.context,
-    required this.hours,
     required this.day,
   });
   final BuildContext context;
-  final List<String> hours;
   final String day;
   @override
   State<HourSelectionSwitch> createState() => _HourSelectionSwitchState();
@@ -156,6 +75,29 @@ class HourSelectionSwitch extends StatefulWidget {
 
 class _HourSelectionSwitchState extends State<HourSelectionSwitch> {
   bool switchValue = false;
+
+  //pick time
+  TimeOfDay? _selectedStartTime;
+  TimeOfDay? _selectedEndTime;
+  Future<void> _pickTime({bool isStartTime = true}) async {
+    final TimeOfDay? time = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay.now(),
+    );
+
+    if (time != null) {
+      if (isStartTime) {
+        setState(() {
+          _selectedStartTime = time;
+        });
+      } else {
+        setState(() {
+          _selectedEndTime = time;
+        });
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -187,24 +129,55 @@ class _HourSelectionSwitchState extends State<HourSelectionSwitch> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                SizedBox(
-                  width: 150.w,
-                  child: MyDropdown(
-                    items: widget.hours,
-                    value: widget.hours.first,
-                    onChanged: (value) {
-                      debugPrint('Start Time updated to: $value');
-                    },
+                ///
+                ///START TIME
+                ///
+                InkWell(
+                  onTap: () {
+                    _pickTime(isStartTime: true);
+                  },
+                  child: Container(
+                    width: 150.w,
+                    height: 50.h,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.white38, width: 1.5.w),
+                      borderRadius: BorderRadius.circular(10.r),
+                      color: Colors.white12,
+                    ),
+                    child: Text(
+                      textAlign: TextAlign.center,
+                      _selectedStartTime != null
+                          ? _selectedStartTime!.format(context)
+                          : '00:00',
+                      style: context.typography.title.copyWith(fontSize: 16.sp),
+                    ),
                   ),
                 ),
-                SizedBox(
-                  width: 150.w,
-                  child: MyDropdown(
-                    items: widget.hours,
-                    value: widget.hours.first,
-                    onChanged: (value) {
-                      debugPrint('End Time updated to: $value');
-                    },
+
+                ///
+                ///END TIME
+                ///
+                InkWell(
+                  onTap: () {
+                    _pickTime(isStartTime: false);
+                  },
+                  child: Container(
+                    width: 150.w,
+                    height: 50.h,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.white38, width: 1.5.w),
+                      borderRadius: BorderRadius.circular(10.r),
+                      color: Colors.white12,
+                    ),
+                    child: Text(
+                      textAlign: TextAlign.center,
+                      _selectedEndTime != null
+                          ? _selectedEndTime!.format(context)
+                          : '00:00',
+                      style: context.typography.title.copyWith(fontSize: 16.sp),
+                    ),
                   ),
                 ),
               ],

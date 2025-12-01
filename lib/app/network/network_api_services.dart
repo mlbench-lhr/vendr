@@ -17,7 +17,14 @@ class NetworkApiService implements BaseApiServices {
   final SessionController _sessionController = SessionController();
 
   // Do not use token in headers for the following API calls
-  final List<String> unauthenticatedEndpoints = [AppUrl.login, AppUrl.signup];
+  // final List<String> unauthenticatedEndpoints = [AppUrl.login, AppUrl.signup];
+  final List<String> unauthenticatedEndpoints = [
+    AppUrl.vendorLogin,
+    AppUrl.vendorSignup,
+    AppUrl.userLogin,
+    AppUrl.userSignup,
+    AppUrl.verifyOtp,
+  ];
 
   /// Utility method to check if API needs token in headers
   bool _needsAuth(String url) {

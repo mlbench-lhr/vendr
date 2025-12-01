@@ -1,16 +1,16 @@
-import 'dart:convert';
-import 'dart:developer';
-
 // import 'package:esthetic_match/app/utils/enums.dart';
 // import 'package:esthetic_match/app/utils/local_storage.dart';
 // import 'package:esthetic_match/model/doctor/doctor_model.dart';
 // import 'package:esthetic_match/model/general/procedure_catalog.dart';
 // import 'package:esthetic_match/model/user/user_model.dart';
-import 'package:flutter/material.dart';
 
 // Enum for storage keys to prevent typos
+import 'package:vendr/app/utils/local_storage.dart';
+import 'dart:developer';
+
 enum StorageKey {
-  authToken('auth_token'),
+  accessToken('access_token'),
+  refreshToken('refresh_token'),
   userType('user_type'),
   procedures('procedures'),
   medicalSpecialty('medical_specialty'),
@@ -25,9 +25,10 @@ class SessionController {
   //   factory SessionController() => _instance;
   //   SessionController._internal();
   //   static final SessionController _instance = SessionController._internal();
-  //   final LocalStorage _localStorage = LocalStorage();
+  final LocalStorage _localStorage = LocalStorage();
 
   String? _token;
+  String? _refreshToken;
   //   UserModel? _user;
   //   DoctorModel? _doctor;
   //   UserType? userType;
@@ -36,6 +37,7 @@ class SessionController {
   //   bool? _isPlanCancelled;
 
   String? get token => _token;
+  String? get refreshToken => _refreshToken;
   //   UserModel? get user => _user;
   //   DoctorModel? get doctor => _doctor;
   //   List<ProcedureCatalogModel>? get procedures => _procedures;
@@ -132,11 +134,17 @@ class SessionController {
   //     log('User type saved: ${userType!.value}');
   //   }
 
-  // Future<void> saveToken(String token) async {
-  //   _token = token;
-  //   await _localStorage.setValue(StorageKey.authToken.value, token);
-  //   log('Token saved: $token');
-  // }
+  Future<void> saveToken({
+    required String accessToken,
+    required String refreshToken,
+  }) async {
+    _token = accessToken;
+    _refreshToken = refreshToken;
+    await _localStorage.setValue(StorageKey.accessToken.value, accessToken);
+    log('Access Token saved: $token');
+    await _localStorage.setValue(StorageKey.refreshToken.value, refreshToken);
+    log('Refresh Token saved: $refreshToken');
+  }
 
   //   Future<void> saveUser(UserModel user) async {
   //     _user = user;
@@ -173,22 +181,24 @@ class SessionController {
   //     _isPlanCancelled = isCancelled;
   //   }
 
-  //   Future<void> clearSession() async {
-  //     _token = null;
-  //     _user = null;
-  //     _doctor = null;
-  //     userType = null;
-  //     _procedures = null;
-  //     _medicalSpecialty = null;
+  Future<void> clearSession() async {
+    _token = null;
+    _refreshToken = null;
+    // _user = null;
+    // _doctor = null;
+    // userType = null;
+    // _procedures = null;
+    // _medicalSpecialty = null;
 
-  //     // Clear all storage values using the enum
-  //     await _localStorage.clearValue(StorageKey.authToken.value);
-  //     await _localStorage.clearValue(StorageKey.userType.value);
-  //     await _localStorage.clearValue(StorageKey.user.value);
-  //     await _localStorage.clearValue(StorageKey.doctor.value);
-  //     await _localStorage.clearValue(StorageKey.procedures.value);
-  //     await _localStorage.clearValue(StorageKey.medicalSpecialty.value);
+    // Clear all storage values using the enum
+    await _localStorage.clearValue(StorageKey.accessToken.value);
+    await _localStorage.clearValue(StorageKey.refreshToken.value);
+    // await _localStorage.clearValue(StorageKey.userType.value);
+    // await _localStorage.clearValue(StorageKey.user.value);
+    // await _localStorage.clearValue(StorageKey.doctor.value);
+    // await _localStorage.clearValue(StorageKey.procedures.value);
+    // await _localStorage.clearValue(StorageKey.medicalSpecialty.value);
 
-  //     log('Session cleared: All data removed');
-  //   }
+    log('Session cleared: All data removed');
+  }
 }
