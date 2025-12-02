@@ -34,8 +34,8 @@ class MyButton extends StatelessWidget {
               : context.colors.buttonDisabled);
 
     final foregroundColor = isDark
-        ? context.colors.buttonPrimaryText
-        : context.colors.buttonSecondaryText;
+        ? (isEnabled ? context.colors.buttonPrimaryText : Colors.black26)
+        : (isEnabled ? Colors.black26 : context.colors.buttonDisabled);
 
     return SizedBox(
       width: double.infinity,

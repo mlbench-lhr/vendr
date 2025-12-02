@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:vendr/app/components/my_button.dart';
 import 'package:vendr/app/components/my_pinput.dart';
@@ -52,6 +53,10 @@ class _ChangePhoneNumberScreenState extends State<ChangePhoneNumberScreen> {
             10.height,
             MyTextField(
               keyboardType: TextInputType.number,
+              inputFormatters: <TextInputFormatter>[
+                // Allows digits (0-9) and the plus sign (+)
+                FilteringTextInputFormatter.allow(RegExp(r'[0-9+]')),
+              ],
               hint: 'Enter new phone number',
               suffixIcon: Icon(Icons.phone_outlined),
               controller: _phoneController,

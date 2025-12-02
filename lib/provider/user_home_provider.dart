@@ -3,7 +3,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:vendr/model/vendor/vendor_model.dart';
 
 class UserHomeProvider extends ChangeNotifier {
-  final List<Vendor> vendors;
+  final List<VendorModel> vendors;
 
   LatLng? _userLocation;
   int? _selectedVendorIndex;
@@ -13,7 +13,7 @@ class UserHomeProvider extends ChangeNotifier {
 
   LatLng? get userLocation => _userLocation;
   int? get selectedVendorIndex => _selectedVendorIndex;
-  Vendor? get selectedVendor =>
+  VendorModel? get selectedVendor =>
       (_selectedVendorIndex != null) ? vendors[_selectedVendorIndex!] : null;
 
   Set<Polyline> get polylines => Set.unmodifiable(_polylines);
@@ -63,15 +63,17 @@ class UserHomeProvider extends ChangeNotifier {
 
     for (var i = 0; i < vendors.length; i++) {
       final vendor = vendors[i];
-      markers.add(
-        Marker(
-          markerId: MarkerId('vendor_$i'),
-          position: vendor.location,
-          icon: customMarker ?? BitmapDescriptor.defaultMarker,
-          onTap: () => toggleVendorSelection(i),
-          infoWindow: InfoWindow(title: vendor.name),
-        ),
-      );
+      if (vendor.location != null) {
+        markers.add(
+          Marker(
+            markerId: MarkerId('vendor_$i'),
+            position: vendor.location!,
+            icon: customMarker ?? BitmapDescriptor.defaultMarker,
+            onTap: () => toggleVendorSelection(i),
+            infoWindow: InfoWindow(title: vendor.name),
+          ),
+        );
+      }
     }
 
     if (_userLocation != null) {

@@ -16,13 +16,12 @@ class _UserFavouritsScreenState extends State<UserFavouritsScreen> {
   Widget build(BuildContext context) {
     return MyScaffold(
       appBar: AppBar(
-        title: Center(
-          child: Text(
-            'Favorite Venders',
-            style: context.typography.title.copyWith(
-              fontSize: 20.sp,
-              fontWeight: FontWeight.w600,
-            ),
+        centerTitle: true,
+        title: Text(
+          'Favorite Venders',
+          style: context.typography.title.copyWith(
+            fontSize: 20.sp,
+            fontWeight: FontWeight.w600,
           ),
         ),
       ),

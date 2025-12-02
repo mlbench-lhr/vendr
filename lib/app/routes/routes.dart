@@ -19,7 +19,7 @@ import 'package:vendr/view/profile/user/edit_profile.dart';
 import 'package:vendr/view/profile/user/notification_prefernces.dart';
 import 'package:vendr/view/profile/user/user_favorites.dart';
 import 'package:vendr/view/profile/user/user_profile.dart';
-import 'package:vendr/view/auth/change_password.dart/change_user_password.dart';
+import 'package:vendr/view/auth/change_password.dart/change_password.dart';
 import 'package:vendr/view/profile/vendor/add_edit_product.dart';
 import 'package:vendr/view/profile/vendor/change_email.dart';
 import 'package:vendr/view/profile/vendor/change_phone.dart';
@@ -29,18 +29,18 @@ import 'package:vendr/view/profile/vendor/my_menu.dart';
 import 'package:vendr/view/profile/vendor/vendor_hours.dart';
 import 'package:vendr/view/profile/vendor/vendor_profile.dart';
 import 'package:vendr/view/reviews/reviews.dart';
+import 'package:vendr/view/splash/splash_view.dart';
 
 class Routes {
-  static String initialRoute() => RoutesName.welcome;
+  static String initialRoute() => RoutesName.splash;
   // static String initialRoute() => RoutesName.userHome;
-
   static final Map<String, WidgetBuilder> _routes = {
+    RoutesName.splash: (_) => const SplashView(),
     RoutesName.welcome: (_) => const WelcomeScreen(),
     RoutesName.profileTypeSelection: (_) => const ProfileTypeSelectionScreen(),
     RoutesName.userSignup: (_) => const UserSignupScreen(),
     RoutesName.vendorSignup: (_) => const VendorSignupScreen(),
     RoutesName.forgotPassword: (_) => const ForgotPasswordScreen(),
-    RoutesName.newPassword: (_) => const NewPasswordScreen(),
     RoutesName.vendorHome: (_) => const VendorHomeScreen(),
     RoutesName.userHome: (_) => const UserHomeScreen(),
     RoutesName.vendorProfile: (_) => const VendorProfileScreen(),
@@ -81,6 +81,16 @@ class Routes {
         return MaterialPageRoute(
           builder: (_) => LoginScreen(isVendor: args['isVendor'] as bool),
         );
+
+      case RoutesName.newPassword:
+        final args = _getArgs(settings, requiredKeys: ['email', 'otp']);
+        return MaterialPageRoute(
+          builder: (_) => NewPasswordScreen(
+            email: args['email'] as String,
+            otp: args['otp'],
+          ),
+        );
+
       case RoutesName.vendorAddEditProduct:
         final args = _getArgs(settings, requiredKeys: ['isEdit']);
         return MaterialPageRoute(

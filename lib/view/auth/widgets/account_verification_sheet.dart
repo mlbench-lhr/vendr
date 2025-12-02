@@ -8,11 +8,16 @@ import 'package:vendr/app/components/my_pinput.dart';
 import 'package:vendr/app/components/my_text_button.dart';
 import 'package:vendr/app/utils/extensions/context_extensions.dart';
 import 'package:vendr/app/utils/extensions/flush_bar_extension.dart';
-import 'package:vendr/services/views/signup_service.dart';
+import 'package:vendr/services/common/auth_service.dart';
 
 class AccountVerificationSheet extends StatefulWidget {
-  const AccountVerificationSheet({required this.email, super.key});
+  const AccountVerificationSheet({
+    required this.email,
+    required this.isVendor,
+    super.key,
+  });
   final String email;
+  final bool isVendor;
 
   @override
   State<AccountVerificationSheet> createState() =>
@@ -21,7 +26,7 @@ class AccountVerificationSheet extends StatefulWidget {
 
 class _AccountVerificationSheetState extends State<AccountVerificationSheet> {
   final pinController = TextEditingController();
-  final signupService = SignupService();
+  final authService = AuthService();
   bool isResendAvailable = false;
   int remainingTime = 60;
   Timer? _timer;
@@ -118,11 +123,12 @@ class _AccountVerificationSheetState extends State<AccountVerificationSheet> {
                 ? null
                 : () async {
                     setState(() => isLoading = true);
-                    await signupService
+                    await authService
                         .verifyOtp(
                           context: context,
                           email: widget.email,
                           otp: pinController.text,
+                          isVendor: widget.isVendor,
                         )
                         .then((_) {
                           if (mounted) {

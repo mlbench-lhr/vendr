@@ -34,8 +34,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
       ),
       body: Padding(
         padding: EdgeInsets.all(16.w),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        child: ListView(
           children: [
             SizedBox(height: 36.h),
             Text(
@@ -106,14 +105,17 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                 ),
               ),
             ),
-            const Spacer(),
-            MyButton(
-              label: 'Submit',
-              onPressed: () {
-                debugPrint('Submit button pressed');
-              },
-            ),
           ],
+        ),
+      ),
+
+      bottomNavigationBar: Padding(
+        padding: EdgeInsets.only(left: 16.w, right: 16.w, bottom: 32.w),
+        child: MyButton(
+          label: 'Submit',
+          onPressed: () {
+            debugPrint('Submit button pressed');
+          },
         ),
       ),
     );

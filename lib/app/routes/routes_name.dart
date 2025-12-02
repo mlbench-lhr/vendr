@@ -1,4 +1,5 @@
 class RoutesName {
+  static const String splash = 'splash_screem';
   //Auth
   static const String welcome = 'welcome_screem';
   static const String profileTypeSelection = 'profile_type_selection_screen';

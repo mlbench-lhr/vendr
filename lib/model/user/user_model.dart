@@ -5,20 +5,12 @@ part 'user_model.g.dart';
 @JsonSerializable()
 class UserModel {
   UserModel({
-    // required this.firstName,
-    // required this.lastName,
-    required this.userName,
-    required this.email,
-    required this.location,
-    required this.lat,
-    required this.lng,
     this.id,
-    this.dob,
-    this.image,
-    this.gender,
-    this.verified,
+    required this.name,
+    this.imageUrl,
     this.createdAt,
     this.updatedAt,
+    this.favoriteVendors,
   });
 
   factory UserModel.fromJson(Map<String, dynamic> json) =>
@@ -26,19 +18,12 @@ class UserModel {
 
   Map<String, dynamic> toJson() => _$UserModelToJson(this);
 
-  @JsonKey(name: '_id')
+  @JsonKey(name: 'id')
   final String? id;
-  // final String firstName;
-  // final String lastName;
-  final String userName;
-  final String email;
-  final bool? verified;
 
-  @JsonKey(name: 'dob', fromJson: _fromJsonDateTime, toJson: _toJsonDateTime)
-  final DateTime? dob;
+  final String name;
 
-  final String location;
-  final String? gender;
+  final String? imageUrl;
 
   @JsonKey(fromJson: _fromJsonDateTime, toJson: _toJsonDateTime)
   final DateTime? createdAt;
@@ -46,16 +31,15 @@ class UserModel {
   @JsonKey(fromJson: _fromJsonDateTime, toJson: _toJsonDateTime)
   final DateTime? updatedAt;
 
-  final String? image;
-  final double lat;
-  final double lng;
+  final List<String>? favoriteVendors;
 
-  static DateTime? _fromJsonDateTime(dynamic date) {
-    if (date == null) return null;
-    if (date is String) return DateTime.parse(date);
-    throw ArgumentError('Invalid date format');
+  // -------- DateTime Converters ----------
+  static DateTime? _fromJsonDateTime(dynamic value) {
+    if (value == null) return null;
+    if (value is String) return DateTime.parse(value);
+    throw ArgumentError('Invalid DateTime format: $value');
   }
 
-  static String? _toJsonDateTime(DateTime? date) =>
-      date?.toUtc().toIso8601String();
+  static String? _toJsonDateTime(DateTime? value) =>
+      value?.toUtc().toIso8601String();
 }

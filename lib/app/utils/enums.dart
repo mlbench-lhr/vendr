@@ -1,14 +1,10 @@
 enum Status { loading, completed, error }
 
-enum Flavor {
-  dev,
-  staging,
-  prod,
-}
+enum Flavor { dev, staging, prod }
 
 enum UserType {
   user('user'),
-  doctor('doctor');
+  vendor('vendor');
 
   const UserType(this.value);
   final String value;

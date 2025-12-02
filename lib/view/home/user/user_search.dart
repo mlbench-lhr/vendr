@@ -12,15 +12,14 @@ class UserSearchScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return MyScaffold(
       appBar: AppBar(
-        title: Center(
-          child: Text(
-            'Search',
-            style: context.typography.title.copyWith(
-              fontSize: 20.sp,
-              fontWeight: FontWeight.w600,
-            ),
-            textAlign: TextAlign.center,
+        centerTitle: true,
+        title: Text(
+          'Search',
+          style: context.typography.title.copyWith(
+            fontSize: 20.sp,
+            fontWeight: FontWeight.w600,
           ),
+          textAlign: TextAlign.center,
         ),
       ),
       body: Padding(

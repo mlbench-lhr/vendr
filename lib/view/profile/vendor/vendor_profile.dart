@@ -3,7 +3,9 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:vendr/app/components/my_button.dart';
 import 'package:vendr/app/components/my_scaffold.dart';
 import 'package:vendr/app/utils/extensions/context_extensions.dart';
+import 'package:vendr/model/vendor/vendor_model.dart';
 import 'package:vendr/services/common/auth_service.dart';
+import 'package:vendr/services/common/session_manager/session_controller.dart';
 import 'package:vendr/services/vendor/vendor_profile_service.dart';
 import 'package:vendr/view/profile/widgets/delete_account_dialog.dart';
 import 'package:vendr/view/profile/widgets/profile_menu_tile.dart';
@@ -16,8 +18,10 @@ class VendorProfileScreen extends StatefulWidget {
 }
 
 class _VendorProfileScreenState extends State<VendorProfileScreen> {
+  final VendorModel vendor = SessionController().vendor!;
   @override
   Widget build(BuildContext context) {
+    final String vendorName = vendor.name;
     return MyScaffold(
       appBar: AppBar(
         title: Text(
@@ -35,17 +39,21 @@ class _VendorProfileScreenState extends State<VendorProfileScreen> {
           child: ListView(
             children: [
               CircleAvatar(
-                backgroundColor: context.colors.buttonPrimary,
                 radius: 40.r,
-                backgroundImage: NetworkImage(
-                  'https://cdn.cpdonline.co.uk/wp-content/uploads/2021/10/28122626/What-is-a-chef-hierarchy.jpg',
+                backgroundColor: context.colors.buttonPrimary,
+                child: CircleAvatar(
+                  backgroundColor: context.colors.buttonPrimary,
+                  radius: 38.r,
+                  backgroundImage: NetworkImage(
+                    'https://cdn.cpdonline.co.uk/wp-content/uploads/2021/10/28122626/What-is-a-chef-hierarchy.jpg',
+                  ),
+                  // child: Icon(Icons.person, color: Colors.white, size: 40.w),
                 ),
-                // child: Icon(Icons.person, color: Colors.white, size: 40.w),
               ),
               SizedBox(height: 16.h),
               Text(
                 textAlign: TextAlign.center,
-                'Harry Brook',
+                vendorName,
                 style: context.typography.title.copyWith(fontSize: 20.sp),
               ),
               SizedBox(height: 12.h),

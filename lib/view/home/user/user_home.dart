@@ -14,6 +14,7 @@ import 'package:vendr/app/components/my_text_field.dart';
 import 'package:vendr/app/styles/app_radiuses.dart';
 import 'package:vendr/app/utils/app_constants.dart';
 import 'package:vendr/app/utils/extensions/context_extensions.dart';
+import 'package:vendr/app/utils/extensions/flush_bar_extension.dart';
 import 'package:vendr/app/utils/extensions/general_extensions.dart';
 import 'package:vendr/generated/assets/assets.gen.dart';
 import 'package:vendr/provider/user_home_provider.dart';
@@ -476,17 +477,23 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
       onTap: () => setState(() => _isCardExpanded = !_isCardExpanded),
       distance: _distanceInKm ?? 0.0,
       vendorName: selectedVendor.name,
-      imageUrl: selectedVendor.imageUrl,
-      vendorAddress: selectedVendor.address,
-      type: selectedVendor.type,
-      menu: selectedVendor.menu,
-      hours: selectedVendor.hours,
+      imageUrl: selectedVendor.imageUrl ?? '',
+      vendorAddress: selectedVendor.address ?? '',
+      vendorType: selectedVendor.vendorType,
+      menu: selectedVendor.menu ?? [],
+      // hours: selectedVendor.hours,
+      hours: selectedVendor.hours ?? [],
+      hoursADay: selectedVendor.hoursADay ?? '',
       onGetDirection: () async {
-        await _drawRouteToVendor(
-          selectedVendor.location,
-          provider.selectedVendorIndex ?? 0,
-        );
-        setState(() => _isCardExpanded = false);
+        if (selectedVendor.location != null) {
+          await _drawRouteToVendor(
+            selectedVendor.location!,
+            provider.selectedVendorIndex ?? 0,
+          );
+          setState(() => _isCardExpanded = false);
+        } else {
+          context.flushBarErrorMessage(message: 'Location not Defined');
+        }
       },
     );
   }

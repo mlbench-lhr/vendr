@@ -7,6 +7,7 @@ import 'package:vendr/app/components/review_tile.dart';
 import 'package:vendr/app/styles/app_radiuses.dart';
 import 'package:vendr/app/utils/extensions/context_extensions.dart';
 import 'package:vendr/app/utils/extensions/general_extensions.dart';
+import 'package:vendr/model/vendor/vendor_model.dart';
 import 'package:vendr/services/user/user_home_service.dart';
 import 'package:vendr/services/vendor/vendor_home_service.dart';
 import 'package:vendr/view/home/vendor/vendor_home.dart';
@@ -17,10 +18,11 @@ class VendorCard extends StatefulWidget {
   final double distance;
   final String vendorName;
   final String vendorAddress;
-  final String type;
+  final String vendorType;
   final String imageUrl;
-  final String menu;
-  final String hours;
+  final List<MenuItemModel> menu;
+  final List<Map<String, dynamic>>? hours;
+  final String? hoursADay;
   final VoidCallback? onGetDirection;
   final Widget Function(BuildContext context)? expandedBuilder;
 
@@ -31,9 +33,10 @@ class VendorCard extends StatefulWidget {
     required this.distance,
     required this.vendorName,
     required this.vendorAddress,
-    required this.type,
+    required this.vendorType,
     required this.menu,
-    required this.hours,
+    this.hours,
+    required this.hoursADay,
     this.expandedBuilder,
     this.onGetDirection,
     required this.imageUrl,
@@ -244,12 +247,17 @@ class _VendorCardState extends State<VendorCard> {
             Icons.copy_all_outlined,
 
             'Type',
-            widget.type,
+            widget.vendorType,
           ),
         ),
         SizedBox(width: 8.w),
         Expanded(
-          child: _infoItem(context, Icons.menu_outlined, 'Menu', widget.menu),
+          child: _infoItem(
+            context,
+            Icons.menu_outlined,
+            'Menu',
+            '${widget.menu.length} Products',
+          ),
         ),
         SizedBox(width: 8.w),
         Expanded(
@@ -257,7 +265,7 @@ class _VendorCardState extends State<VendorCard> {
             context,
             Icons.timer_outlined,
             'Hours',
-            widget.hours,
+            widget.hoursADay ?? '',
           ),
         ),
       ],
@@ -268,7 +276,7 @@ class _VendorCardState extends State<VendorCard> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        CardVendorHoursHeading(),
+        CardVendorHoursHeading(hoursADay: widget.hoursADay ?? '0'),
         SizedBox(height: 16.h),
         Wrap(
           spacing: 10.w,
@@ -339,7 +347,7 @@ class _VendorCardState extends State<VendorCard> {
                 ),
                 SizedBox(height: 4.h),
                 Text(
-                  'Vendor Type',
+                  widget.vendorType,
                   style: context.typography.label.copyWith(fontSize: 12.sp),
                 ),
               ],
@@ -551,8 +559,8 @@ class CardMenuHeading extends StatelessWidget {
 }
 
 class CardVendorHoursHeading extends StatelessWidget {
-  const CardVendorHoursHeading({super.key});
-
+  const CardVendorHoursHeading({super.key, required this.hoursADay});
+  final String hoursADay;
   @override
   Widget build(BuildContext context) {
     return Row(
@@ -572,7 +580,7 @@ class CardVendorHoursHeading extends StatelessWidget {
         ),
         const Spacer(),
         Text(
-          '8 Hours',
+          hoursADay,
           style: context.typography.body.copyWith(fontSize: 14.sp),
         ),
       ],

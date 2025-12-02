@@ -16,10 +16,25 @@
 // import 'package:flutter/material.dart';
 // import 'package:provider/provider.dart';
 
+import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:vendr/app/components/my_bottom_sheet.dart';
+import 'package:vendr/app/data/exception/app_exceptions.dart';
 import 'package:vendr/app/routes/routes_name.dart';
+import 'package:vendr/app/utils/enums.dart';
+import 'package:vendr/app/utils/extensions/context_extensions.dart';
+import 'package:vendr/app/utils/extensions/flush_bar_extension.dart';
+import 'package:vendr/app/utils/service_error_handler.dart';
+import 'package:vendr/model/user/user_model.dart';
+import 'package:vendr/model/vendor/vendor_model.dart';
+import 'package:vendr/repository/user_auth_repo.dart';
+import 'package:vendr/repository/vendor_auth_repo.dart';
+import 'package:vendr/services/common/session_manager/session_controller.dart';
+import 'package:vendr/view/auth/widgets/account_verification_sheet.dart';
 
 class AuthService {
+  static const String tag = 'AuthService';
+
   static void gotoProfileTypeSelection(BuildContext context) {
     Navigator.pushReplacementNamed(context, RoutesName.profileTypeSelection);
   }
@@ -43,11 +58,15 @@ class AuthService {
     Navigator.pushNamed(context, RoutesName.forgotPassword);
   }
 
-  static void gotoNewPassword(BuildContext context) {
-    Navigator.pushNamed(context, RoutesName.newPassword);
+  static void gotoNewPassword(BuildContext context, String email, String otp) {
+    Navigator.pushNamed(
+      context,
+      arguments: {'email': email, 'otp': otp},
+      RoutesName.newPassword,
+    );
   }
 
-  static void gotoVendorHome(BuildContext context) {
+  static void goToVendorHome(BuildContext context) {
     Navigator.pushNamedAndRemoveUntil(
       context,
       RoutesName.vendorHome,
@@ -55,7 +74,7 @@ class AuthService {
     );
   }
 
-  static void gotoUserHome(BuildContext context) {
+  static void goToUserHome(BuildContext context) {
     Navigator.pushNamedAndRemoveUntil(
       context,
       RoutesName.userHome,
@@ -63,41 +82,387 @@ class AuthService {
     );
   }
 
-  static void logout(BuildContext context) {
+  static void goToWelcome(BuildContext context) {
     Navigator.pushNamedAndRemoveUntil(
       context,
-      RoutesName.profileTypeSelection,
+      RoutesName.welcome,
       (route) => false,
     );
+  }
+
+  static void logout(BuildContext context) async {
+    await SessionController().clearSession();
+    if (context.mounted) {
+      Navigator.pushNamedAndRemoveUntil(
+        context,
+        RoutesName.profileTypeSelection,
+        (route) => false,
+      );
+    }
   }
 
   static void gotoChangePassword(BuildContext context) {
     Navigator.pushNamed(context, RoutesName.changePassword);
   }
 
+  final VendorAuthRepository _vendorAuthRepo = VendorAuthRepository();
+  final UserAuthRepository _userAuthRepo = UserAuthRepository();
+  final SessionController _sessionController = SessionController();
+
+  static void showVerificationSheet(
+    BuildContext context, {
+    required String email,
+    required bool isVendor,
+  }) {
+    MyBottomSheet.show<void>(
+      context,
+      isDismissible: false,
+      backgroundColor: context.colors.cardPrimary,
+      child: AccountVerificationSheet(email: email, isVendor: isVendor),
+    );
+  }
+
+  ///
+  ///Vendor Sign Up
+  ///
+  Future<void> vendorSignup(
+    BuildContext context, {
+    required String name,
+    required String email,
+    required String phone,
+    required String vendorType,
+    required String password,
+  }) async {
+    try {
+      final Map<String, dynamic> data = {
+        'name': name,
+        'email': email,
+        'phone': phone,
+        'vendor_type': vendorType,
+        'password': password,
+      };
+
+      // final response =
+      await _vendorAuthRepo.vendorSignup(data);
+
+      if (context.mounted) {
+        // context.flushBarSuccessMessage(message: 'Signup successful!');
+        showVerificationSheet(context, email: email, isVendor: true);
+      }
+    } catch (e) {
+      if (e is AppException) {
+        debugPrint('[SignupService] ❌ ${e.debugMessage}');
+        if (context.mounted) {
+          context.flushBarErrorMessage(message: e.userMessage);
+        }
+      } else {
+        debugPrint('[SignupService] ❌ Unexpected: $e');
+        if (context.mounted) {
+          context.flushBarErrorMessage(message: 'Something went wrong');
+        }
+      }
+    }
+  }
+
+  ///
+  ///User Sign Up
+  ///
+  Future<void> userSignup(
+    BuildContext context, {
+    required String name,
+    required String email,
+    required String password,
+  }) async {
+    try {
+      final Map<String, dynamic> data = {
+        'name': name,
+        'email': email,
+        'password': password,
+      };
+
+      // final response =
+      await _userAuthRepo.userSignup(data);
+
+      if (context.mounted) {
+        // context.flushBarSuccessMessage(message: 'Signup successful!');
+        showVerificationSheet(context, email: email, isVendor: false);
+      }
+    } catch (e) {
+      if (e is AppException) {
+        debugPrint('[SignupService] ❌ ${e.debugMessage}');
+        if (context.mounted) {
+          context.flushBarErrorMessage(message: e.userMessage);
+        }
+      } else {
+        debugPrint('[SignupService] ❌ Unexpected: $e');
+        if (context.mounted) {
+          context.flushBarErrorMessage(message: 'Something went wrong');
+        }
+      }
+    }
+  }
+
+  Future<void> verifyOtp({
+    required BuildContext context,
+    required String email,
+    required String otp,
+    required bool isVendor,
+  }) async {
+    try {
+      final Map<String, dynamic> data = {'email': email, 'otp': otp};
+
+      if (isVendor) {
+        //Vendor Side
+        final response = await _vendorAuthRepo.verifySignupOtp(data);
+        final String accessToken = response['tokens']['accessToken'] as String;
+        final String refreshToken =
+            response['tokens']['refreshToken'] as String;
+        final Map<String, dynamic> vendorData =
+            response['vendor'] as Map<String, dynamic>;
+
+        await _sessionController.saveVendor(VendorModel.fromJson(vendorData));
+
+        //save token in session controller
+        await _sessionController.saveToken(
+          accessToken: accessToken,
+          refreshToken: refreshToken,
+        );
+      } else {
+        //User Side
+
+        final response = await _userAuthRepo.verifySignupOtp(data);
+        final String accessToken = response['tokens']['accessToken'] as String;
+        final String refreshToken =
+            response['tokens']['refreshToken'] as String;
+        final Map<String, dynamic> userData =
+            response['user'] as Map<String, dynamic>;
+
+        await _sessionController.saveUser(UserModel.fromJson(userData));
+
+        //save token in session controller
+        await _sessionController.saveToken(
+          accessToken: accessToken,
+          refreshToken: refreshToken,
+        );
+      }
+
+      // final Map<String, dynamic> userData =
+      //     response['user'] as Map<String, dynamic>;
+
+      // //save token in session controller
+
+      // //save user
+      // //save user to session #muttas
+      // await SessionController().saveUser(
+      //   UserModel.fromJson(
+      //     userData,
+      //   ),
+      // );
+      // await SessionController().updateUser(
+      //   UserModel.fromJson(
+      //     userData,
+      //   ),
+      // );
+      // // _sessionController.user.name = verifyResponse['name'] as String;
+
+      // if (context.mounted) {
+      //   context.flushBarSuccessMessage(message: 'Account Verified...');
+      //   goToOnBoarding(context);
+      // }
+
+      //Vendor Login
+      if (context.mounted) {
+        isVendor ? goToVendorHome(context) : goToUserHome(context);
+      }
+    } catch (e) {
+      if (e is AppException) {
+        debugPrint('[SignupService] ❌ ${e.debugMessage}');
+        if (context.mounted) {
+          context.flushBarErrorMessage(message: e.userMessage);
+        }
+      } else {
+        debugPrint('[SignupService] ❌ Unexpected: $e');
+        if (context.mounted) {
+          context.flushBarErrorMessage(message: 'Something went wrong');
+        }
+      }
+    }
+  }
+
+  ///
+  ///User Login
+  ///
+  Future<void> userLogin(
+    BuildContext context, {
+    required String email,
+    required String password,
+  }) async {
+    final data = {'email': email, 'password': password};
+
+    try {
+      final response = await _userAuthRepo.userLogin(data);
+      final String accessToken = response['tokens']['accessToken'] as String;
+      final String refreshToken = response['tokens']['refreshToken'] as String;
+      final userData = response['user'] as Map<String, dynamic>;
+
+      await _sessionController.saveToken(
+        accessToken: accessToken,
+        refreshToken: refreshToken,
+      );
+      await _sessionController.saveUser(UserModel.fromJson(userData));
+      _sessionController.userType = UserType.user;
+      await _sessionController.saveUserType();
+      if (context.mounted) {
+        goToUserHome(context);
+      }
+      debugPrint('[$tag] ✅ User login success');
+    } catch (e) {
+      if (context.mounted) ErrorHandler.handle(context, e, serviceName: tag);
+    }
+  }
+
+  ///
+  ///Vendor Login
+  ///
+  Future<void> vendorLogin(
+    BuildContext context, {
+    required String email,
+    required String password,
+  }) async {
+    final data = {'email': email, 'password': password};
+
+    try {
+      final response = await _vendorAuthRepo.vendorLogin(data);
+      final String accessToken = response['tokens']['accessToken'] as String;
+      final String refreshToken = response['tokens']['refreshToken'] as String;
+      final vendorData = response['vendor'] as Map<String, dynamic>;
+
+      await _sessionController.saveToken(
+        accessToken: accessToken,
+        refreshToken: refreshToken,
+      );
+      await _sessionController.saveVendor(VendorModel.fromJson(vendorData));
+      _sessionController.userType = UserType.vendor;
+      await _sessionController.saveUserType();
+      if (context.mounted) {
+        goToVendorHome(context);
+      }
+      debugPrint('[$tag] ✅ Vendor login success');
+    } catch (e) {
+      if (context.mounted) ErrorHandler.handle(context, e, serviceName: tag);
+    }
+  }
+
+  Future<void> checkAuthentication(BuildContext context) async {
+    if (_sessionController.isLoggedIn && _sessionController.userType != null) {
+      debugPrint('[$tag] Active session found, fetching profile');
+      try {
+        // await fetchProfile(context);
+        if (context.mounted) {
+          _sessionController.userType == UserType.user
+              ? goToUserHome(context)
+              : goToVendorHome(context);
+        }
+      } catch (_) {
+        debugPrint('[$tag] Error fetching profile, clearing session');
+        await _sessionController.clearSession();
+        if (context.mounted) goToWelcome(context);
+      }
+    } else {
+      debugPrint(
+        '[$tag] No active session found, redirecting to welcome screen',
+      );
+      Timer(const Duration(seconds: 1), () {
+        if (context.mounted) goToWelcome(context);
+      });
+    }
+  }
+
+  Future<bool> sendForgotOtp({
+    required BuildContext context,
+    required String email,
+    // bool isDoctor = false,
+  }) async {
+    try {
+      final Map<String, dynamic> data = {'email': email};
+
+      //same for both user and vendor
+      await _userAuthRepo.forgotPassword(data);
+      if (context.mounted) {
+        context.flushBarSuccessMessage(message: 'OTP sent to your email...');
+      }
+      return true;
+    } catch (e) {
+      if (context.mounted) ErrorHandler.handle(context, e, serviceName: tag);
+    }
+    return false;
+  }
+
+  Future<void> verifyForgotOtp({
+    required BuildContext context,
+    required String email,
+    required String otp,
+    // required bool isDoctor,
+  }) async {
+    final data = {'email': email, 'otp': otp};
+    try {
+      await _userAuthRepo.verifyPasswordOtp(data);
+
+      // await goToResetPasswordScreen(
+      //   context,
+      //   otp: otp,
+      //   email: email,
+      //   // isDoctor: isDoctor,
+      // );
+
+      if (context.mounted) {
+        gotoNewPassword(context, email, otp);
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ErrorHandler.handle(context, e, serviceName: tag);
+      }
+    }
+  }
+
+  Future<void> resetPassword({
+    required BuildContext context,
+    required String email,
+    required String otp,
+    required String newPassword,
+    bool isDoctor = false,
+  }) async {
+    try {
+      final Map<String, dynamic> data = {
+        'email': email,
+        'otp': otp,
+        'new_password': newPassword,
+        // 'newPassword': newPassword,
+      };
+      await _userAuthRepo.resetPassword(data);
+
+      if (context.mounted) {
+        Navigator.of(context).pop();
+        Navigator.of(context).pop();
+      }
+    } catch (e) {
+      if (context.mounted) ErrorHandler.handle(context, e, serviceName: tag);
+    }
+  }
+
+  ///
+  ///
+  ///
+  ///
+  ///FROM Esthetic
+  ///
+  ///
+  ///
+  ///
   // final UserAuthRepository _userAuth = UserAuthRepository();
   // final DoctorAuthRepository _docAuth = DoctorAuthRepository();
   // final SessionController _session = SessionController();
   // static const String tag = 'AuthService';
-
-  // Future<void> getAllProcedures(
-  //   BuildContext? context, {
-  //   required String locale,
-  // }) async {
-  //   try {
-  //     final response = await _docAuth.getAllProcedures(locale);
-  //     await _session.saveProcedures((response['procedures'] as List<dynamic>)
-  //         .map((e) => ProcedureCatalogModel.fromJson(e as Map<String, dynamic>))
-  //         .toList());
-  //     await _session.saveMedicalSpecialty((response['medical_speciality']
-  //             as List<dynamic>)
-  //         .map((e) => MedicalSpecialtyModel.fromJson(e as Map<String, dynamic>))
-  //         .toList());
-  //     debugPrint('[$tag] ✅ Fetched all procedures');
-  //   } catch (e) {
-  //     ErrorHandler.handle(context, e, serviceName: tag);
-  //   }
-  // }
 
   // Future<void> userLogin(
   //   BuildContext context, {

@@ -1,3 +1,4 @@
+import 'package:flutter/src/services/text_formatter.dart';
 import 'package:vendr/app/utils/extensions/context_extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -21,6 +22,7 @@ class MyTextField extends StatelessWidget {
     this.onChanged,
     this.maxLines,
     this.onSubmitted,
+    this.inputFormatters,
   });
 
   final TextEditingController? controller;
@@ -38,12 +40,14 @@ class MyTextField extends StatelessWidget {
   final double borderRadius;
   final void Function(String)? onChanged;
   final void Function(String)? onSubmitted;
+  final List<TextInputFormatter>? inputFormatters;
   final int? maxLines;
 
   @override
   Widget build(BuildContext context) {
     return TextField(
       onSubmitted: onSubmitted,
+      inputFormatters: inputFormatters,
       controller: controller,
       cursorColor: context.colors.inputIcon,
       cursorErrorColor: context.colors.error,

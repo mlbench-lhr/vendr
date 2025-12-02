@@ -7,7 +7,7 @@ import 'package:vendr/app/components/my_scaffold.dart';
 import 'package:vendr/app/utils/extensions/context_extensions.dart';
 import 'package:vendr/app/utils/extensions/validations_exception.dart';
 import 'package:vendr/generated/assets/assets.gen.dart';
-import 'package:vendr/services/views/signup_service.dart';
+import 'package:vendr/services/common/auth_service.dart';
 import 'package:vendr/view/auth/widgets/language_menu.dart';
 import 'package:vendr/view/auth/widgets/social_login_btn.dart';
 
@@ -39,7 +39,7 @@ class _VendorSignupScreenState extends State<VendorSignupScreen> {
   @override
   void initState() {
     super.initState();
-    fillFieldsForTesting();
+    fillFormForTesting();
     _nameController.addListener(_updateButtonState);
     _emailController.addListener(_updateButtonState);
     _phoneController.addListener(_updateButtonState);
@@ -86,14 +86,14 @@ class _VendorSignupScreenState extends State<VendorSignupScreen> {
   ///Auto Fill fields in debug mode only
   ///
   ///
-  void fillFieldsForTesting() {
+  void fillFormForTesting() {
     if (kDebugMode) {
       _nameController.text = 'Test User';
-      _emailController.text = 'mtalha2410+1dec5@gmail.com';
+      _emailController.text = 'mtalha2410+2dec2@gmail.com';
       _phoneController.text = '1234567890';
       _vendorTypeController.text = 'Food Vendor';
-      _passwordController.text = 'Vendr@123';
-      _confirmPasswordController.text = 'Vendr@123';
+      _passwordController.text = '12345678';
+      _confirmPasswordController.text = '12345678';
       isFormFilled.value = true;
     }
   }
@@ -311,7 +311,7 @@ class _VendorSignupScreenState extends State<VendorSignupScreen> {
                         ? () async {
                             if (!formKey.currentState!.validate()) return;
                             setState(() => isLoading = true);
-                            await SignupService()
+                            await AuthService()
                                 .vendorSignup(
                                   context,
                                   name: _nameController.text.trim(),

@@ -23,7 +23,7 @@ class NetworkApiService implements BaseApiServices {
     AppUrl.vendorSignup,
     AppUrl.userLogin,
     AppUrl.userSignup,
-    AppUrl.verifyOtp,
+    AppUrl.verifyVendorOtp,
   ];
 
   /// Utility method to check if API needs token in headers
