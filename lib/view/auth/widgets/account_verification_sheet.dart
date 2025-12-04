@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:vendr/app/components/colored_rich_text.dart';
@@ -85,12 +84,12 @@ class _AccountVerificationSheetState extends State<AccountVerificationSheet> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          ColoredRichText(first: "Account", second: "Verification"),
+          ColoredRichText(first: "Account", second: " Verification"),
           SizedBox(height: 7.h),
           ColoredRichText(
             first:
                 "Please enter the verification code that we have sent on your email",
-            second: widget.email,
+            second: ' ${widget.email}',
             // firstColor: context.colors.textDarkGreen.withValues(alpha: .60),
             // secondColor: context.colors.textDarkGreen,
             firstColor: context.colors.primary.withValues(alpha: .60),

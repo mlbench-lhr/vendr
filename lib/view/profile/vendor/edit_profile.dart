@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:vendr/app/components/my_button.dart';
+import 'package:vendr/app/components/my_dropdown.dart';
 import 'package:vendr/app/components/my_scaffold.dart';
 import 'package:vendr/app/components/my_text_field.dart';
+import 'package:vendr/app/utils/app_constants.dart';
 import 'package:vendr/app/utils/extensions/context_extensions.dart';
+import 'package:vendr/services/common/session_manager/session_controller.dart';
 
 class VendorEditProfileScreen extends StatefulWidget {
   const VendorEditProfileScreen({super.key});
@@ -14,6 +17,26 @@ class VendorEditProfileScreen extends StatefulWidget {
 }
 
 class _VendorEditProfileScreenState extends State<VendorEditProfileScreen> {
+  final _nameController = TextEditingController();
+  String _selectedVendorType = '';
+
+  @override
+  void initState() {
+    super.initState();
+    setDataFromSession();
+  }
+
+  final _session = SessionController();
+  void setDataFromSession() {
+    final vendor = _session.vendor!;
+    final vendorName = vendor.name;
+    final vendorType = vendor.vendorType;
+    setState(() {
+      _nameController.text = vendorName;
+      _selectedVendorType = vendorType;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return MyScaffold(
@@ -58,7 +81,7 @@ class _VendorEditProfileScreenState extends State<VendorEditProfileScreen> {
                 style: context.typography.title.copyWith(fontSize: 18.sp),
               ),
               SizedBox(height: 10.h),
-              MyTextField(hint: 'Enter your name'),
+              MyTextField(hint: 'Enter your name', controller: _nameController),
 
               SizedBox(height: 16.h),
               Text(
@@ -66,7 +89,25 @@ class _VendorEditProfileScreenState extends State<VendorEditProfileScreen> {
                 style: context.typography.title.copyWith(fontSize: 18.sp),
               ),
               SizedBox(height: 10.h),
-              MyTextField(hint: 'e.g., Food Vendor'),
+              //vendorTypes list is imported from app_constants.dart
+              MyDropdown(
+                items: TypeAndCategoryConstants.vendorTypes,
+                value: _selectedVendorType.isNotEmpty
+                    ? _selectedVendorType
+                    : null,
+                onChanged: (value) {
+                  setState(() {
+                    _selectedVendorType = value!;
+                  });
+                },
+                hint: 'Choose a Category',
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Vendor Type is required.';
+                  }
+                  return null;
+                },
+              ),
               const Spacer(),
               MyButton(
                 label: 'Save',

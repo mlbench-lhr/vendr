@@ -5,8 +5,10 @@ import 'package:vendr/app/components/my_dropdown.dart';
 import 'package:vendr/app/components/my_scaffold.dart';
 import 'package:vendr/app/components/my_text_field.dart';
 import 'package:vendr/app/styles/app_radiuses.dart';
+import 'package:vendr/app/utils/app_constants.dart';
 import 'package:vendr/app/utils/extensions/context_extensions.dart';
 import 'package:vendr/app/utils/extensions/general_extensions.dart';
+import 'package:vendr/services/common/session_manager/session_controller.dart';
 
 class AddEditProductScreen extends StatefulWidget {
   const AddEditProductScreen({super.key, required this.isEdit});
@@ -28,6 +30,40 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
   List<Map<String, dynamic>> servings = [
     {'id': 1, 'servingType': 'Single Serving', 'price': '\$100'},
   ];
+
+  List<String> categories = [];
+
+  final _session = SessionController();
+  void setProductCategories() {
+    final vendor = _session.vendor;
+    final vendorType = vendor!.vendorType;
+    debugPrint('Vendor Type is: $vendorType');
+    switch (vendorType) {
+      case "Food and Drinks":
+        setState(() {
+          categories = TypeAndCategoryConstants.foodsAndDrinksCategories;
+        });
+        break;
+      case "Retail Goods":
+        setState(() {
+          categories = TypeAndCategoryConstants.retailGoodsCategories;
+        });
+      default:
+        setState(() {
+          categories =
+              TypeAndCategoryConstants.foodsAndDrinksCategories +
+              TypeAndCategoryConstants.retailGoodsCategories;
+        });
+    }
+    categories.add('Other');
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    setProductCategories();
+  }
+
   @override
   Widget build(BuildContext context) {
     return MyScaffold(
@@ -62,6 +98,19 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
             ),
             10.height,
             MyTextField(hint: 'Enter your name'),
+            16.height,
+            //item category
+            Text(
+              'Category',
+              style: context.typography.title.copyWith(fontSize: 18.sp),
+            ),
+            10.height,
+            MyDropdown(
+              value: categories.first,
+              items: categories,
+              onChanged: (value) {},
+            ),
+            //END: item category
             16.height,
             Text(
               'Description',

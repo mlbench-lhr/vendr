@@ -452,10 +452,7 @@ class AuthService {
 
   ///
   ///
-  ///
-  ///
   ///FROM Esthetic
-  ///
   ///
   ///
   ///

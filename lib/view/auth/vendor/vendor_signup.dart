@@ -2,8 +2,10 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:vendr/app/components/my_button.dart';
+import 'package:vendr/app/components/my_dropdown.dart';
 import 'package:vendr/app/components/my_form_text_field.dart';
 import 'package:vendr/app/components/my_scaffold.dart';
+import 'package:vendr/app/utils/app_constants.dart';
 import 'package:vendr/app/utils/extensions/context_extensions.dart';
 import 'package:vendr/app/utils/extensions/validations_exception.dart';
 import 'package:vendr/generated/assets/assets.gen.dart';
@@ -29,9 +31,10 @@ class _VendorSignupScreenState extends State<VendorSignupScreen> {
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   final _phoneController = TextEditingController();
-  final _vendorTypeController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
+
+  String _selectedVendorType = '';
 
   final FocusNode _passwordFocusNode = FocusNode();
   final FocusNode _confirmPasswordFocusNode = FocusNode();
@@ -43,7 +46,6 @@ class _VendorSignupScreenState extends State<VendorSignupScreen> {
     _nameController.addListener(_updateButtonState);
     _emailController.addListener(_updateButtonState);
     _phoneController.addListener(_updateButtonState);
-    _vendorTypeController.addListener(_updateButtonState);
     _passwordController.addListener(_updateButtonState);
     _confirmPasswordController.addListener(_updateButtonState);
   }
@@ -53,14 +55,12 @@ class _VendorSignupScreenState extends State<VendorSignupScreen> {
     _nameController.removeListener(_updateButtonState);
     _emailController.removeListener(_updateButtonState);
     _phoneController.removeListener(_updateButtonState);
-    _vendorTypeController.removeListener(_updateButtonState);
     _passwordController.removeListener(_updateButtonState);
     _confirmPasswordController.removeListener(_updateButtonState);
 
     _nameController.dispose();
     _emailController.dispose();
     _phoneController.dispose();
-    _vendorTypeController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
     isFormFilled.dispose();
@@ -75,7 +75,6 @@ class _VendorSignupScreenState extends State<VendorSignupScreen> {
         _nameController.text.trim().isNotEmpty &&
         _emailController.text.trim().isNotEmpty &&
         _phoneController.text.trim().isNotEmpty &&
-        _vendorTypeController.text.trim().isNotEmpty &&
         _passwordController.text.trim().isNotEmpty &&
         _confirmPasswordController.text.trim().isNotEmpty;
     isFormFilled.value = isFilled;
@@ -91,7 +90,6 @@ class _VendorSignupScreenState extends State<VendorSignupScreen> {
       _nameController.text = 'Test User';
       _emailController.text = 'mtalha2410+2dec2@gmail.com';
       _phoneController.text = '1234567890';
-      _vendorTypeController.text = 'Food Vendor';
       _passwordController.text = '12345678';
       _confirmPasswordController.text = '12345678';
       isFormFilled.value = true;
@@ -221,16 +219,21 @@ class _VendorSignupScreenState extends State<VendorSignupScreen> {
                 style: context.typography.title.copyWith(fontSize: 18.sp),
               ),
               SizedBox(height: 6.h),
-              MyFormTextField(
-                hint: 'e.g., Food Vendor',
-                suffixIcon: Assets.icons.shop.svg(height: 24.h),
-                controller: _vendorTypeController,
-                readOnly: isLoading,
+              //vendorTypes list is imported from app_constants.dart
+              MyDropdown(
+                items: TypeAndCategoryConstants.vendorTypes,
+                onChanged: (value) {
+                  setState(() {
+                    _selectedVendorType = value!;
+                  });
+                },
+                value: _selectedVendorType.isNotEmpty
+                    ? _selectedVendorType
+                    : null,
+                hint: 'Choose a Category',
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Vendor Type is required.';
-                  } else if (!value.nameValidator()) {
-                    return 'Vendor Type contain only alphabets and spaces.';
                   }
                   return null;
                 },
@@ -317,7 +320,7 @@ class _VendorSignupScreenState extends State<VendorSignupScreen> {
                                   name: _nameController.text.trim(),
                                   email: _emailController.text.trim(),
                                   phone: _phoneController.text.trim(),
-                                  vendorType: _vendorTypeController.text.trim(),
+                                  vendorType: _selectedVendorType,
                                   password: _passwordController.text.trim(),
                                 )
                                 .then((_) {
