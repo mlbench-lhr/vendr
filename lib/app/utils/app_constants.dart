@@ -185,7 +185,7 @@ class TypeAndCategoryConstants {
     'Other',
   ];
 
-  static List<String> foodsAndDrinksCategories = [
+  static Set<String> foodsAndDrinksCategories = {
     'Hot Food',
     'Cold Food',
     'Snacks',
@@ -195,8 +195,8 @@ class TypeAndCategoryConstants {
     'Ice Cream',
     'Fresh Fruit / Produce',
     'Specialty Foods (cultural/unique foods)',
-  ];
-  static List<String> retailGoodsCategories = [
+  };
+  static Set<String> retailGoodsCategories = {
     'Flowers',
     'Clothing',
     'Accessories',
@@ -206,5 +206,5 @@ class TypeAndCategoryConstants {
     'Crafts / Art',
     'Home Goods',
     'Seasonal Items (Holiday, Events)',
-  ];
+  };
 }

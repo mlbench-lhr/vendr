@@ -31,13 +31,12 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
     {'id': 1, 'servingType': 'Single Serving', 'price': '\$100'},
   ];
 
-  List<String> categories = [];
+  Set<String> categories = {};
 
   final _session = SessionController();
   void setProductCategories() {
     final vendor = _session.vendor;
     final vendorType = vendor!.vendorType;
-    debugPrint('Vendor Type is: $vendorType');
     switch (vendorType) {
       case "Food and Drinks":
         setState(() {
@@ -50,9 +49,8 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
         });
       default:
         setState(() {
-          categories =
-              TypeAndCategoryConstants.foodsAndDrinksCategories +
-              TypeAndCategoryConstants.retailGoodsCategories;
+          categories.addAll(TypeAndCategoryConstants.foodsAndDrinksCategories);
+          categories.addAll(TypeAndCategoryConstants.retailGoodsCategories);
         });
     }
     categories.add('Other');
@@ -107,7 +105,7 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
             10.height,
             MyDropdown(
               value: categories.first,
-              items: categories,
+              items: categories.toList(),
               onChanged: (value) {},
             ),
             //END: item category
