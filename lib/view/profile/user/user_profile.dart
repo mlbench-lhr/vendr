@@ -60,10 +60,10 @@ class _UserProfileState extends State<UserProfileScreen> {
                   UserProfileService.gotoUserEditProfile(context);
                 },
               ),
-              LocationMenuTile(
-                title: 'Location',
-                icon: Icons.my_location_outlined,
-              ),
+              // LocationMenuTile(
+              //   title: 'Location',
+              //   icon: Icons.my_location_outlined,
+              // ),
               ProfileMenuTile(
                 title: 'Favorite Venders',
                 icon: Icons.star_border_outlined,
@@ -123,47 +123,47 @@ class _UserProfileState extends State<UserProfileScreen> {
   }
 }
 
-class LocationMenuTile extends StatefulWidget {
-  const LocationMenuTile({super.key, required this.title, required this.icon});
-  final String title;
-  final IconData icon;
+// class LocationMenuTile extends StatefulWidget {
+//   const LocationMenuTile({super.key, required this.title, required this.icon});
+//   final String title;
+//   final IconData icon;
 
-  @override
-  State<LocationMenuTile> createState() => _LocationMenuTileState();
-}
+//   @override
+//   State<LocationMenuTile> createState() => _LocationMenuTileState();
+// }
 
-class _LocationMenuTileState extends State<LocationMenuTile> {
-  bool switchValue = true;
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: EdgeInsets.symmetric(vertical: 6.h, horizontal: 16.w),
-      color: Colors.transparent,
-      child: Row(
-        children: [
-          CircleAvatar(
-            radius: 18.r,
-            backgroundColor: Colors.white24,
-            child: Icon(widget.icon, color: Colors.white, size: 20.w),
-          ),
-          SizedBox(width: 12.w),
-          Text(widget.title, style: context.typography.title.copyWith()),
-          const Spacer(),
-          Switch(
-            value: switchValue,
-            onChanged: (value) {
-              setState(() {
-                switchValue = value;
-                debugPrint('Location set to: $switchValue');
-              });
-            },
-            activeColor: Colors.white,
-            activeTrackColor: context.colors.buttonPrimary,
-            inactiveThumbColor: Colors.white,
-            inactiveTrackColor: Colors.white70,
-          ),
-        ],
-      ),
-    );
-  }
-}
+// class _LocationMenuTileState extends State<LocationMenuTile> {
+//   bool switchValue = true;
+//   @override
+//   Widget build(BuildContext context) {
+//     return Container(
+//       margin: EdgeInsets.symmetric(vertical: 6.h, horizontal: 16.w),
+//       color: Colors.transparent,
+//       child: Row(
+//         children: [
+//           CircleAvatar(
+//             radius: 18.r,
+//             backgroundColor: Colors.white24,
+//             child: Icon(widget.icon, color: Colors.white, size: 20.w),
+//           ),
+//           SizedBox(width: 12.w),
+//           Text(widget.title, style: context.typography.title.copyWith()),
+//           const Spacer(),
+//           Switch(
+//             value: switchValue,
+//             onChanged: (value) {
+//               setState(() {
+//                 switchValue = value;
+//                 debugPrint('Location set to: $switchValue');
+//               });
+//             },
+//             activeColor: Colors.white,
+//             activeTrackColor: context.colors.buttonPrimary,
+//             inactiveThumbColor: Colors.white,
+//             inactiveTrackColor: Colors.white70,
+//           ),
+//         ],
+//       ),
+//     );
+//   }
+// }

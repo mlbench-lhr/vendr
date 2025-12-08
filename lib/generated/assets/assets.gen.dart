@@ -31,6 +31,10 @@ class $AssetsIconsGen {
   /// File path: assets/icons/shop.svg
   SvgGenImage get shop => const SvgGenImage('assets/icons/shop.svg');
 
+  /// File path: assets/icons/user_placeholder.png
+  AssetGenImage get userPlaceholder =>
+      const AssetGenImage('assets/icons/user_placeholder.png');
+
   /// File path: assets/icons/vendr_text_logo.svg
   SvgGenImage get vendrTextLogo =>
       const SvgGenImage('assets/icons/vendr_text_logo.svg');
@@ -40,12 +44,13 @@ class $AssetsIconsGen {
       const SvgGenImage('assets/icons/waving_hand.svg');
 
   /// List of all assets
-  List<SvgGenImage> get values => [
+  List<dynamic> get values => [
     appleLogo,
     cartLogo,
     googleIcon,
     profile,
     shop,
+    userPlaceholder,
     vendrTextLogo,
     wavingHand,
   ];

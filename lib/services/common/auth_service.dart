@@ -18,6 +18,7 @@
 
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:vendr/app/components/my_bottom_sheet.dart';
 import 'package:vendr/app/data/exception/app_exceptions.dart';
 import 'package:vendr/app/routes/routes_name.dart';
@@ -34,6 +35,10 @@ import 'package:vendr/view/auth/widgets/account_verification_sheet.dart';
 
 class AuthService {
   static const String tag = 'AuthService';
+
+  final VendorAuthRepository _vendorAuthRepo = VendorAuthRepository();
+  final UserAuthRepository _userAuthRepo = UserAuthRepository();
+  final SessionController _sessionController = SessionController();
 
   static void gotoProfileTypeSelection(BuildContext context) {
     Navigator.pushReplacementNamed(context, RoutesName.profileTypeSelection);
@@ -105,10 +110,9 @@ class AuthService {
     Navigator.pushNamed(context, RoutesName.changePassword);
   }
 
-  final VendorAuthRepository _vendorAuthRepo = VendorAuthRepository();
-  final UserAuthRepository _userAuthRepo = UserAuthRepository();
-  final SessionController _sessionController = SessionController();
-
+  ///
+  ///Show Verification Sheet
+  ///
   static void showVerificationSheet(
     BuildContext context, {
     required String email,
@@ -202,6 +206,9 @@ class AuthService {
     }
   }
 
+  ///
+  ///Verify Otp
+  ///
   Future<void> verifyOtp({
     required BuildContext context,
     required String email,
@@ -229,16 +236,13 @@ class AuthService {
         );
       } else {
         //User Side
-
         final response = await _userAuthRepo.verifySignupOtp(data);
         final String accessToken = response['tokens']['accessToken'] as String;
         final String refreshToken =
             response['tokens']['refreshToken'] as String;
         final Map<String, dynamic> userData =
             response['user'] as Map<String, dynamic>;
-
         await _sessionController.saveUser(UserModel.fromJson(userData));
-
         //save token in session controller
         await _sessionController.saveToken(
           accessToken: accessToken,
@@ -353,6 +357,10 @@ class AuthService {
     }
   }
 
+  ///
+  ///Check Authentication
+  ///
+
   Future<void> checkAuthentication(BuildContext context) async {
     if (_sessionController.isLoggedIn && _sessionController.userType != null) {
       debugPrint('[$tag] Active session found, fetching profile');
@@ -378,6 +386,9 @@ class AuthService {
     }
   }
 
+  ///
+  ///Send Forgot Otp
+  ///
   Future<bool> sendForgotOtp({
     required BuildContext context,
     required String email,
@@ -398,6 +409,9 @@ class AuthService {
     return false;
   }
 
+  ///
+  ///Verify Forgot OTP
+  ///
   Future<void> verifyForgotOtp({
     required BuildContext context,
     required String email,
@@ -425,6 +439,9 @@ class AuthService {
     }
   }
 
+  ///
+  ///Reset Password
+  ///
   Future<void> resetPassword({
     required BuildContext context,
     required String email,
@@ -449,6 +466,151 @@ class AuthService {
       if (context.mounted) ErrorHandler.handle(context, e, serviceName: tag);
     }
   }
+
+  ///
+  ///Change Password
+  ///
+  Future<void> changePassword({
+    required BuildContext context,
+    required String oldPassword,
+    required String newPassword,
+  }) async {
+    final data = {'old_password': oldPassword, 'new_password': newPassword};
+    try {
+      await _userAuthRepo.changePassword(data);
+    } catch (e) {
+      if (context.mounted) {
+        ErrorHandler.handle(context, e, serviceName: tag);
+      }
+    }
+  }
+
+  ///
+  ///Google Sign in
+  ///
+  // final GoogleSignIn _googleSignIn = GoogleSignIn();
+  // Future<void> signInWithGoogle() async {
+  //   try {
+  //     final GoogleSignInAccount? account = await _googleSignIn.signIn();
+  //     if (account == null) return; // user canceled
+
+  //     final GoogleSignInAuthentication auth = await account.authentication;
+  //     final idToken = auth.idToken;
+  //     final accessToken = auth.accessToken;
+
+  //     // Send these tokens to your backend
+  //     await sendGoogleTokenToBackend(idToken, accessToken);
+  //   } catch (e) {
+  //     print('Google Sign-In Error: $e');
+  //   }
+  // }
+
+  ///
+  ///NEW Google Sign in
+  ///
+
+  // Use the official singleton instance (no unnamed constructor).
+  final GoogleSignIn _google = GoogleSignIn.instance;
+
+  /// Starts interactive sign-in.
+  ///
+  /// Returns [GoogleSignInResult] when the user signs-in successfully,
+  /// or `null` if the user cancelled the flow.
+  ///
+  /// Note: `GoogleSignInAccount.authentication` currently only exposes
+  /// `idToken`. If you need an access token, call [requestAuthorizationForScopes].
+  Future<GoogleSignInResult?> signIn() async {
+    // On mobile/desktop the correct entry is `.authenticate()`,
+    // which triggers the platform sign-in UI. It returns a GoogleSignInAccount?
+    final GoogleSignInAccount? account = await _google.authenticate();
+
+    if (account == null) {
+      // user cancelled
+      return null;
+    }
+
+    // This returns the authentication wrapper (currently contains idToken).
+    final GoogleSignInAuthentication auth = await account.authentication;
+
+    return GoogleSignInResult(
+      idToken: auth.idToken,
+      email: account.email,
+      displayName: account.displayName,
+      photoUrl: account.photoUrl,
+    );
+  }
+
+  /// Signs out the currently signed-in user (keeps account cached info).
+  // Future<void> signOut() => _google.signOut();
+
+  // /// Disconnects the user and clears the local session (removes previous consent).
+  // Future<void> disconnect() => GoogleSignIn.instance.disconnect();
+
+  // /// OPTIONAL: Request *authorization* for specific scopes and return the access token.
+  // ///
+  // /// IMPORTANT: `authentication` provides the *idToken* (identity). Access tokens
+  // /// are returned from authorization flows (authorizeScopes).
+  // ///
+  // /// Example: await requestAuthorizationForScopes(['https://www.googleapis.com/auth/drive']);
+  // /// Returns the `accessToken` string on success, or null on failure/user-cancel.
+  // Future<String?> requestAuthorizationForScopes(List<String> scopes) async {
+  //   // First ensure that the user is signed in
+  //   final GoogleSignInAccount? account = GoogleSignIn.instance.currentUser;
+  //   if (account == null) {
+  //     // you may want to call signIn() before requesting scopes
+  //     return null;
+  //   }
+
+  //   try {
+  //     final GoogleSignInClientAuthorization authorization = await account
+  //         .authorizationClient
+  //         .authorizeScopes(scopes);
+  //     return authorization.accessToken;
+  //   } catch (e) {
+  //     // user canceled or platform error
+  //     return null;
+  //   }
+  // }
+
+  // /// OPTIONAL: Request a server auth code for server-side token exchange.
+  // ///
+  // /// This is the correct way to get a one-time code to exchange on your Node backend.
+  // /// Returns the server auth code string or null.
+  // Future<String?> requestServerAuthCode(List<String> scopes) async {
+  //   final GoogleSignInAccount? account = GoogleSignIn.instance.currentUser;
+  //   if (account == null) return null;
+
+  //   try {
+  //     final GoogleSignInServerAuthorization? serverAuth = await account
+  //         .authorizationClient
+  //         .authorizeServer(scopes);
+  //     return serverAuth?.serverAuthCode;
+  //   } catch (e) {
+  //     return null;
+  //   }
+  // }
+
+  //END: Google Sign in
+
+  ///
+  ///Apple Sign in
+  ///
+  // Future<void> signInWithApple() async {
+  //   final credential = await SignInWithApple.getAppleIDCredential(
+  //     scopes: [
+  //       AppleIDAuthorizationScopes.email,
+  //       AppleIDAuthorizationScopes.fullName,
+  //     ],
+  //   );
+
+  //   final idToken = credential.identityToken;
+  //   final authorizationCode = credential.authorizationCode;
+
+  //   // Send these tokens to your backend
+  //   await sendAppleTokenToBackend(idToken, authorizationCode);
+  //   debugPrint('🍎 ID TOKEN: $idToken');
+  //   debugPrint('🍎 Auth Code: $authorizationCode');
+  // }
 
   ///
   ///
@@ -901,4 +1063,19 @@ class AuthService {
   //     (route) => false,
   //   );
   // }
+}
+
+//TODO: MOVE THIS TO MODELS
+class GoogleSignInResult {
+  final String? idToken; // send to backend (verify with Google)
+  final String email;
+  final String? displayName;
+  final String? photoUrl;
+
+  GoogleSignInResult({
+    required this.idToken,
+    required this.email,
+    required this.displayName,
+    required this.photoUrl,
+  });
 }

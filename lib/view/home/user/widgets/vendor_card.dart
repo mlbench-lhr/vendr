@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:vendr/app/components/menu_item_tile.dart';
+import 'package:vendr/app/components/my_bottom_sheet.dart';
 import 'package:vendr/app/components/my_button.dart';
 import 'package:vendr/app/components/my_text_button.dart';
 import 'package:vendr/app/components/review_tile.dart';
@@ -10,6 +11,7 @@ import 'package:vendr/app/utils/extensions/general_extensions.dart';
 import 'package:vendr/model/vendor/vendor_model.dart';
 import 'package:vendr/services/user/user_home_service.dart';
 import 'package:vendr/services/vendor/vendor_home_service.dart';
+import 'package:vendr/view/home/user/widgets/menu_bottom_sheet.dart';
 import 'package:vendr/view/home/vendor/vendor_home.dart';
 
 class VendorCard extends StatefulWidget {
@@ -440,6 +442,17 @@ class _VendorCardState extends State<VendorCard> {
         itemCount: menuItems.length,
         itemBuilder: (context, index) {
           return MenuItemTile(
+            onTap: () {
+              MyBottomSheet.show(
+                context,
+                isDismissible: true,
+                enableDrag: true,
+                isScrollControlled: true,
+                backgroundColor: context.colors.primary,
+                child: MenuBottomSheet(),
+                // child: AddReviewBottomSheet(),
+              );
+            },
             name: menuItems[index]['name'],
             price: menuItems[index]['price'],
             imageUrl: menuItems[index]['imageUrl'],

@@ -23,4 +23,33 @@ class VendorAuthRepository {
     debugPrint('verifyOtp called with data: $data'); //#muttas
     return _apiServices.post(url: AppUrl.verifyVendorOtp, data: data);
   }
+
+  //Profile management
+  Future<Map<String, dynamic>> updateVendorProfile(
+    Map<String, dynamic> data,
+  ) async {
+    return _apiServices.put(url: AppUrl.vendorProfileUpdate, data: data);
+  }
+
+  Future<Map<String, dynamic>> updateVendorHours(
+    Map<String, dynamic> data,
+  ) async {
+    return _apiServices.put(url: AppUrl.vendorHoursUpdate, data: data);
+  }
+
+  //Upload product
+  Future<Map<String, dynamic>> uploadProduct(Map<String, dynamic> data) async {
+    return _apiServices.post(url: AppUrl.uploadProduct, data: data);
+  }
+
+  //Upload product
+  Future<Map<String, dynamic>> editProduct(
+    String productId,
+    Map<String, dynamic> data,
+  ) async {
+    return _apiServices.post(
+      url: '${AppUrl.editProduct}$productId',
+      data: data,
+    );
+  }
 }

@@ -43,8 +43,8 @@ class _LoginScreenState extends State<LoginScreen> {
   void fillFormForTesting() {
     if (kDebugMode) {
       emailController.text = widget.isVendor
-          ? 'mtalha2410+2dec0@gmail.com'
-          : 'mtalha2410+USER2dec0@gmail.com';
+          ? 'mtalha2410+4dec0@gmail.com'
+          : 'mtalha2410+USER5dec0@gmail.com';
       passwordController.text = '12345678';
     }
   }
@@ -226,14 +226,19 @@ class _LoginScreenState extends State<LoginScreen> {
                 children: [
                   SocialLoginBtn(
                     type: 'apple',
-                    onTap: () {
+                    onTap: () async {
                       debugPrint('apple btn pressed');
+                      // await AuthService().signInWithApple();
                     },
                   ),
                   SocialLoginBtn(
                     type: 'google',
-                    onTap: () {
+                    onTap: () async {
                       debugPrint('google btn pressed');
+                      final signInResponse = await AuthService().signIn();
+                      debugPrint(
+                        '🚨 G O O G L E Sign in response: $signInResponse',
+                      );
                     },
                   ),
                 ],

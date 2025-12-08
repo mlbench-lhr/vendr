@@ -36,4 +36,8 @@ class UserAuthRepository {
   Future<Map<String, dynamic>> resetPassword(Map<String, dynamic> data) async {
     return _apiServices.post(url: AppUrl.resetPassword, data: data);
   }
+
+  Future<Map<String, dynamic>> changePassword(Map<String, dynamic> data) async {
+    return _apiServices.post(url: AppUrl.changePassword, data: data);
+  }
 }

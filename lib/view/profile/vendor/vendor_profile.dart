@@ -100,13 +100,13 @@ class _VendorProfileScreenState extends State<VendorProfileScreen> {
                   VendorProfileService.gotoChangePhoneNumber(context);
                 },
               ),
-              ProfileMenuTile(
-                title: 'Change Email',
-                icon: Icons.mail_outline,
-                onTap: () {
-                  VendorProfileService.gotoChangeEmail(context);
-                },
-              ),
+              // ProfileMenuTile(
+              //   title: 'Change Email',
+              //   icon: Icons.mail_outline,
+              //   onTap: () {
+              //     VendorProfileService.gotoChangeEmail(context);
+              //   },
+              // ),
               ProfileMenuTile(
                 title: 'Change Password',
                 icon: Icons.password_outlined,

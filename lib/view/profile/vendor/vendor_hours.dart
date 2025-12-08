@@ -3,6 +3,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:vendr/app/components/my_button.dart';
 import 'package:vendr/app/components/my_scaffold.dart';
 import 'package:vendr/app/utils/extensions/context_extensions.dart';
+import 'package:vendr/app/utils/extensions/flush_bar_extension.dart';
+import 'package:vendr/services/vendor/vendor_profile_service.dart';
 
 class VendorHoursScreen extends StatefulWidget {
   const VendorHoursScreen({super.key});
@@ -12,6 +14,38 @@ class VendorHoursScreen extends StatefulWidget {
 }
 
 class _VendorHoursScreenState extends State<VendorHoursScreen> {
+  final _vendorProfileService = VendorProfileService();
+  bool isLoading = false;
+
+  //Monday
+  bool _isMondayEnabled = false;
+  String _mondayStartTime = '00:00';
+  String _mondayEndTime = '00:00';
+  //Tuesday
+  bool _isTuesdayEnabled = false;
+  String _tuesdayStartTime = '00:00';
+  String _tuesdayEndTime = '00:00';
+  //Wednesday
+  bool _isWednesdayEnabled = false;
+  String _wednesdayStartTime = '00:00';
+  String _wednesdayEndTime = '00:00';
+  //Thursday
+  bool _isThursdayEnabled = false;
+  String _thursdayStartTime = '00:00';
+  String _thursdayEndTime = '00:00';
+  //Friday
+  bool _isFridayEnabled = false;
+  String _fridayStartTime = '00:00';
+  String _fridayEndTime = '00:00';
+  //Saturday
+  bool _isSaturdayEnabled = false;
+  String _saturdayStartTime = '00:00';
+  String _saturdayEndTime = '00:00';
+  //Sunday
+  bool _isSundayEnabled = false;
+  String _sundayStartTime = '00:00';
+  String _sundayEndTime = '00:00';
+
   @override
   Widget build(BuildContext context) {
     return MyScaffold(
@@ -33,13 +67,160 @@ class _VendorHoursScreenState extends State<VendorHoursScreen> {
               child: SingleChildScrollView(
                 child: Column(
                   children: [
-                    HourSelectionSwitch(context: context, day: 'Monday'),
-                    HourSelectionSwitch(context: context, day: 'Tuesday'),
-                    HourSelectionSwitch(context: context, day: 'Wednesday'),
-                    HourSelectionSwitch(context: context, day: 'Thursday'),
-                    HourSelectionSwitch(context: context, day: 'Friday'),
-                    HourSelectionSwitch(context: context, day: 'Saturday'),
-                    HourSelectionSwitch(context: context, day: 'Sunday'),
+                    HourSelectionSwitch(
+                      context: context,
+                      day: 'Monday',
+                      onTimeChanged: (Map<String, dynamic> value) {
+                        setState(() {
+                          if (value['isStartTime']) {
+                            setState(() {
+                              _mondayStartTime = value['time'];
+                            });
+                          } else {
+                            setState(() {
+                              _mondayEndTime = value['time'];
+                            });
+                          }
+                        });
+                      },
+                      onStatusChanged: (bool value) {
+                        setState(() {
+                          _isMondayEnabled = value;
+                        });
+                      },
+                    ),
+                    HourSelectionSwitch(
+                      context: context,
+                      day: 'Tuesday',
+                      onTimeChanged: (Map<String, dynamic> value) {
+                        setState(() {
+                          if (value['isStartTime']) {
+                            setState(() {
+                              _tuesdayStartTime = value['time'];
+                            });
+                          } else {
+                            setState(() {
+                              _tuesdayEndTime = value['time'];
+                            });
+                          }
+                        });
+                      },
+                      onStatusChanged: (bool value) {
+                        setState(() {
+                          _isTuesdayEnabled = value;
+                        });
+                      },
+                    ),
+                    HourSelectionSwitch(
+                      context: context,
+                      day: 'Wednesday',
+                      onTimeChanged: (Map<String, dynamic> value) {
+                        setState(() {
+                          if (value['isStartTime']) {
+                            setState(() {
+                              _wednesdayStartTime = value['time'];
+                            });
+                          } else {
+                            setState(() {
+                              _wednesdayEndTime = value['time'];
+                            });
+                          }
+                        });
+                      },
+                      onStatusChanged: (bool value) {
+                        setState(() {
+                          _isWednesdayEnabled = value;
+                        });
+                      },
+                    ),
+                    HourSelectionSwitch(
+                      context: context,
+                      day: 'Thursday',
+                      onTimeChanged: (Map<String, dynamic> value) {
+                        setState(() {
+                          if (value['isStartTime']) {
+                            setState(() {
+                              _thursdayStartTime = value['time'];
+                            });
+                          } else {
+                            setState(() {
+                              _thursdayEndTime = value['time'];
+                            });
+                          }
+                        });
+                      },
+                      onStatusChanged: (bool value) {
+                        setState(() {
+                          _isThursdayEnabled = value;
+                        });
+                      },
+                    ),
+                    HourSelectionSwitch(
+                      context: context,
+                      day: 'Friday',
+                      onTimeChanged: (Map<String, dynamic> value) {
+                        setState(() {
+                          if (value['isStartTime']) {
+                            setState(() {
+                              _fridayStartTime = value['time'];
+                            });
+                          } else {
+                            setState(() {
+                              _fridayEndTime = value['time'];
+                            });
+                          }
+                        });
+                      },
+                      onStatusChanged: (bool value) {
+                        setState(() {
+                          _isFridayEnabled = value;
+                        });
+                      },
+                    ),
+                    HourSelectionSwitch(
+                      context: context,
+                      day: 'Saturday',
+                      onTimeChanged: (Map<String, dynamic> value) {
+                        setState(() {
+                          if (value['isStartTime']) {
+                            setState(() {
+                              _saturdayStartTime = value['time'];
+                            });
+                          } else {
+                            setState(() {
+                              _saturdayEndTime = value['time'];
+                            });
+                          }
+                        });
+                      },
+                      onStatusChanged: (bool value) {
+                        setState(() {
+                          _isSaturdayEnabled = value;
+                        });
+                      },
+                    ),
+                    HourSelectionSwitch(
+                      context: context,
+                      day: 'Sunday',
+                      onTimeChanged: (Map<String, dynamic> value) {
+                        setState(() {
+                          if (value['isStartTime']) {
+                            setState(() {
+                              _sundayStartTime = value['time'];
+                            });
+                          } else {
+                            setState(() {
+                              _sundayEndTime = value['time'];
+                            });
+                          }
+                        });
+                      },
+                      onStatusChanged: (bool value) {
+                        setState(() {
+                          _isSundayEnabled = value;
+                        });
+                      },
+                    ),
                     SizedBox(height: 20),
                   ],
                 ),
@@ -51,7 +232,67 @@ class _VendorHoursScreenState extends State<VendorHoursScreen> {
               top: false,
               child: Padding(
                 padding: const EdgeInsets.only(top: 20),
-                child: MyButton(label: 'Update', onPressed: () {}),
+                child: MyButton(
+                  label: 'Update',
+                  isLoading: isLoading,
+                  onPressed: () async {
+                    Map<String, dynamic> data = {
+                      "days": {
+                        "monday": {
+                          "enabled": _isMondayEnabled,
+                          "start": _mondayStartTime,
+                          "end": _mondayEndTime,
+                        },
+                        "tuesday": {
+                          "enabled": _isTuesdayEnabled,
+                          "start": _tuesdayStartTime,
+                          "end": _tuesdayEndTime,
+                        },
+                        "wednesday": {
+                          "enabled": _isWednesdayEnabled,
+                          "start": _wednesdayStartTime,
+                          "end": _wednesdayEndTime,
+                        },
+                        "thursday": {
+                          "enabled": _isThursdayEnabled,
+                          "start": _thursdayStartTime,
+                          "end": _thursdayEndTime,
+                        },
+                        "friday": {
+                          "enabled": _isFridayEnabled,
+                          "start": _fridayStartTime,
+                          "end": _fridayEndTime,
+                        },
+                        "saturday": {
+                          "enabled": _isSaturdayEnabled,
+                          "start": _saturdayStartTime,
+                          "end": _saturdayEndTime,
+                        },
+                        "sunday": {
+                          "enabled": _isSundayEnabled,
+                          "start": _sundayStartTime,
+                          "end": _sundayEndTime,
+                        },
+                      },
+                    };
+                    debugPrint('Data: $data');
+                    if (mounted) {
+                      setState(() => isLoading = true);
+                    }
+                    await _vendorProfileService.updateVendorHours(
+                      context,
+                      data,
+                      () {
+                        context.flushBarSuccessMessage(
+                          message: 'Vendor hours updated successfully!',
+                        );
+                      },
+                    );
+                    if (mounted) {
+                      setState(() => isLoading = false);
+                    }
+                  },
+                ),
               ),
             ),
           ],
@@ -66,9 +307,13 @@ class HourSelectionSwitch extends StatefulWidget {
     super.key,
     required this.context,
     required this.day,
+    required this.onTimeChanged,
+    required this.onStatusChanged,
   });
   final BuildContext context;
   final String day;
+  final ValueChanged<Map<String, dynamic>> onTimeChanged;
+  final ValueChanged<bool> onStatusChanged;
   @override
   State<HourSelectionSwitch> createState() => _HourSelectionSwitchState();
 }
@@ -95,6 +340,14 @@ class _HourSelectionSwitchState extends State<HourSelectionSwitch> {
           _selectedEndTime = time;
         });
       }
+      //extract time string
+      String formattedTime =
+          '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
+
+      //notify time
+      widget.onTimeChanged({'isStartTime': isStartTime, 'time': formattedTime});
+
+      debugPrint('time : $formattedTime');
     }
   }
 
@@ -114,6 +367,7 @@ class _HourSelectionSwitchState extends State<HourSelectionSwitch> {
                 onChanged: (value) {
                   setState(() {
                     switchValue = value;
+                    widget.onStatusChanged(value);
                     debugPrint('Is ${widget.day} Switched: $switchValue');
                   });
                 },
