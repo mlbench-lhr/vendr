@@ -99,7 +99,7 @@ class _UserProfileState extends State<UserProfileScreen> {
                   //
                   showDialog<void>(
                     context: context,
-                    builder: (_) => DeleteAccountDialog(),
+                    builder: (_) => DeleteAccountDialog(isVendor: false),
                   );
                 },
                 showArrow: false,

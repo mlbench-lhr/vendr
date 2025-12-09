@@ -52,4 +52,19 @@ class VendorAuthRepository {
       data: data,
     );
   }
+
+  //fetch profile
+  Future<Map<String, dynamic>> getCurrentVendorProfile() async {
+    return _apiServices.get(url: AppUrl.getVendorProfile);
+  }
+
+  //delete product
+  Future<Map<String, dynamic>> deleteProduct(String productId) async {
+    return _apiServices.delete(url: '${AppUrl.deleteProduct}/$productId');
+  }
+
+  //delete product
+  Future<Map<String, dynamic>> deleteVendorAccount() async {
+    return _apiServices.delete(url: AppUrl.deleteVendorAccount);
+  }
 }

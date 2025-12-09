@@ -70,7 +70,10 @@ class _ImagePickerAvatarState extends State<ImagePickerAvatar> {
       setState(() => _isBusy = true);
     }
 
-    final url = await _uploadService.uploadImage(context, file: file);
+    String? url;
+    if (context.mounted) {
+      url = await _uploadService.uploadImage(context, file: file);
+    }
 
     if (!mounted) return;
     if (mounted) {

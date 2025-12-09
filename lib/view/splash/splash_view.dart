@@ -27,11 +27,11 @@ class _SplashViewState extends State<SplashView> {
 
     // Continue your authentication check
 
-    Future.delayed(const Duration(seconds: 2), () {
-      if (mounted) {
-        AuthService().checkAuthentication(context);
-      }
-    });
+    // Future.delayed(const Duration(seconds: 2), () {
+    if (mounted) {
+      AuthService().checkAuthentication(context);
+    }
+    //});
   }
 
   @override

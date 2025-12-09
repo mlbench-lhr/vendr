@@ -24,17 +24,22 @@ class AppUrl {
   static const String userLogin = '$baseUrl/auth/user/login';
   static const String verifyOtp = '$baseUrl/auth/verify-otp';
 
+  static const String deleteVendorAccount =
+      '$baseUrl/auth/vendor/delete-account';
+
   // ========================
   // Profile Endpoints
   // ========================
+  static const String getVendorProfile = '$baseUrl/auth/vendor/profile';
   static const String vendorProfileUpdate = '$baseUrl/auth/vendor/edit-profile';
   static const String vendorHoursUpdate = '$baseUrl/auth/vendor/hours';
   static const String uploadProduct = '$baseUrl/auth/vendor/menu/upload';
+  static const String deleteProduct = '$baseUrl/auth/vendor/menu';
   static const String editProduct =
       '$baseUrl/auth/vendor/menu/edit/'; // $baseUrl/auth/vendor/menu/edit/productId
 
   // ========================
   // Upload Endpoints
   // ========================
-  static const String uploadImage = '$baseUrl/api/upload/image';
+  static const String uploadImage = '$baseUrl/auth/image';
 }

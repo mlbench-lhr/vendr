@@ -16,7 +16,7 @@ class ImageUploadService {
       final response = await _repo.uploadImage(file: file);
 
       // Extract URL from response - adjust key as per your API
-      return response['imageUrl'] as String?;
+      return response['url'] as String?;
     } catch (e) {
       if (context.mounted) {
         ErrorHandler.handle(context, e, serviceName: tag);

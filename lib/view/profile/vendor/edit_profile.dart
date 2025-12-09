@@ -4,7 +4,6 @@ import 'package:vendr/app/components/my_button.dart';
 import 'package:vendr/app/components/my_dropdown.dart';
 import 'package:vendr/app/components/my_form_text_field.dart';
 import 'package:vendr/app/components/my_scaffold.dart';
-import 'package:vendr/app/components/my_text_field.dart';
 import 'package:vendr/app/utils/app_constants.dart';
 import 'package:vendr/app/utils/extensions/context_extensions.dart';
 import 'package:vendr/app/utils/extensions/flush_bar_extension.dart';
@@ -25,15 +24,16 @@ class _VendorEditProfileScreenState extends State<VendorEditProfileScreen> {
   final _vendorProfileService = VendorProfileService();
   final formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
-  String _selectedVendorType = '';
+  final _addressController = TextEditingController();
+  late String _selectedVendorType;
 
   bool isLoading = false;
-  String? _imageUrl;
+  late String? _imageUrl;
 
   @override
   void initState() {
-    super.initState();
     setDataFromSession();
+    super.initState();
   }
 
   final _session = SessionController();
@@ -41,9 +41,14 @@ class _VendorEditProfileScreenState extends State<VendorEditProfileScreen> {
     final vendor = _session.vendor!;
     final vendorName = vendor.name;
     final vendorType = vendor.vendorType;
+    final image = vendor.profileImage;
+    final address = vendor.address;
     setState(() {
       _nameController.text = vendorName;
+      _addressController.text = address ?? '';
       _selectedVendorType = vendorType;
+      _imageUrl = image;
+      debugPrint('here ${vendor.profileImage}');
     });
   }
 
@@ -74,6 +79,8 @@ class _VendorEditProfileScreenState extends State<VendorEditProfileScreen> {
                   initialUrl: _imageUrl,
                   onImageChanged: (url) {
                     _imageUrl = url;
+                    debugPrint('url: $url');
+                    debugPrint('_imageUrl: $_imageUrl');
                   },
                 ),
                 SizedBox(height: 24.h),
@@ -87,6 +94,7 @@ class _VendorEditProfileScreenState extends State<VendorEditProfileScreen> {
                   hint: 'Enter your name',
                   controller: _nameController,
                   readOnly: isLoading,
+                  textCapitalization: TextCapitalization.none,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return 'Name is required.';
@@ -96,7 +104,24 @@ class _VendorEditProfileScreenState extends State<VendorEditProfileScreen> {
                     return null;
                   },
                 ),
-
+                SizedBox(height: 16.h),
+                Text(
+                  'Address',
+                  style: context.typography.title.copyWith(fontSize: 18.sp),
+                ),
+                SizedBox(height: 10.h),
+                MyFormTextField(
+                  hint: 'Enter shop address',
+                  controller: _addressController,
+                  readOnly: isLoading,
+                  textCapitalization: TextCapitalization.none,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Address is required.';
+                    }
+                    return null;
+                  },
+                ),
                 SizedBox(height: 16.h),
                 Text(
                   'Type',
@@ -135,17 +160,18 @@ class _VendorEditProfileScreenState extends State<VendorEditProfileScreen> {
                     await _vendorProfileService.updateVendorProfile(
                       context,
                       name: _nameController.text,
+                      shopAddress: _addressController.text,
                       vendorType: _selectedVendorType,
                       imageUrl: _imageUrl,
                       onSuccess: () {
                         context.flushBarSuccessMessage(
                           message: 'Profile updated successfully!',
                         );
-                        if (mounted) {
-                          setState(() => isLoading = false);
-                        }
                       },
                     );
+                    if (mounted) {
+                      setState(() => isLoading = false);
+                    }
                   },
                 ),
               ],

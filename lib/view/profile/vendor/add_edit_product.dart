@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:vendr/app/components/my_button.dart';
+import 'package:vendr/app/components/my_dialog.dart';
 import 'package:vendr/app/components/my_dropdown.dart';
 import 'package:vendr/app/components/my_form_text_field.dart';
 import 'package:vendr/app/components/my_scaffold.dart';
@@ -11,13 +12,15 @@ import 'package:vendr/app/utils/extensions/context_extensions.dart';
 import 'package:vendr/app/utils/extensions/flush_bar_extension.dart';
 import 'package:vendr/app/utils/extensions/general_extensions.dart';
 import 'package:vendr/app/utils/extensions/validations_exception.dart';
+import 'package:vendr/model/vendor/vendor_model.dart';
 import 'package:vendr/services/common/session_manager/session_controller.dart';
 import 'package:vendr/services/vendor/vendor_profile_service.dart';
 import 'package:vendr/view/profile/widgets/profile_image_picker.dart';
 
 class AddEditProductScreen extends StatefulWidget {
-  const AddEditProductScreen({super.key, required this.isEdit});
+  const AddEditProductScreen({super.key, required this.isEdit, this.product});
   final bool isEdit;
+  final MenuItemModel? product;
   @override
   State<AddEditProductScreen> createState() => _AddEditProductScreenState();
 }
@@ -75,6 +78,16 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
   void initState() {
     super.initState();
     setProductCategories();
+    setExistingProductData();
+  }
+
+  void setExistingProductData() {
+    if (widget.isEdit) {
+      _productNameController.text = widget.product!.itemName;
+      _productDescriptionController.text = widget.product!.itemDescription!;
+      selectedCategory = widget.product!.category!;
+      _imageUrl = widget.product!.imageUrl!;
+    }
   }
 
   @override
@@ -89,6 +102,36 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
           ),
         ),
         centerTitle: true,
+        actions: [
+          if (widget.isEdit)
+            IconButton(
+              onPressed: () {
+                showDialog<void>(
+                  context: context,
+                  builder: (_) => MyDialog(
+                    title: 'Delete Product?',
+                    subtitle: 'This product will be deleted Permanently',
+                    confirmLabel: 'Delete',
+                    onConfirm: () async {
+                      await _vendorProfileService.deleteProduct(
+                        context,
+                        productId: widget.product!.itemId!,
+                        onSuccess: () {
+                          if (context.mounted) {
+                            Navigator.pop(context);
+                            Navigator.pop(context);
+                          }
+                        },
+                      );
+
+                      // await deleteMenuitem();
+                    },
+                  ),
+                );
+              },
+              icon: Icon(Icons.delete, color: Colors.redAccent),
+            ),
+        ],
       ),
       body: Padding(
         padding: EdgeInsets.all(16.w),
@@ -112,6 +155,7 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
               MyFormTextField(
                 hint: 'Enter product name',
                 controller: _productNameController,
+                textCapitalization: TextCapitalization.none,
                 readOnly: isLoading,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
@@ -147,6 +191,7 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
                 borderRadius: 16.r,
                 maxLines: 5,
                 hint: 'Add product description here...',
+                textCapitalization: TextCapitalization.none,
                 controller: _productDescriptionController,
                 readOnly: isLoading,
                 validator: (value) {

@@ -314,7 +314,7 @@ class _VendorCardState extends State<VendorCard> {
               startTime: '09:00 AM',
               endTime: '06:00 PM',
             ),
-            VendorHoursCard(day: 'Sunday', isOff: true),
+            VendorHoursCard(day: 'Sunday', isEnabled: true),
           ],
         ),
         SizedBox(height: 24.h),

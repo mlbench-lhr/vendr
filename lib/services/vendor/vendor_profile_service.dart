@@ -38,10 +38,14 @@ class VendorProfileService {
     Navigator.pushNamed(context, RoutesName.vendorChangeEmail);
   }
 
-  static void gotoVendorAddProduct(BuildContext context, bool isEdit) {
+  static void gotoVendorAddProduct(
+    BuildContext context,
+    bool isEdit,
+    MenuItemModel? product,
+  ) {
     Navigator.pushNamed(
       context,
-      arguments: {'isEdit': isEdit},
+      arguments: {'isEdit': isEdit, if (isEdit) 'product': product},
       RoutesName.vendorAddEditProduct,
     );
   }
@@ -57,11 +61,16 @@ class VendorProfileService {
     String? shopAddress,
     VoidCallback? onSuccess,
   }) async {
+    final vendor = _sessionController.vendor;
+
     final Map<String, dynamic> data = {
-      'name': name,
-      'profile_image': imageUrl,
-      'vendor_type': vendorType,
-      'shop_address': shopAddress,
+      if (name != null && vendor?.name != name) 'name': name,
+      if (imageUrl != null && vendor?.profileImage != imageUrl)
+        'profile_image': imageUrl,
+      if (vendorType != null && vendor?.vendorType != vendorType)
+        'vendor_type': vendorType,
+      if (shopAddress != null && vendor?.address != shopAddress)
+        'shop_address': shopAddress,
     };
     try {
       final response = await _vendorAuthRepo.updateVendorProfile(data);
@@ -112,12 +121,29 @@ class VendorProfileService {
       'category': category,
       'servings': servings,
       'description': description,
-      'image': imageUrl,
+      'image_url': imageUrl,
+      // 'image': imageUrl,
     };
     try {
       isEdit
           ? await _vendorAuthRepo.editProduct(productId!, data)
           : await _vendorAuthRepo.uploadProduct(data);
+      onSuccess?.call();
+    } catch (e) {
+      if (context.mounted) ErrorHandler.handle(context, e, serviceName: tag);
+    }
+  }
+
+  ///
+  ///Delete Product/Menu Item
+  ///
+  Future<void> deleteProduct(
+    BuildContext context, {
+    required String productId,
+    VoidCallback? onSuccess,
+  }) async {
+    try {
+      await _vendorAuthRepo.deleteProduct(productId);
       onSuccess?.call();
     } catch (e) {
       if (context.mounted) ErrorHandler.handle(context, e, serviceName: tag);

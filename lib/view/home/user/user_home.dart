@@ -17,6 +17,7 @@ import 'package:vendr/app/utils/extensions/context_extensions.dart';
 import 'package:vendr/app/utils/extensions/flush_bar_extension.dart';
 import 'package:vendr/app/utils/extensions/general_extensions.dart';
 import 'package:vendr/generated/assets/assets.gen.dart';
+import 'package:vendr/model/vendor/vendor_model.dart';
 import 'package:vendr/provider/user_home_provider.dart';
 import 'package:vendr/services/user/user_home_service.dart';
 import 'package:vendr/services/user/user_profile_service.dart';
@@ -477,12 +478,12 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
       onTap: () => setState(() => _isCardExpanded = !_isCardExpanded),
       distance: _distanceInKm ?? 0.0,
       vendorName: selectedVendor.name,
-      imageUrl: selectedVendor.imageUrl ?? '',
+      imageUrl: selectedVendor.profileImage ?? '',
       vendorAddress: selectedVendor.address ?? '',
       vendorType: selectedVendor.vendorType,
       menu: selectedVendor.menu ?? [],
       // hours: selectedVendor.hours,
-      hours: selectedVendor.hours ?? [],
+      // hours: selectedVendor.hours ?? [],
       hoursADay: selectedVendor.hoursADay ?? '',
       onGetDirection: () async {
         if (selectedVendor.location != null) {

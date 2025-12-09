@@ -160,6 +160,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
         padding: EdgeInsets.only(left: 16.w, right: 16.w, bottom: 32.w),
         child: MyButton(
           label: 'Submit',
+          isLoading: isLoading,
           onPressed: () async {
             if (!formKey.currentState!.validate()) return;
             if (mounted) {

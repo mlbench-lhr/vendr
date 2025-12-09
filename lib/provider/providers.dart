@@ -36,7 +36,7 @@ final List<VendorModel> initialVendors = [
       ),
     ],
     hoursADay: '10 Hours',
-    imageUrl:
+    profileImage:
         'https://images.unsplash.com/photo-1600891964599-f61ba0e24092?auto=format&fit=crop&w=800&q=80',
   ),
   VendorModel(
@@ -61,7 +61,7 @@ final List<VendorModel> initialVendors = [
       ),
     ],
     hoursADay: '10 Hours',
-    imageUrl:
+    profileImage:
         'https://images.unsplash.com/photo-1604719312566-8912e9227c6a?q=80&w=1074&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
   ),
   VendorModel(
@@ -104,7 +104,7 @@ final List<VendorModel> initialVendors = [
       ),
     ],
     hoursADay: '10 Hours',
-    imageUrl:
+    profileImage:
         'https://images.unsplash.com/photo-1519520104014-df63821cb6f9?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
   ),
   VendorModel(
@@ -159,7 +159,7 @@ final List<VendorModel> initialVendors = [
       ),
     ],
     hoursADay: '10 Hours',
-    imageUrl:
+    profileImage:
         'https://images.unsplash.com/photo-1762844877991-54c007866283?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
   ),
 ];

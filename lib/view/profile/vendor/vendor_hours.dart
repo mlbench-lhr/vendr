@@ -4,6 +4,7 @@ import 'package:vendr/app/components/my_button.dart';
 import 'package:vendr/app/components/my_scaffold.dart';
 import 'package:vendr/app/utils/extensions/context_extensions.dart';
 import 'package:vendr/app/utils/extensions/flush_bar_extension.dart';
+import 'package:vendr/services/common/session_manager/session_controller.dart';
 import 'package:vendr/services/vendor/vendor_profile_service.dart';
 
 class VendorHoursScreen extends StatefulWidget {
@@ -47,6 +48,46 @@ class _VendorHoursScreenState extends State<VendorHoursScreen> {
   String _sundayEndTime = '00:00';
 
   @override
+  void initState() {
+    setDataFromSession();
+    super.initState();
+  }
+
+  final _sessionController = SessionController();
+  void setDataFromSession() {
+    final vendor = _sessionController.vendor!;
+    final days = vendor.hours!.days;
+    //Monday
+    _isMondayEnabled = days.monday.enabled;
+    _mondayStartTime = days.monday.start;
+    _mondayEndTime = days.monday.end;
+    //Tuesday
+    _isTuesdayEnabled = days.tuesday.enabled;
+    _tuesdayStartTime = days.tuesday.start;
+    _tuesdayEndTime = days.tuesday.end;
+    //Wednesday
+    _isWednesdayEnabled = days.wednesday.enabled;
+    _wednesdayStartTime = days.wednesday.start;
+    _wednesdayEndTime = days.wednesday.end;
+    //Thursday
+    _isThursdayEnabled = days.thursday.enabled;
+    _thursdayStartTime = days.thursday.start;
+    _thursdayEndTime = days.thursday.end;
+    //Friday
+    _isFridayEnabled = days.friday.enabled;
+    _fridayStartTime = days.friday.start;
+    _fridayEndTime = days.friday.end;
+    //Saturday
+    _isSaturdayEnabled = days.saturday.enabled;
+    _saturdayStartTime = days.saturday.start;
+    _saturdayEndTime = days.saturday.end;
+    //Sunday
+    _isSundayEnabled = days.sunday.enabled;
+    _sundayStartTime = days.sunday.start;
+    _sundayEndTime = days.sunday.end;
+  }
+
+  @override
   Widget build(BuildContext context) {
     return MyScaffold(
       appBar: AppBar(
@@ -88,6 +129,9 @@ class _VendorHoursScreenState extends State<VendorHoursScreen> {
                           _isMondayEnabled = value;
                         });
                       },
+                      defaultSwitchValue: _isMondayEnabled,
+                      defaultStartTime: _mondayStartTime,
+                      defaultEndTime: _mondayEndTime,
                     ),
                     HourSelectionSwitch(
                       context: context,
@@ -110,6 +154,9 @@ class _VendorHoursScreenState extends State<VendorHoursScreen> {
                           _isTuesdayEnabled = value;
                         });
                       },
+                      defaultSwitchValue: _isTuesdayEnabled,
+                      defaultStartTime: _tuesdayStartTime,
+                      defaultEndTime: _tuesdayEndTime,
                     ),
                     HourSelectionSwitch(
                       context: context,
@@ -132,6 +179,9 @@ class _VendorHoursScreenState extends State<VendorHoursScreen> {
                           _isWednesdayEnabled = value;
                         });
                       },
+                      defaultSwitchValue: _isWednesdayEnabled,
+                      defaultStartTime: _wednesdayStartTime,
+                      defaultEndTime: _wednesdayEndTime,
                     ),
                     HourSelectionSwitch(
                       context: context,
@@ -154,6 +204,9 @@ class _VendorHoursScreenState extends State<VendorHoursScreen> {
                           _isThursdayEnabled = value;
                         });
                       },
+                      defaultSwitchValue: _isThursdayEnabled,
+                      defaultStartTime: _thursdayStartTime,
+                      defaultEndTime: _thursdayEndTime,
                     ),
                     HourSelectionSwitch(
                       context: context,
@@ -176,6 +229,9 @@ class _VendorHoursScreenState extends State<VendorHoursScreen> {
                           _isFridayEnabled = value;
                         });
                       },
+                      defaultSwitchValue: _isFridayEnabled,
+                      defaultStartTime: _fridayStartTime,
+                      defaultEndTime: _fridayEndTime,
                     ),
                     HourSelectionSwitch(
                       context: context,
@@ -198,6 +254,9 @@ class _VendorHoursScreenState extends State<VendorHoursScreen> {
                           _isSaturdayEnabled = value;
                         });
                       },
+                      defaultSwitchValue: _isSaturdayEnabled,
+                      defaultStartTime: _saturdayStartTime,
+                      defaultEndTime: _saturdayEndTime,
                     ),
                     HourSelectionSwitch(
                       context: context,
@@ -220,6 +279,9 @@ class _VendorHoursScreenState extends State<VendorHoursScreen> {
                           _isSundayEnabled = value;
                         });
                       },
+                      defaultSwitchValue: _isSundayEnabled,
+                      defaultStartTime: _sundayStartTime,
+                      defaultEndTime: _sundayEndTime,
                     ),
                     SizedBox(height: 20),
                   ],
@@ -309,9 +371,18 @@ class HourSelectionSwitch extends StatefulWidget {
     required this.day,
     required this.onTimeChanged,
     required this.onStatusChanged,
+    required this.defaultSwitchValue,
+    required this.defaultStartTime,
+    required this.defaultEndTime,
   });
+
   final BuildContext context;
   final String day;
+  final bool defaultSwitchValue;
+  final String defaultStartTime;
+  final String defaultEndTime;
+
+  //callbacks
   final ValueChanged<Map<String, dynamic>> onTimeChanged;
   final ValueChanged<bool> onStatusChanged;
   @override
@@ -319,8 +390,6 @@ class HourSelectionSwitch extends StatefulWidget {
 }
 
 class _HourSelectionSwitchState extends State<HourSelectionSwitch> {
-  bool switchValue = false;
-
   //pick time
   TimeOfDay? _selectedStartTime;
   TimeOfDay? _selectedEndTime;
@@ -352,7 +421,31 @@ class _HourSelectionSwitchState extends State<HourSelectionSwitch> {
   }
 
   @override
+  void initState() {
+    setTimeFromSession();
+    super.initState();
+  }
+
+  void setTimeFromSession() {
+    setState(() {
+      _selectedStartTime = stringToTimeOfDay(widget.defaultStartTime);
+      _selectedEndTime = stringToTimeOfDay(widget.defaultEndTime);
+    });
+  }
+
+  TimeOfDay stringToTimeOfDay(String timeString) {
+    //here
+    final parts = timeString.split(":");
+    TimeOfDay time = TimeOfDay(
+      hour: int.parse(parts[0]),
+      minute: int.parse(parts[1]),
+    );
+    return time;
+  }
+
+  @override
   Widget build(BuildContext context) {
+    bool switchValue = widget.defaultSwitchValue;
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 8.h),
       child: Column(

@@ -94,7 +94,10 @@ class Routes {
       case RoutesName.vendorAddEditProduct:
         final args = _getArgs(settings, requiredKeys: ['isEdit']);
         return MaterialPageRoute(
-          builder: (_) => AddEditProductScreen(isEdit: args['isEdit'] as bool),
+          builder: (_) => AddEditProductScreen(
+            isEdit: args['isEdit'] as bool,
+            product: args['product'],
+          ),
         );
       case RoutesName.reviews:
         final args = _getArgs(settings, requiredKeys: ['isVendor']);

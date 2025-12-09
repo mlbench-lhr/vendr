@@ -19,9 +19,11 @@ class VendorProfileScreen extends StatefulWidget {
 
 class _VendorProfileScreenState extends State<VendorProfileScreen> {
   final VendorModel vendor = SessionController().vendor!;
+
   @override
   Widget build(BuildContext context) {
-    final String vendorName = vendor.name;
+    String vendorName = vendor.name;
+    String? vendorProfileImage = vendor.profileImage;
     return MyScaffold(
       appBar: AppBar(
         title: Text(
@@ -44,10 +46,12 @@ class _VendorProfileScreenState extends State<VendorProfileScreen> {
                 child: CircleAvatar(
                   backgroundColor: context.colors.buttonPrimary,
                   radius: 38.r,
-                  backgroundImage: NetworkImage(
-                    'https://cdn.cpdonline.co.uk/wp-content/uploads/2021/10/28122626/What-is-a-chef-hierarchy.jpg',
-                  ),
-                  // child: Icon(Icons.person, color: Colors.white, size: 40.w),
+                  backgroundImage: vendorProfileImage != null
+                      ? NetworkImage(vendorProfileImage)
+                      : null,
+                  child: vendorProfileImage != null
+                      ? null
+                      : Icon(Icons.person, color: Colors.white, size: 40.w),
                 ),
               ),
               SizedBox(height: 16.h),
@@ -121,7 +125,7 @@ class _VendorProfileScreenState extends State<VendorProfileScreen> {
                   //
                   showDialog<void>(
                     context: context,
-                    builder: (_) => DeleteAccountDialog(),
+                    builder: (_) => DeleteAccountDialog(isVendor: true),
                   );
                 },
                 showArrow: false,
