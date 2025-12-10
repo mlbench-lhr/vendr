@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
+import 'package:vendr/app/components/loading_widget.dart';
 import 'package:vendr/app/components/my_bottom_sheet.dart';
 import 'package:vendr/app/components/my_button.dart';
 import 'package:vendr/app/components/my_scaffold.dart';
@@ -10,78 +11,80 @@ import 'package:vendr/app/styles/app_radiuses.dart';
 import 'package:vendr/app/utils/extensions/context_extensions.dart';
 import 'package:vendr/app/utils/extensions/general_extensions.dart';
 import 'package:vendr/generated/assets/assets.gen.dart';
+import 'package:vendr/model/vendor/vendor_model.dart';
+import 'package:vendr/services/common/reviews_service.dart';
+import 'package:vendr/services/vendor/vendor_home_service.dart';
 import 'package:vendr/view/reviews/widgets/add_review_bottom_sheet.dart';
 
 class ReviewsScreen extends StatefulWidget {
   const ReviewsScreen({super.key, required this.isVendor});
   final bool isVendor;
+
   @override
   State<ReviewsScreen> createState() => _ReviewsScreenState();
 }
 
 class _ReviewsScreenState extends State<ReviewsScreen> {
-  //Sample rating analysis
-  final Map<String, dynamic> _ratingAnalysis = {
-    "averageRating": 3.2,
-    "totalReviews": 120,
+  late Future<ReviewsModel?> _reviewsFuture;
 
-    // distribution keys must be like "1.0", "2.0", ..., "5.0"
-    "distribution": {
-      "5.0": 0.60, // 60% gave 5 stars
-      "4.0": 0.20, // 20%
-      "3.0": 0.10, // 10%
-      "2.0": 0.05, // 5%
-      "1.0": 0.05, // 5%
-    },
-  };
-  List<Map<String, dynamic>> reviews = [
-    {
-      'id': 1,
-      'name': 'Cameron Williamson',
-      'rating': 4.0,
-      'time_stamp': '2 mins ago',
-      'content':
-          'Consequat velit qui adipisicing sunt do rependerit ad laborum tempor ullamco.',
-    },
-    {
-      'id': 2,
-      'name': 'Jane Cooper',
-      'rating': 2.5,
-      'time_stamp': '4 hours ago',
-      'content':
-          'Velit qui adipisicing sunt do rependerit ad laborum tempor ullamco.',
-    },
-    {
-      'id': 3,
-      'name': 'James Smith',
-      'rating': 5.0,
-      'time_stamp': '1 day ago',
-      'content': 'Adipisicing qui sunt do rependerit ad laborum.',
-    },
-    {
-      'id': 1,
-      'name': 'Cameron Williamson',
-      'rating': 4.0,
-      'time_stamp': '2 mins ago',
-      'content':
-          'Consequat velit qui adipisicing sunt do rependerit ad laborum tempor ullamco.',
-    },
-    {
-      'id': 2,
-      'name': 'Jane Cooper',
-      'rating': 2.5,
-      'time_stamp': '4 hours ago',
-      'content':
-          'Velit qui adipisicing sunt do rependerit ad laborum tempor ullamco.',
-    },
-    {
-      'id': 3,
-      'name': 'James Smith',
-      'rating': 5.0,
-      'time_stamp': '1 day ago',
-      'content': 'Adipisicing qui sunt do rependerit ad laborum.',
-    },
-  ];
+  // Internal analyzed structure: { 'average': double, 'totalReviews': int, 'distribution': { '5.0': double, ... } }
+  final Map<String, dynamic> _ratingAnalysis = {};
+
+  @override
+  void initState() {
+    super.initState();
+    _reviewsFuture = _fetchData();
+  }
+
+  Future<ReviewsModel?> _fetchData() async {
+    try {
+      final ReviewsModel? response = await VendorHomeService().getVendorReviews(
+        context,
+      );
+
+      if (response == null) return null;
+
+      // Build distribution (1..5) based on provided response.list
+      final List<SingleReviewModel> reviewsList = response.list;
+
+      final Map<int, int> counts = {1: 0, 2: 0, 3: 0, 4: 0, 5: 0};
+      for (final r in reviewsList) {
+        final star = (r.rating < 1)
+            ? 1
+            : (r.rating > 5)
+            ? 5
+            : r.rating;
+        counts[star] = (counts[star] ?? 0) + 1;
+      }
+
+      final int totalReviews = response.totalReviews;
+      final Map<String, double> distribution = {
+        for (var i = 5; i >= 1; i--) '$i.0': 0.0,
+      };
+
+      if (totalReviews > 0) {
+        for (var i = 1; i <= 5; i++) {
+          distribution['$i.0'] = (counts[i]! / totalReviews);
+        }
+      }
+
+      final average = response.averageRating;
+
+      _ratingAnalysis
+        ..clear()
+        ..addAll({
+          'average': double.parse(average.toStringAsFixed(1)),
+          'totalReviews': totalReviews,
+          'distribution': distribution,
+        });
+
+      return response;
+    } catch (e) {
+      debugPrint('Error fetching reviews: $e');
+      return null;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return MyScaffold(
@@ -97,64 +100,77 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
       ),
       body: Padding(
         padding: EdgeInsets.only(top: 16.w, right: 16.w, left: 16.w),
-        child: Center(
-          child: Stack(
-            children: [
-              reviews.isNotEmpty
-                  ? ListView(
-                      children: [
-                        Container(
-                          width: double.infinity,
-                          padding: EdgeInsets.symmetric(
-                            vertical: 12.h,
-                            horizontal: 8.w,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.white12,
-                            borderRadius: BorderRadius.circular(
-                              AppRadiuses.mediumRadius,
-                            ),
-                            border: Border.all(color: Colors.white38),
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              _buildRatingDistribution(context),
-                              _buildAverageRating(
-                                context,
-                                //  reviewsResponse,
-                              ),
-                            ],
-                          ),
-                        ),
-                        24.height,
-                        _buildReviewsList(reviews),
-                        if (!widget.isVendor) 100.height,
-                      ],
-                    )
-                  : _buildEmptyReviews(context),
-              if (!widget.isVendor)
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.end,
+        child: FutureBuilder<ReviewsModel?>(
+          future: _reviewsFuture,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: LoadingWidget(color: Colors.white));
+            }
+
+            if (snapshot.hasError || !snapshot.hasData) {
+              return _buildEmptyReviews(context);
+            }
+
+            final ReviewsModel data = snapshot.data!;
+            final List<SingleReviewModel> reviews = data.list;
+
+            if (reviews.isEmpty) {
+              return _buildEmptyReviews(context);
+            }
+
+            return Stack(
+              children: [
+                ListView(
                   children: [
-                    MyButton(
-                      onPressed: () {
-                        MyBottomSheet.show(
-                          context,
-                          isDismissible: true,
-                          isScrollControlled: true,
-                          enableDrag: true,
-                          backgroundColor: context.colors.primary,
-                          child: AddReviewBottomSheet(),
-                        );
-                      },
-                      label: 'Write Review',
+                    Container(
+                      width: double.infinity,
+                      padding: EdgeInsets.symmetric(
+                        vertical: 12.h,
+                        horizontal: 8.w,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.white12,
+                        borderRadius: BorderRadius.circular(
+                          AppRadiuses.mediumRadius,
+                        ),
+                        border: Border.all(color: Colors.white38),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          _buildRatingDistribution(context),
+                          _buildAverageRating(context),
+                        ],
+                      ),
                     ),
                     24.height,
+                    _buildReviewsList(reviews),
+                    if (!widget.isVendor) 100.height,
                   ],
                 ),
-            ],
-          ),
+                if (!widget.isVendor)
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      MyButton(
+                        onPressed: () {
+                          MyBottomSheet.show(
+                            context,
+                            isDismissible: true,
+                            isScrollControlled: true,
+                            enableDrag: true,
+                            backgroundColor: context.colors.primary,
+                            child: AddReviewBottomSheet(),
+                          );
+                        },
+                        label: 'Write Review',
+                      ),
+                      24.height,
+                    ],
+                  ),
+              ],
+            );
+          },
         ),
       ),
     );
@@ -178,20 +194,26 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
     );
   }
 
-  //build reviews list
-  SizedBox _buildReviewsList(List<Map<String, dynamic>> reviews) {
+  // build reviews list
+  SizedBox _buildReviewsList(List<SingleReviewModel> reviews) {
     return SizedBox(
       child: ListView.separated(
         physics: const NeverScrollableScrollPhysics(),
         shrinkWrap: true,
         itemCount: reviews.length,
         itemBuilder: (BuildContext context, int index) {
+          final SingleReviewModel r = reviews[index];
+
+          final name = r.user.name.isNotEmpty ? r.user.name : 'User';
+          final rating = r.rating.toDouble();
+          final timeStamp = ReviewsService.formatTimeAgo(r.createdAt);
+          final content = r.message;
+
           return ReviewTile(
-            name: reviews[index]['name'],
-            rating: reviews[index]['rating'],
-            timeStamp: reviews[index]['time_stamp'],
-            content: reviews[index]['content'],
-            // imageUrl: ,
+            name: name,
+            rating: rating,
+            timeStamp: timeStamp,
+            content: content,
           );
         },
         separatorBuilder: (BuildContext context, int index) {
@@ -204,12 +226,9 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
     );
   }
 
-  Widget _buildAverageRating(
-    BuildContext context,
-    // ReviewResponse reviewsResponse,
-  ) {
-    // final averageRating = _ratingAnalysis['average'] as double? ?? 0.0;
-    final averageRating = _ratingAnalysis['averageRating'] as double? ?? 0.0;
+  Widget _buildAverageRating(BuildContext context) {
+    final averageRating = _ratingAnalysis['average'] as double? ?? 0.0;
+    final totalReviews = _ratingAnalysis['totalReviews'] as int? ?? 0;
 
     return Padding(
       padding: EdgeInsets.only(left: 0.w),
@@ -233,12 +252,7 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
           ),
           SizedBox(height: 12.h),
           Text(
-            // reviewsResponse.totalReviews == null
-            //     ? context.l10n.reviews_zero
-            //     :
-            // context.l10n.reviews_count(reviewsResponse.totalReviews.toString(),
-            // ),
-            '0 Reviews',
+            '$totalReviews Reviews',
             style: context.typography.subtitle.copyWith(
               fontSize: 12.sp,
               fontWeight: FontWeight.w600,

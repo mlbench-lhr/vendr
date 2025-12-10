@@ -6,7 +6,10 @@ class LogManager {
 
   /// Logs an HTTP request
   static void logRequest(
-      String method, String url, Map<String, dynamic>? body) {
+    String method,
+    String url,
+    Map<String, dynamic>? body,
+  ) {
     _printInSequence([
       _line,
       '📤 REQUEST [$method] → $url',

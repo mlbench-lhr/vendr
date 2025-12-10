@@ -130,10 +130,14 @@ class VendorProfileService {
       'image_url': imageUrl,
       // 'image': imageUrl,
     };
+
     try {
       isEdit
           ? await _vendorAuthRepo.editProduct(productId!, data)
           : await _vendorAuthRepo.uploadProduct(data);
+      if (context.mounted) {
+        await AuthService().fetchProfile(context);
+      }
       onSuccess?.call();
     } catch (e) {
       if (context.mounted) ErrorHandler.handle(context, e, serviceName: tag);
@@ -150,6 +154,9 @@ class VendorProfileService {
   }) async {
     try {
       await _vendorAuthRepo.deleteProduct(productId);
+      if (context.mounted) {
+        await AuthService().fetchProfile(context);
+      }
       onSuccess?.call();
     } catch (e) {
       if (context.mounted) ErrorHandler.handle(context, e, serviceName: tag);

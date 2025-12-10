@@ -32,22 +32,27 @@ class _VendorMyMenuScreenState extends State<VendorMyMenuScreen> {
   @override
   void initState() {
     super.initState();
-    setVendorProfileData();
+    sessionController.addListener(_onSessionChanged);
   }
 
-  final _sessionController = SessionController();
-  VendorModel? vendor;
-  void setVendorProfileData() {
-    vendor = _sessionController.vendor;
-    if (vendor != null) {
-      if (vendor!.menu != null) {
-        menuItems = vendor!.menu!;
-      }
-    }
+  final sessionController = SessionController();
+
+  void _onSessionChanged() {
+    if (mounted) setState(() {});
+  }
+
+  @override
+  void dispose() {
+    sessionController.removeListener(_onSessionChanged);
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final vendor = sessionController.vendor!;
+    if (vendor.menu != null) {
+      menuItems = vendor.menu!;
+    }
     return MyScaffold(
       appBar: AppBar(
         title: Text(

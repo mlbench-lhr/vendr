@@ -215,7 +215,7 @@ class DayHours {
 class ReviewsModel {
   final double averageRating;
   final int totalReviews;
-  final List<Map<String, dynamic>> list;
+  final List<SingleReviewModel> list;
 
   ReviewsModel({
     required this.averageRating,
@@ -223,12 +223,21 @@ class ReviewsModel {
     required this.list,
   });
 
+  // factory ReviewsModel.fromJson(Map<String, dynamic> json) {
+  //   return ReviewsModel(
+  //     averageRating: (json['average_rating'] ?? 0).toDouble(),
+  //     totalReviews: json['total_reviews'] ?? 0,
+  //     list: (json['list'] as List? ?? [])
+  //         .map((e) => SingleReviewModel.fromJson(e))
+  //         .toList(),
+  //   );
+  // }
   factory ReviewsModel.fromJson(Map<String, dynamic> json) {
     return ReviewsModel(
       averageRating: (json['average_rating'] ?? 0).toDouble(),
       totalReviews: json['total_reviews'] ?? 0,
-      list: (json['list'] as List<dynamic>? ?? [])
-          .map((e) => Map<String, dynamic>.from(e as Map))
+      list: (json['reviews'] as List? ?? [])
+          .map((e) => SingleReviewModel.fromJson(e))
           .toList(),
     );
   }
@@ -237,7 +246,61 @@ class ReviewsModel {
     return {
       'average_rating': averageRating,
       'total_reviews': totalReviews,
-      'list': list,
+      'list': list.map((e) => e.toJson()).toList(),
     };
+  }
+}
+
+class SingleReviewModel {
+  final String id;
+  final int rating;
+  final String message;
+  final DateTime createdAt;
+  final ReviewUser user;
+
+  SingleReviewModel({
+    required this.id,
+    required this.rating,
+    required this.message,
+    required this.createdAt,
+    required this.user,
+  });
+
+  factory SingleReviewModel.fromJson(Map<String, dynamic> json) {
+    return SingleReviewModel(
+      id: json['_id'] ?? '',
+      rating: json['rating'] ?? 0,
+      message: json['message'] ?? '',
+      createdAt: DateTime.tryParse(json['created_at'] ?? '') ?? DateTime.now(),
+      user: ReviewUser.fromJson(json['user'] ?? {}),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      '_id': id,
+      'rating': rating,
+      'message': message,
+      'created_at': createdAt.toIso8601String(),
+      'user': user.toJson(),
+    };
+  }
+}
+
+class ReviewUser {
+  final String name;
+  final String? profileImage;
+
+  ReviewUser({required this.name, this.profileImage});
+
+  factory ReviewUser.fromJson(Map<String, dynamic> json) {
+    return ReviewUser(
+      name: json['name'] ?? '',
+      profileImage: json['profile_image'],
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {'name': name, 'profile_image': profileImage};
   }
 }

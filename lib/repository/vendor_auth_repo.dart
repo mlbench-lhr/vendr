@@ -58,6 +58,11 @@ class VendorAuthRepository {
     return _apiServices.get(url: AppUrl.getVendorProfile);
   }
 
+  //fetch profile
+  Future<Map<String, dynamic>> getReviews({String query = ''}) async {
+    return _apiServices.get(url: '${AppUrl.getVendorReviews}?$query');
+  }
+
   //delete product
   Future<Map<String, dynamic>> deleteProduct(String productId) async {
     return _apiServices.delete(url: '${AppUrl.deleteProduct}/$productId');

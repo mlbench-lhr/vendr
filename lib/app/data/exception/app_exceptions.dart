@@ -30,7 +30,9 @@ class FetchDataException extends AppException {
     try {
       final Map<String, dynamic> json =
           jsonDecode(responseBody ?? '{}') as Map<String, dynamic>;
-      return json['message'] as String? ?? 'Invalid request';
+      return json['message'] as String? ??
+          json['error'] as String? ??
+          'Invalid request';
     } catch (_) {
       return 'Invalid request';
     }
@@ -46,7 +48,9 @@ class BadRequestException extends AppException {
     try {
       final Map<String, dynamic> json =
           jsonDecode(responseBody ?? '{}') as Map<String, dynamic>;
-      return json['message'] as String? ?? 'Invalid request';
+      return json['message'] as String? ??
+          json['error'] as String? ??
+          'Invalid request';
     } catch (_) {
       return 'Invalid request';
     }

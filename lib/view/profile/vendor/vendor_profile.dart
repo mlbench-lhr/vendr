@@ -75,6 +75,12 @@ class _VendorProfileScreenState extends State<VendorProfileScreen> {
                 vendor.name,
                 style: context.typography.title.copyWith(fontSize: 20.sp),
               ),
+              SizedBox(height: 4.h),
+              Text(
+                textAlign: TextAlign.center,
+                vendor.email,
+                style: context.typography.bodySmall.copyWith(fontSize: 14.sp),
+              ),
               SizedBox(height: 12.h),
               //Menus
               ProfileMenuTile(

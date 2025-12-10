@@ -5,13 +5,11 @@ import 'package:vendr/app/components/my_dialog.dart';
 import 'package:vendr/app/components/my_dropdown.dart';
 import 'package:vendr/app/components/my_form_text_field.dart';
 import 'package:vendr/app/components/my_scaffold.dart';
-import 'package:vendr/app/components/my_text_field.dart';
 import 'package:vendr/app/styles/app_radiuses.dart';
 import 'package:vendr/app/utils/app_constants.dart';
 import 'package:vendr/app/utils/extensions/context_extensions.dart';
 import 'package:vendr/app/utils/extensions/flush_bar_extension.dart';
 import 'package:vendr/app/utils/extensions/general_extensions.dart';
-import 'package:vendr/app/utils/extensions/validations_exception.dart';
 import 'package:vendr/model/vendor/vendor_model.dart';
 import 'package:vendr/services/common/session_manager/session_controller.dart';
 import 'package:vendr/services/vendor/vendor_profile_service.dart';
@@ -31,7 +29,7 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
   final _productDescriptionController = TextEditingController();
 
   bool isLoading = false;
-  String? _imageUrl = '';
+  String _imageUrl = '';
   String? selectedCategory;
 
   final formKey = GlobalKey<FormState>();
@@ -44,7 +42,8 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
     '5 Servings',
   ];
   final List<String> prices = ['\$100', '\$200', '\$300'];
-  int servingCount = 1;
+
+  // Use consistent keys: 'id', 'serving', 'price'
   List<Map<String, dynamic>> servings = [
     {'id': 1, 'serving': 'Single Serving', 'price': '\$100'},
   ];
@@ -52,6 +51,7 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
   Set<String> categories = {};
 
   final _session = SessionController();
+
   void setProductCategories() {
     final vendor = _session.vendor;
     final vendorType = vendor!.vendorType;
@@ -65,6 +65,7 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
         setState(() {
           categories = TypeAndCategoryConstants.retailGoodsCategories;
         });
+        break;
       default:
         setState(() {
           categories.addAll(TypeAndCategoryConstants.foodsAndDrinksCategories);
@@ -72,6 +73,7 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
         });
     }
     categories.add('Other');
+    if (categories.isNotEmpty) selectedCategory = categories.first;
   }
 
   @override
@@ -82,16 +84,43 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
   }
 
   void setExistingProductData() {
-    if (widget.isEdit) {
+    if (widget.isEdit && widget.product != null) {
       _productNameController.text = widget.product!.itemName;
-      _productDescriptionController.text = widget.product!.itemDescription!;
-      selectedCategory = widget.product!.category!;
-      _imageUrl = widget.product!.imageUrl!;
+      _productDescriptionController.text =
+          widget.product!.itemDescription ?? '';
+      selectedCategory = widget.product!.category ?? selectedCategory;
+      debugPrint('Selected Category is: ${widget.product!.category}');
+      debugPrint('SET : Selected Category is: $selectedCategory');
+      _imageUrl = widget.product!.imageUrl ?? '';
+
+      // If product has servings (depending on your API model),
+      // map them into `servings`. Uncomment/adapt if your API returns servings.
+      // if (widget.product!.servings != null && widget.product!.servings.isNotEmpty) {
+      //   servings = [];
+      //   int idCounter = 1;
+      //   for (final s in widget.product!.servings) {
+      //     servings.add({
+      //       'id': idCounter++,
+      //       'serving': s['serving'] ?? servingTypes.first,
+      //       'price': s['price'] ?? prices.first,
+      //     });
+      //   }
+      // }
     }
+  }
+
+  int _indexOfId(int id) {
+    return servings.indexWhere((s) => s['id'] == id);
   }
 
   @override
   Widget build(BuildContext context) {
+    // Build a set of currently chosen serving types (for filtering)
+    final Set<String> chosenTypes = servings
+        .map((s) => (s['serving'] ?? '') as String)
+        .where((s) => s.isNotEmpty)
+        .toSet();
+
     return MyScaffold(
       appBar: AppBar(
         title: Text(
@@ -123,8 +152,6 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
                           }
                         },
                       );
-
-                      // await deleteMenuitem();
                     },
                   ),
                 );
@@ -143,7 +170,7 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
                 readOnly: isLoading,
                 initialUrl: _imageUrl,
                 onImageChanged: (url) {
-                  _imageUrl = url;
+                  _imageUrl = url ?? '';
                 },
               ),
               8.height,
@@ -165,14 +192,14 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
                 },
               ),
               16.height,
-              //item category
+              // item category
               Text(
                 'Category',
                 style: context.typography.title.copyWith(fontSize: 18.sp),
               ),
               10.height,
               MyDropdown(
-                value: categories.first,
+                value: selectedCategory,
                 items: categories.toList(),
                 onChanged: (value) {
                   setState(() {
@@ -180,7 +207,7 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
                   });
                 },
               ),
-              //END: item category
+              // END: item category
               16.height,
               Text(
                 'Description',
@@ -202,11 +229,32 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
                 },
               ),
               16.height,
-              ...(servings.map((serving) {
+              // Map servings to ServingSection, computing available serving types per section
+              ...servings.map((serving) {
+                final int id = serving['id'] as int;
+                final String currentServingValue = serving['serving'] as String;
+                final String currentPriceValue = serving['price'] as String;
+
+                // Use chosenTypes set to compute available types for this section
+                // Include this section's current serving so it doesn't vanish.
+                final List<String> availableServingTypes = servingTypes.where((
+                  t,
+                ) {
+                  final bool usedByOther =
+                      chosenTypes.contains(t) &&
+                      t !=
+                          currentServingValue; // t is used by some other section
+                  return !usedByOther;
+                }).toList();
+
                 return ServingSection(
-                  servings: servingTypes,
+                  id: id,
+                  servingTypes: availableServingTypes,
                   prices: prices,
-                  onRemove: (id) {
+                  servingValue: currentServingValue,
+                  priceValue: currentPriceValue,
+                  onRemove: () {
+                    debugPrint('Removed id: $id');
                     if (servings.length > 1) {
                       setState(() {
                         servings.removeWhere((item) => item['id'] == id);
@@ -214,40 +262,77 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
                       debugPrint('Removed id = $id');
                     } else {
                       context.flushBarErrorMessage(
-                        message: 'At least 1 price is required.',
+                        message: 'At least one serving is required.',
                       );
                     }
                   },
-                  id: serving['id'] as int,
+                  onServingUpdate: (String value) {
+                    debugPrint('ID TO BE UPDATED $id to $value');
+                    final idx = _indexOfId(id);
+                    if (idx != -1) {
+                      setState(() {
+                        servings[idx]['serving'] = value;
+                      });
+                    }
+                  },
+                  onPriceUpdate: (String value) {
+                    debugPrint('ID TO BE UPDATED $id price to $value');
+                    final idx = _indexOfId(id);
+                    if (idx != -1) {
+                      setState(() {
+                        servings[idx]['price'] = value;
+                      });
+                    }
+                  },
                 );
-              })),
+              }),
               10.height,
-              AddNewBtn(
-                addServing: () {
-                  int newId = servings.isNotEmpty ? servings.last['id'] + 1 : 1;
-                  debugPrint('new ID $newId');
-                  setState(() {
-                    servings.add({
-                      'id': newId,
-                      'servingType': 'Single Serving',
-                      'price': '\$100',
+              if (servings.length < servingTypes.length)
+                AddNewBtn(
+                  // when adding new serving, pick the first unused serving type if possible
+                  addServing: () {
+                    final Set<String> chosen = servings
+                        .map((s) => (s['serving'] ?? '') as String)
+                        .where((s) => s.isNotEmpty)
+                        .toSet();
+                    final String newServingType = servingTypes.firstWhere(
+                      (t) => !chosen.contains(t),
+                      orElse: () => servingTypes.first,
+                    );
+
+                    int newId = servings.isNotEmpty
+                        ? (servings.last['id'] as int) + 1
+                        : 1;
+                    debugPrint('new ID $newId');
+                    setState(() {
+                      servings.add({
+                        'id': newId,
+                        'serving': newServingType,
+                        'price': prices.first,
+                      });
+                      debugPrint('Serving added; $servings');
                     });
-                  });
-                },
-              ),
+                  },
+                ),
               20.height,
               MyButton(
                 label: 'Add',
                 isLoading: isLoading,
                 onPressed: () async {
                   if (!formKey.currentState!.validate()) return;
+                  if (_imageUrl.isEmpty) {
+                    context.flushBarErrorMessage(message: 'Image is required');
+                    return;
+                  }
+
                   if (mounted) {
                     setState(() => isLoading = true);
                   }
-                  //request here...
+
+                  // request here...
                   await _vendorProfileService.editOrUploadProduct(
                     context,
-                    // productId: widget.productId, //in case of edit
+                    productId: widget.isEdit ? widget.product!.itemId : null,
                     isEdit: widget.isEdit,
                     imageUrl: _imageUrl,
                     category: selectedCategory,
@@ -307,22 +392,66 @@ class AddNewBtn extends StatelessWidget {
   }
 }
 
-class ServingSection extends StatelessWidget {
+class ServingSection extends StatefulWidget {
   const ServingSection({
     super.key,
-    required this.servings,
+    required this.servingTypes,
     required this.prices,
     required this.onRemove,
     required this.id,
+    required this.onServingUpdate,
+    required this.onPriceUpdate,
+    required this.servingValue,
+    required this.priceValue,
   });
 
   final int id;
-  final List<String> servings;
+  final List<String> servingTypes;
   final List<String> prices;
-  final ValueChanged<int> onRemove;
+  final VoidCallback onRemove;
+  final ValueChanged<String> onServingUpdate;
+  final ValueChanged<String> onPriceUpdate;
+
+  // controlled values
+  final String servingValue;
+  final String priceValue;
+
+  @override
+  State<ServingSection> createState() => _ServingSectionState();
+}
+
+class _ServingSectionState extends State<ServingSection> {
+  late String selectedServing;
+  late String selectedPrice;
+
+  @override
+  void initState() {
+    super.initState();
+    // initialize from widget values provided by parent (controlled)
+    selectedServing = widget.servingValue;
+    selectedPrice = widget.priceValue;
+  }
+
+  @override
+  void didUpdateWidget(covariant ServingSection oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // keep local selected values in sync if parent updated them
+    if (oldWidget.servingValue != widget.servingValue) {
+      selectedServing = widget.servingValue;
+    }
+    if (oldWidget.priceValue != widget.priceValue) {
+      selectedPrice = widget.priceValue;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    // Use the list passed from parent (already filtered). Don't re-add duplicates here.
+    // But make sure the currently selected value is present as an option (in case parent omitted it incorrectly).
+    final List<String> items = widget.servingTypes.contains(selectedServing)
+        ? widget.servingTypes
+        : [selectedServing, ...widget.servingTypes];
+
     return Padding(
       padding: EdgeInsets.only(bottom: 12.h),
       child: Container(
@@ -334,9 +463,14 @@ class ServingSection extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
+            // Serving column
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                Text(
+                  'ID: ${widget.id}',
+                  style: context.typography.body.copyWith(fontSize: 9.sp),
+                ),
                 Text(
                   'Serving',
                   style: context.typography.title.copyWith(fontSize: 18.sp),
@@ -345,13 +479,21 @@ class ServingSection extends StatelessWidget {
                 SizedBox(
                   width: 160.w,
                   child: MyDropdown(
-                    value: servings.first,
-                    items: servings,
-                    onChanged: (value) {},
+                    value: selectedServing,
+                    items: items,
+                    onChanged: (value) {
+                      if (value == null) return;
+                      setState(() {
+                        selectedServing = value;
+                      });
+                      widget.onServingUpdate(value);
+                    },
                   ),
                 ),
               ],
             ),
+
+            // Price column
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -370,8 +512,8 @@ class ServingSection extends StatelessWidget {
                       InkWell(
                         borderRadius: BorderRadius.circular(6.r),
                         onTap: () {
-                          onRemove(id);
-                          debugPrint('THE ID HERE $id');
+                          widget.onRemove.call();
+                          debugPrint('THE ID HERE ${widget.id}');
                         },
                         child: Icon(Icons.close, size: 20.w),
                       ),
@@ -382,9 +524,15 @@ class ServingSection extends StatelessWidget {
                 SizedBox(
                   width: 140.w,
                   child: MyDropdown(
-                    value: prices.first,
-                    items: prices,
-                    onChanged: (value) {},
+                    value: selectedPrice,
+                    items: widget.prices,
+                    onChanged: (value) {
+                      if (value == null) return;
+                      setState(() {
+                        selectedPrice = value;
+                      });
+                      widget.onPriceUpdate(value);
+                    },
                   ),
                 ),
               ],

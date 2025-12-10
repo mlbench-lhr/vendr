@@ -35,6 +35,13 @@ class MenuItemTile extends StatelessWidget {
                 backgroundImage: imageUrl != null
                     ? NetworkImage(imageUrl!)
                     : null,
+                child: imageUrl == null
+                    ? Icon(
+                        Icons.restaurant_menu,
+                        size: 32,
+                        color: context.colors.primary.withValues(alpha: 0.5),
+                      )
+                    : null,
               ),
             ),
             Container(

@@ -1,21 +1,3 @@
-// import 'dart:async';
-// import 'package:esthetic_match/app/components/my_bottom_sheet.dart';
-// import 'package:esthetic_match/app/routes/routes_name.dart';
-// import 'package:esthetic_match/app/utils/enums.dart';
-// import 'package:esthetic_match/app/utils/extensions/flush_bar_extension.dart';
-// import 'package:esthetic_match/app/utils/service_error_handler.dart';
-// import 'package:esthetic_match/model/doctor/doctor_model.dart';
-// import 'package:esthetic_match/model/general/procedure_catalog.dart';
-// import 'package:esthetic_match/model/user/user_model.dart';
-// import 'package:esthetic_match/provider/auth/locale_provider.dart';
-// import 'package:esthetic_match/provider/home/navigation_provider.dart';
-// import 'package:esthetic_match/repository/doctor/doctor_auth_repo.dart';
-// import 'package:esthetic_match/repository/user/user_auth_repo.dart';
-// import 'package:esthetic_match/services/common/session_manager/session_controller.dart';
-// import 'package:esthetic_match/view/auth/widgets/email_verification_sheet.dart';
-// import 'package:flutter/material.dart';
-// import 'package:provider/provider.dart';
-
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -121,6 +103,9 @@ class AuthService {
     MyBottomSheet.show<void>(
       context,
       isDismissible: false,
+      isScrollControlled: false,
+      enableDrag: false,
+      showDragHandle: false,
       backgroundColor: context.colors.cardPrimary,
       child: AccountVerificationSheet(email: email, isVendor: isVendor),
     );
@@ -404,7 +389,7 @@ class AuthService {
       } catch (_) {
         debugPrint('[$tag] Error fetching profile, clearing session');
         await _sessionController.clearSession();
-        if (context.mounted) goToWelcome(context);
+        // if (context.mounted) goToWelcome(context);
       }
     } else {
       debugPrint(

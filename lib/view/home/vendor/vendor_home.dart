@@ -8,6 +8,7 @@ import 'package:vendr/app/styles/app_radiuses.dart';
 import 'package:vendr/app/utils/extensions/context_extensions.dart';
 import 'package:vendr/app/utils/extensions/general_extensions.dart';
 import 'package:vendr/model/vendor/vendor_model.dart';
+import 'package:vendr/services/common/reviews_service.dart';
 import 'package:vendr/services/common/session_manager/session_controller.dart';
 import 'package:vendr/services/user/user_home_service.dart';
 import 'package:vendr/services/vendor/vendor_home_service.dart';
@@ -20,50 +21,8 @@ class VendorHomeScreen extends StatefulWidget {
 }
 
 class _VendorHomeScreenState extends State<VendorHomeScreen> {
-  List<MenuItemModel> menuItems = [
-    // MenuItemModel(
-    //   itemId: '1',
-    //   itemName: 'First Item Name',
-    //   itemDescription: 'This is the description for first menu item',
-    //   itemImageUrl:
-    //       'https://assets.bonappetit.com/photos/5d4356436f98a4000898782b/4:3/w_3376,h_2532,c_limit/Basically-Ratatouille-Pasta.jpg',
-    //   servings: [
-    //     ServingModel(servingQuantity: 'Single Serving', servingPrice: '\$23'),
-    //     ServingModel(servingQuantity: 'Double Serving', servingPrice: '\$34'),
-    //     ServingModel(servingQuantity: 'Triple Serving', servingPrice: '\$48'),
-    //   ],
-    // ),
-  ];
-
-  // List<Map<String, dynamic>> reviews = [
-  //   {
-  //     'id': 1,
-  //     'name': 'Cameron Williamson',
-  //     'rating': 4.0,
-  //     'time_stamp': '2 mins ago',
-  //     'content':
-  //         'Consequat velit qui adipisicing sunt do rependerit ad laborum tempor ullamco.',
-  //   },
-  //   {
-  //     'id': 2,
-  //     'name': 'Jane Cooper',
-  //     'rating': 2.5,
-  //     'time_stamp': '4 hours ago',
-  //     'content':
-  //         'Velit qui adipisicing sunt do rependerit ad laborum tempor ullamco.',
-  //   },
-  //   {
-  //     'id': 3,
-  //     'name': 'James Smith',
-  //     'rating': 5.0,
-  //     'time_stamp': '1 day ago',
-  //     'content': 'Adipisicing qui sunt do rependerit ad laborum.',
-  //   },
-  // ];
-
-  List<Map<String, dynamic>> reviews = [];
-
-  String hoursToday = 'Off';
+  List<MenuItemModel> menuItems = [];
+  List<SingleReviewModel> reviews = [];
 
   final sessionController = SessionController();
   @override
@@ -82,21 +41,18 @@ class _VendorHomeScreenState extends State<VendorHomeScreen> {
     super.dispose();
   }
 
-  VendorModel? vendor;
-
   @override
   Widget build(BuildContext context) {
     //set vendor profile data from session
-    vendor = sessionController.vendor;
-    if (vendor != null) {
-      if (vendor!.menu != null) {
-        menuItems = vendor!.menu!;
-      }
-
-      if (vendor!.reviews != null) {
-        reviews = vendor!.reviews!.list;
-      }
+    final vendor = sessionController.vendor!;
+    if (vendor.menu != null) {
+      menuItems = vendor.menu!;
     }
+
+    if (vendor.reviews != null) {
+      reviews = vendor.reviews!.list;
+    }
+
     return MyScaffold(
       body: Padding(
         padding: EdgeInsets.only(top: 16.w),
@@ -112,9 +68,7 @@ class _VendorHomeScreenState extends State<VendorHomeScreen> {
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      VendorAvatar(
-                        vendorProfileImage: vendor!.profileImage,
-                      ), //TODO: check this
+                      VendorAvatar(vendorProfileImage: vendor.profileImage),
                       12.width,
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -122,7 +76,7 @@ class _VendorHomeScreenState extends State<VendorHomeScreen> {
                         children: [
                           8.height,
                           Text(
-                            vendor!.name,
+                            vendor.name,
                             style: context.typography.title.copyWith(
                               fontWeight: FontWeight.w700,
                               fontSize: 20.sp,
@@ -130,7 +84,7 @@ class _VendorHomeScreenState extends State<VendorHomeScreen> {
                           ),
                           SizedBox(height: 4.h),
                           Text(
-                            vendor!.vendorType,
+                            vendor.vendorType,
                             style: context.typography.body.copyWith(
                               fontSize: 14.sp,
                             ),
@@ -149,11 +103,11 @@ class _VendorHomeScreenState extends State<VendorHomeScreen> {
                     ],
                   ),
                   SizedBox(height: 24.h),
-                  LocationSection(location: vendor!.address),
+                  LocationSection(location: vendor.address),
                   SizedBox(height: 24.h),
                   //Menu heading
-                  if (vendor!.menu != null)
-                    MenuHeading(productsCount: vendor!.menu!.length),
+                  if (vendor.menu != null)
+                    MenuHeading(productsCount: vendor.menu!.length),
                 ],
               ),
             ),
@@ -166,7 +120,7 @@ class _VendorHomeScreenState extends State<VendorHomeScreen> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  if (vendor!.hours != null) ...[
+                  if (vendor.hours != null) ...[
                     VendorHoursHeading(),
                     SizedBox(height: 16.h),
                     Wrap(
@@ -175,47 +129,47 @@ class _VendorHomeScreenState extends State<VendorHomeScreen> {
                       children: [
                         VendorHoursCard(
                           day: 'Monday',
-                          startTime: vendor!.hours!.days.monday.start,
-                          endTime: vendor!.hours!.days.monday.end,
-                          isEnabled: vendor!.hours!.days.monday.enabled,
+                          startTime: vendor.hours!.days.monday.start,
+                          endTime: vendor.hours!.days.monday.end,
+                          isEnabled: vendor.hours!.days.monday.enabled,
                         ),
                         VendorHoursCard(
                           day: 'Tuesday',
                           // startTime: '09:00 AM',
                           // endTime: '06:00 PM',
-                          startTime: vendor!.hours!.days.tuesday.start,
-                          endTime: vendor!.hours!.days.tuesday.end,
-                          isEnabled: vendor!.hours!.days.tuesday.enabled,
+                          startTime: vendor.hours!.days.tuesday.start,
+                          endTime: vendor.hours!.days.tuesday.end,
+                          isEnabled: vendor.hours!.days.tuesday.enabled,
                         ),
                         VendorHoursCard(
                           day: 'Wednesday',
-                          startTime: vendor!.hours!.days.wednesday.start,
-                          endTime: vendor!.hours!.days.wednesday.end,
-                          isEnabled: vendor!.hours!.days.wednesday.enabled,
+                          startTime: vendor.hours!.days.wednesday.start,
+                          endTime: vendor.hours!.days.wednesday.end,
+                          isEnabled: vendor.hours!.days.wednesday.enabled,
                         ),
                         VendorHoursCard(
                           day: 'Thursday',
-                          startTime: vendor!.hours!.days.thursday.start,
-                          endTime: vendor!.hours!.days.thursday.end,
-                          isEnabled: vendor!.hours!.days.thursday.enabled,
+                          startTime: vendor.hours!.days.thursday.start,
+                          endTime: vendor.hours!.days.thursday.end,
+                          isEnabled: vendor.hours!.days.thursday.enabled,
                         ),
                         VendorHoursCard(
                           day: 'Friday',
-                          startTime: vendor!.hours!.days.friday.start,
-                          endTime: vendor!.hours!.days.friday.end,
-                          isEnabled: vendor!.hours!.days.friday.enabled,
+                          startTime: vendor.hours!.days.friday.start,
+                          endTime: vendor.hours!.days.friday.end,
+                          isEnabled: vendor.hours!.days.friday.enabled,
                         ),
                         VendorHoursCard(
                           day: 'Saturday',
-                          startTime: vendor!.hours!.days.saturday.start,
-                          endTime: vendor!.hours!.days.saturday.end,
-                          isEnabled: vendor!.hours!.days.saturday.enabled,
+                          startTime: vendor.hours!.days.saturday.start,
+                          endTime: vendor.hours!.days.saturday.end,
+                          isEnabled: vendor.hours!.days.saturday.enabled,
                         ),
                         VendorHoursCard(
                           day: 'Sunday',
-                          startTime: vendor!.hours!.days.sunday.start,
-                          endTime: vendor!.hours!.days.sunday.end,
-                          isEnabled: vendor!.hours!.days.sunday.enabled,
+                          startTime: vendor.hours!.days.sunday.start,
+                          endTime: vendor.hours!.days.sunday.end,
+                          isEnabled: vendor.hours!.days.sunday.enabled,
                         ),
                       ],
                     ),
@@ -243,6 +197,7 @@ class _VendorHomeScreenState extends State<VendorHomeScreen> {
             children: [
               SizedBox(height: 8.h),
               SizedBox(
+                width: double.infinity,
                 height: 200,
                 child: ListView.separated(
                   padding: EdgeInsets.only(left: 16.w),
@@ -268,7 +223,7 @@ class _VendorHomeScreenState extends State<VendorHomeScreen> {
   }
 }
 
-Widget _buildReviewsList(List<Map<String, dynamic>> reviews) {
+Widget _buildReviewsList(List<SingleReviewModel> reviews) {
   return reviews.isNotEmpty
       ? SizedBox(
           child: ListView.separated(
@@ -277,10 +232,16 @@ Widget _buildReviewsList(List<Map<String, dynamic>> reviews) {
             itemCount: reviews.length,
             itemBuilder: (BuildContext context, int index) {
               return ReviewTile(
-                name: reviews[index]['name'],
-                rating: reviews[index]['rating'],
-                timeStamp: reviews[index]['time_stamp'],
-                content: reviews[index]['content'],
+                // name: reviews[index]['name'],
+                // rating: reviews[index]['rating'],
+                // timeStamp: reviews[index]['time_stamp'],
+                // content: reviews[index]['content'],
+                name: reviews[index].user.name,
+                rating: reviews[index].rating.toDouble(),
+                timeStamp: ReviewsService.formatTimeAgo(
+                  reviews[index].createdAt,
+                ),
+                content: reviews[index].message,
               );
             },
             separatorBuilder: (BuildContext context, int index) {
@@ -386,12 +347,6 @@ class MenuHeading extends StatelessWidget {
   final int productsCount;
   @override
   Widget build(BuildContext context) {
-    debugPrint('count : $productsCount');
-    debugPrint('count : $productsCount');
-    debugPrint('count : $productsCount');
-    debugPrint('count : $productsCount');
-    debugPrint('count : $productsCount');
-    debugPrint('count : $productsCount');
     return productsCount > 0
         ? Row(
             children: [
@@ -425,7 +380,6 @@ class MenuHeading extends StatelessWidget {
 
 class VendorHoursHeading extends StatelessWidget {
   const VendorHoursHeading({super.key});
-
   @override
   Widget build(BuildContext context) {
     return Row(
@@ -445,7 +399,8 @@ class VendorHoursHeading extends StatelessWidget {
         ),
         const Spacer(),
         Text(
-          '8 Hours',
+          // '8 Hours',
+          VendorHomeService.getVendorWorkingHoursToday(),
           style: context.typography.body.copyWith(fontSize: 14.sp),
         ),
       ],
