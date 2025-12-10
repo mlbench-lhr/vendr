@@ -3,6 +3,7 @@ import 'package:vendr/app/routes/routes_name.dart';
 import 'package:vendr/app/utils/service_error_handler.dart';
 import 'package:vendr/model/vendor/vendor_model.dart';
 import 'package:vendr/repository/vendor_auth_repo.dart';
+import 'package:vendr/services/common/auth_service.dart';
 import 'package:vendr/services/common/session_manager/session_controller.dart';
 
 class VendorProfileService {
@@ -73,10 +74,15 @@ class VendorProfileService {
         'shop_address': shopAddress,
     };
     try {
-      final response = await _vendorAuthRepo.updateVendorProfile(data);
-      await _sessionController.saveVendor(
-        VendorModel.fromJson(response['vendor'] as Map<String, dynamic>),
-      );
+      await _vendorAuthRepo.updateVendorProfile(data);
+
+      if (context.mounted) {
+        await AuthService().fetchProfile(context);
+      }
+
+      // await _sessionController.saveVendor(
+      //   VendorModel.fromJson(response['vendor'] as Map<String, dynamic>),
+      // );
       onSuccess?.call();
     } catch (e) {
       if (context.mounted) ErrorHandler.handle(context, e, serviceName: tag);
@@ -92,10 +98,10 @@ class VendorProfileService {
     VoidCallback? onSuccess,
   ) async {
     try {
-      final response = await _vendorAuthRepo.updateVendorHours(data);
-      await _sessionController.saveVendor(
-        VendorModel.fromJson(response['vendor'] as Map<String, dynamic>),
-      );
+      await _vendorAuthRepo.updateVendorHours(data);
+      if (context.mounted) {
+        AuthService().fetchProfile(context);
+      }
       onSuccess?.call();
     } catch (e) {
       if (context.mounted) ErrorHandler.handle(context, e, serviceName: tag);

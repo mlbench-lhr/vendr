@@ -1,5 +1,6 @@
 // Enum for storage keys to prevent typos
 import 'dart:convert';
+import 'package:flutter/material.dart';
 import 'package:vendr/app/utils/enums.dart';
 import 'package:vendr/app/utils/local_storage.dart';
 import 'package:vendr/model/user/user_model.dart';
@@ -17,7 +18,7 @@ enum StorageKey {
   final String value;
 }
 
-class SessionController {
+class SessionController extends ChangeNotifier {
   factory SessionController() => _instance;
   SessionController._internal();
   static final SessionController _instance = SessionController._internal();
@@ -110,11 +111,13 @@ class SessionController {
     _vendor = vendor;
     final encoded = jsonEncode(vendor.toJson());
     await _localStorage.setValue(StorageKey.vendor.value, encoded);
+    notifyListeners();
     log('Vendor saved: ${vendor.id}');
   }
 
   Future<void> saveUser(UserModel user) async {
     _user = user;
+    notifyListeners();
     final encoded = jsonEncode(user.toJson());
     await _localStorage.setValue(StorageKey.user.value, encoded);
     log('User saved: ${user.id}');
@@ -133,7 +136,7 @@ class SessionController {
     _vendor = null;
     userType = null;
     _user = null;
-
+    notifyListeners();
     // Clear all storage values using the enum
     await _localStorage.clearValue(StorageKey.accessToken.value);
     await _localStorage.clearValue(StorageKey.refreshToken.value);

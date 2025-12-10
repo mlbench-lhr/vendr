@@ -260,7 +260,7 @@ class _UserSignupScreenState extends State<UserSignupScreen> {
                             setState(() => isLoading = true);
                             await AuthService()
                                 .userSignup(
-                                  context,
+                                  context: context,
                                   name: _nameController.text.trim(),
                                   email: _emailController.text.trim(),
                                   password: _passwordController.text.trim(),

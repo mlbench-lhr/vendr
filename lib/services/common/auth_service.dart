@@ -171,8 +171,8 @@ class AuthService {
   ///
   ///User Sign Up
   ///
-  Future<void> userSignup(
-    BuildContext context, {
+  Future<void> userSignup({
+    required BuildContext context,
     required String name,
     required String email,
     required String password,

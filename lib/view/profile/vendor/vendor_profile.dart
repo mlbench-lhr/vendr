@@ -18,12 +18,27 @@ class VendorProfileScreen extends StatefulWidget {
 }
 
 class _VendorProfileScreenState extends State<VendorProfileScreen> {
-  final VendorModel vendor = SessionController().vendor!;
+  final sessionController = SessionController();
+
+  @override
+  void initState() {
+    super.initState();
+    sessionController.addListener(_onSessionChanged);
+  }
+
+  void _onSessionChanged() {
+    if (mounted) setState(() {});
+  }
+
+  @override
+  void dispose() {
+    sessionController.removeListener(_onSessionChanged);
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    String vendorName = vendor.name;
-    String? vendorProfileImage = vendor.profileImage;
+    final VendorModel vendor = sessionController.vendor!;
     return MyScaffold(
       appBar: AppBar(
         title: Text(
@@ -46,10 +61,10 @@ class _VendorProfileScreenState extends State<VendorProfileScreen> {
                 child: CircleAvatar(
                   backgroundColor: context.colors.buttonPrimary,
                   radius: 38.r,
-                  backgroundImage: vendorProfileImage != null
-                      ? NetworkImage(vendorProfileImage)
+                  backgroundImage: vendor.profileImage != null
+                      ? NetworkImage(vendor.profileImage!)
                       : null,
-                  child: vendorProfileImage != null
+                  child: vendor.profileImage != null
                       ? null
                       : Icon(Icons.person, color: Colors.white, size: 40.w),
                 ),
@@ -57,7 +72,7 @@ class _VendorProfileScreenState extends State<VendorProfileScreen> {
               SizedBox(height: 16.h),
               Text(
                 textAlign: TextAlign.center,
-                vendorName,
+                vendor.name,
                 style: context.typography.title.copyWith(fontSize: 20.sp),
               ),
               SizedBox(height: 12.h),

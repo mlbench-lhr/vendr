@@ -65,16 +65,29 @@ class _VendorHomeScreenState extends State<VendorHomeScreen> {
 
   String hoursToday = 'Off';
 
+  final sessionController = SessionController();
   @override
   void initState() {
     super.initState();
-    setVendorProfileData();
+    sessionController.addListener(_onSessionChanged);
   }
 
-  final _sessionController = SessionController();
+  void _onSessionChanged() {
+    if (mounted) setState(() {});
+  }
+
+  @override
+  void dispose() {
+    sessionController.removeListener(_onSessionChanged);
+    super.dispose();
+  }
+
   VendorModel? vendor;
-  void setVendorProfileData() {
-    vendor = _sessionController.vendor;
+
+  @override
+  Widget build(BuildContext context) {
+    //set vendor profile data from session
+    vendor = sessionController.vendor;
     if (vendor != null) {
       if (vendor!.menu != null) {
         menuItems = vendor!.menu!;
@@ -84,10 +97,6 @@ class _VendorHomeScreenState extends State<VendorHomeScreen> {
         reviews = vendor!.reviews!.list;
       }
     }
-  }
-
-  @override
-  Widget build(BuildContext context) {
     return MyScaffold(
       body: Padding(
         padding: EdgeInsets.only(top: 16.w),
@@ -103,7 +112,9 @@ class _VendorHomeScreenState extends State<VendorHomeScreen> {
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      VendorAvatar(vendorProfileImage: vendor!.profileImage),
+                      VendorAvatar(
+                        vendorProfileImage: vendor!.profileImage,
+                      ), //TODO: check this
                       12.width,
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
