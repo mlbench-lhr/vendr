@@ -6,9 +6,7 @@ import 'package:vendr/app/components/my_button.dart';
 import 'package:vendr/app/components/my_form_text_field.dart';
 import 'package:vendr/app/components/my_pinput.dart';
 import 'package:vendr/app/components/my_scaffold.dart';
-import 'package:vendr/app/components/my_text_field.dart';
 import 'package:vendr/app/utils/extensions/context_extensions.dart';
-import 'package:vendr/app/utils/extensions/flush_bar_extension.dart';
 import 'package:vendr/app/utils/extensions/validations_exception.dart';
 import 'package:vendr/services/common/auth_service.dart';
 

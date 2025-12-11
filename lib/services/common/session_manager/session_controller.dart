@@ -142,7 +142,7 @@ class SessionController extends ChangeNotifier {
     await _localStorage.clearValue(StorageKey.userType.value);
     await _localStorage.clearValue(StorageKey.vendor.value);
     await _localStorage.clearValue(StorageKey.user.value);
-    // notifyListeners(); //causes error
+
     log('Session cleared: All data removed');
   }
 }

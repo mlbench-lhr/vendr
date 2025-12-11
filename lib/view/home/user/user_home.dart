@@ -7,7 +7,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
-import 'package:provider/provider.dart';
 import 'package:vendr/app/components/loading_widget.dart';
 import 'package:vendr/app/components/my_bottom_sheet.dart';
 import 'package:vendr/app/components/my_text_field.dart';
@@ -17,13 +16,172 @@ import 'package:vendr/app/utils/extensions/context_extensions.dart';
 import 'package:vendr/app/utils/extensions/flush_bar_extension.dart';
 import 'package:vendr/app/utils/extensions/general_extensions.dart';
 import 'package:vendr/generated/assets/assets.gen.dart';
+import 'package:vendr/model/user/user_model.dart';
 import 'package:vendr/model/vendor/vendor_model.dart';
-import 'package:vendr/provider/user_home_provider.dart';
+import 'package:vendr/services/common/session_manager/session_controller.dart';
 import 'package:vendr/services/user/user_home_service.dart';
 import 'package:vendr/services/user/user_profile_service.dart';
 import 'package:vendr/view/home/user/widgets/location_permission_required.dart';
 import 'package:vendr/view/home/user/widgets/vendor_card.dart';
 import 'package:vendr/view/home/vendor/vendor_home.dart';
+
+/// Initial vendor list (as provided)
+final List<VendorModel> initialVendors = [
+  VendorModel(
+    name: 'Harry Brook',
+    address: '15 Maiden Ln Suite 908, New York, NY 10038',
+    location: LatLng(31.50293, 74.34801),
+    phone: '09876542',
+    email: 'harry@brook.com',
+    vendorType: 'Food vendor',
+    menu: [
+      MenuItemModel(
+        itemName: 'First Item',
+        servings: [
+          ServingModel(servingQuantity: 'Single Serving', servingPrice: '\$73'),
+        ],
+      ),
+      MenuItemModel(
+        itemName: 'Second Item',
+        servings: [
+          ServingModel(servingQuantity: 'Single Serving', servingPrice: '\$73'),
+        ],
+      ),
+      MenuItemModel(
+        itemName: 'Third Item',
+        servings: [
+          ServingModel(servingQuantity: 'Single Serving', servingPrice: '\$73'),
+        ],
+      ),
+    ],
+    hoursADay: '10 Hours',
+    profileImage:
+        'https://images.unsplash.com/photo-1600891964599-f61ba0e24092?auto=format&fit=crop&w=800&q=80',
+  ),
+  VendorModel(
+    name: 'Emma Stone',
+    email: 'emma@stone.com',
+    phone: '09876542',
+    address: '22 Broadway, New York, NY 10007',
+    location: LatLng(31.46719, 74.26598),
+    vendorType: 'Grocery vendor',
+    menu: [
+      MenuItemModel(
+        itemName: 'First Item',
+        servings: [
+          ServingModel(servingQuantity: 'Single Serving', servingPrice: '\$73'),
+        ],
+      ),
+      MenuItemModel(
+        itemName: 'Second Item',
+        servings: [
+          ServingModel(servingQuantity: 'Single Serving', servingPrice: '\$73'),
+        ],
+      ),
+    ],
+    hoursADay: '10 Hours',
+    profileImage:
+        'https://images.unsplash.com/photo-1604719312566-8912e9227c6a?q=80&w=1074&auto=format&fit=crop&ixlib=rb-4.1.0',
+  ),
+  VendorModel(
+    name: 'Tom Hanks',
+    address: '34 Wall Street, New York, NY 10005',
+    location: LatLng(31.47124, 74.35593),
+    vendorType: 'Electronics vendor',
+    phone: '09876542',
+    email: 'tom@hank.com',
+    menu: [
+      MenuItemModel(
+        itemName: 'First Item',
+        servings: [
+          ServingModel(servingQuantity: 'Single Serving', servingPrice: '\$73'),
+        ],
+      ),
+      MenuItemModel(
+        itemName: 'Second Item',
+        servings: [
+          ServingModel(servingQuantity: 'Single Serving', servingPrice: '\$73'),
+        ],
+      ),
+      MenuItemModel(
+        itemName: 'Third Item',
+        servings: [
+          ServingModel(servingQuantity: 'Single Serving', servingPrice: '\$73'),
+        ],
+      ),
+      MenuItemModel(
+        itemName: 'Fourth Item',
+        servings: [
+          ServingModel(servingQuantity: 'Single Serving', servingPrice: '\$73'),
+        ],
+      ),
+      MenuItemModel(
+        itemName: 'Fifth Item',
+        servings: [
+          ServingModel(servingQuantity: 'Single Serving', servingPrice: '\$73'),
+        ],
+      ),
+    ],
+    hoursADay: '10 Hours',
+    profileImage:
+        'https://images.unsplash.com/photo-1519520104014-df63821cb6f9?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0',
+  ),
+  VendorModel(
+    name: 'Sophia Lee',
+    address: '10 Park Ave, New York, NY 10016',
+    location: LatLng(31.450, 74.310),
+    vendorType: 'Clothing vendor',
+    phone: '09876542',
+    email: 'sophia@lee.com',
+    menu: [
+      MenuItemModel(
+        itemName: 'First Item',
+        servings: [
+          ServingModel(servingQuantity: 'Single Serving', servingPrice: '\$73'),
+        ],
+      ),
+      MenuItemModel(
+        itemName: 'Second Item',
+        servings: [
+          ServingModel(servingQuantity: 'Single Serving', servingPrice: '\$73'),
+        ],
+      ),
+      MenuItemModel(
+        itemName: 'Third Item',
+        servings: [
+          ServingModel(servingQuantity: 'Single Serving', servingPrice: '\$73'),
+        ],
+      ),
+      MenuItemModel(
+        itemName: 'Fourth Item',
+        servings: [
+          ServingModel(servingQuantity: 'Single Serving', servingPrice: '\$73'),
+        ],
+      ),
+      MenuItemModel(
+        itemName: 'Fifth Item',
+        servings: [
+          ServingModel(servingQuantity: 'Single Serving', servingPrice: '\$73'),
+        ],
+      ),
+      MenuItemModel(
+        itemName: 'Sixth Item',
+        servings: [
+          ServingModel(servingQuantity: 'Single Serving', servingPrice: '\$73'),
+        ],
+      ),
+      MenuItemModel(
+        itemName: 'Seventh Item',
+        servings: [
+          ServingModel(servingQuantity: 'Single Serving', servingPrice: '\$73'),
+        ],
+      ),
+    ],
+    hoursADay: '10 Hours',
+    profileImage:
+        'https://images.unsplash.com/photo-1762844877991-54c007866283?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0',
+  ),
+];
 
 class UserHomeScreen extends StatefulWidget {
   const UserHomeScreen({super.key});
@@ -37,6 +195,10 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
   final Completer<GoogleMapController> _controller = Completer();
   late final PolylinePoints _polylinePoints;
 
+  //Access Users Data
+  final sessionController = SessionController();
+  UserModel? get user => SessionController().user;
+
   // Custom marker for vendors
   BitmapDescriptor? _customMarker;
 
@@ -48,14 +210,25 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
   double? _distanceInKm;
   bool _isCardExpanded = false;
 
+  // ----- Replaced Provider state (moved here) -----
+  final List<VendorModel> vendors = List<VendorModel>.from(initialVendors);
+  LatLng? _userLocation;
+  int? _selectedVendorIndex;
+  final Set<Polyline> _polylines = {};
+
+  VendorModel? get selectedVendor =>
+      (_selectedVendorIndex != null) ? vendors[_selectedVendorIndex!] : null;
+  Set<Polyline> get polylines => Set.unmodifiable(_polylines);
+
+  // -----------------------------------------------
+
   @override
   void initState() {
+    sessionController.addListener(_onSessionChanged);
     super.initState();
     checkLocationPermission();
     _loadAssets();
     _polylinePoints = PolylinePoints(apiKey: KeyConstants.googleApiKey);
-
-    // Load assets (map style and custom marker)
 
     // Get user location after the first frame
     WidgetsBinding.instance.addPostFrameCallback((_) => _getUserLocation());
@@ -87,10 +260,14 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
         enableDrag: true,
         useSafeArea: false,
         backgroundColor: context.colors.primary.withOpacity(0.0),
-        child: LocationPermissionRequired(),
+        child: const LocationPermissionRequired(),
       );
       checkLocationPermission();
     }
+  }
+
+  void _onSessionChanged() {
+    if (mounted) setState(() {});
   }
 
   /// Load map style and custom marker assets
@@ -119,7 +296,6 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
     double imageSize = 60,
   }) async {
     try {
-      // final data = await rootBundle.load('assets/images/home.png');
       final data = await rootBundle.load(Assets.images.shopMarker.path);
       final bytes = data.buffer.asUint8List();
 
@@ -176,10 +352,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
         ),
       );
 
-      final provider = Provider.of<UserHomeProvider>(context, listen: false);
-      provider.updateUserLocation(
-        LatLng(position.latitude, position.longitude),
-      );
+      updateUserLocation(LatLng(position.latitude, position.longitude));
 
       _moveCameraToUser();
     } catch (e) {
@@ -189,15 +362,13 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
 
   /// Move camera to user's current location
   Future<void> _moveCameraToUser() async {
-    final provider = Provider.of<UserHomeProvider>(context, listen: false);
-    if (provider.userLocation == null) return;
+    if (_userLocation == null) return;
 
     final controller = await _controller.future;
     controller.animateCamera(
       CameraUpdate.newCameraPosition(
         CameraPosition(
-          // target: provider.userLocation!,
-          target: const LatLng(31.4645193, 74.2540502),
+          target: _userLocation ?? const LatLng(31.4645193, 74.2540502),
           zoom: 15,
         ),
       ),
@@ -206,11 +377,10 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
 
   /// Draw route from user to vendor
   Future<void> _drawRouteToVendor(LatLng vendor, int index) async {
-    final provider = Provider.of<UserHomeProvider>(context, listen: false);
-    final user = provider.userLocation;
+    final user = _userLocation;
     if (user == null) return;
 
-    provider.clearPolylines();
+    clearPolylines();
 
     // Calculate straight-line distance
     final meters = Geolocator.distanceBetween(
@@ -232,7 +402,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
 
       if (result.points.isEmpty) {
         // Draw straight dashed line if no route
-        provider.addOrReplacePolyline(
+        addOrReplacePolyline(
           Polyline(
             polylineId: PolylineId('straight_$index'),
             points: [user, vendor],
@@ -246,7 +416,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
         final coords = result.points
             .map((p) => LatLng(p.latitude, p.longitude))
             .toList();
-        provider.addOrReplacePolyline(
+        addOrReplacePolyline(
           Polyline(
             polylineId: PolylineId('route_$index'),
             points: coords,
@@ -280,17 +450,112 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
     controller.animateCamera(CameraUpdate.newLatLngBounds(bounds, 100));
   }
 
+  // ----------------- Provider methods moved here -----------------
+
+  void updateUserLocation(LatLng newLocation) {
+    if (_userLocation == newLocation) return;
+    setState(() {
+      _userLocation = newLocation;
+    });
+  }
+
+  void selectVendor(int index) {
+    if (index < 0 || index >= vendors.length) return;
+    if (_selectedVendorIndex == index) return;
+    setState(() {
+      _selectedVendorIndex = index;
+    });
+  }
+
+  void unselectVendor() {
+    if (_selectedVendorIndex == null && _polylines.isEmpty) return;
+    setState(() {
+      _selectedVendorIndex = null;
+      _polylines.clear();
+      _distanceInKm = null;
+      _isCardExpanded = false;
+    });
+  }
+
+  void toggleVendorSelection(int index) {
+    if (_selectedVendorIndex == index) {
+      unselectVendor();
+    } else {
+      selectVendor(index);
+    }
+  }
+
+  void addOrReplacePolyline(Polyline polyline) {
+    setState(() {
+      _polylines.removeWhere((p) => p.polylineId == polyline.polylineId);
+      _polylines.add(polyline);
+    });
+  }
+
+  void clearPolylines() {
+    if (_polylines.isEmpty) return;
+    setState(() {
+      _polylines.clear();
+    });
+  }
+
+  Set<Marker> buildMarkers({BitmapDescriptor? customMarker}) {
+    final Set<Marker> markers = {};
+
+    for (var i = 0; i < vendors.length; i++) {
+      final vendor = vendors[i];
+      if (vendor.location != null) {
+        markers.add(
+          Marker(
+            markerId: MarkerId('vendor_$i'),
+            position: vendor.location!,
+            icon: customMarker ?? BitmapDescriptor.defaultMarker,
+            onTap: () => toggleVendorSelection(i),
+            infoWindow: InfoWindow(title: vendor.name),
+          ),
+        );
+      }
+    }
+
+    if (_userLocation != null) {
+      markers.add(
+        Marker(
+          markerId: const MarkerId('user'),
+          position: _userLocation!,
+          icon: BitmapDescriptor.defaultMarkerWithHue(
+            BitmapDescriptor.hueAzure,
+          ),
+          infoWindow: const InfoWindow(title: 'Your Location'),
+        ),
+      );
+    }
+
+    return markers;
+  }
+
+  // ----------------------------------------------------------------
+
   /// Main build method
   @override
   Widget build(BuildContext context) {
-    return Consumer<UserHomeProvider>(
-      builder: (context, provider, _) {
-        return Scaffold(
-          body: _assetsLoaded
-              ? _buildMapStack(provider)
-              : const Center(child: LoadingWidget(color: Colors.white)),
-        );
-      },
+    return Scaffold(
+      floatingActionButton: AnimatedOpacity(
+        opacity: _selectedVendorIndex == null ? 1.0 : 0.0,
+        duration: const Duration(milliseconds: 300),
+        child: Visibility(
+          visible: _selectedVendorIndex == null,
+          child: FloatingActionButton(
+            backgroundColor: context.colors.buttonPrimary,
+            onPressed: () {
+              _moveCameraToUser();
+            },
+            child: Icon(Icons.my_location_sharp, color: Colors.white),
+          ),
+        ),
+      ),
+      body: _assetsLoaded
+          ? _buildMapStack()
+          : const Center(child: LoadingWidget(color: Colors.white)),
     );
   }
 
@@ -306,9 +571,12 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
         child: CircleAvatar(
           radius: 23.r,
           backgroundColor: context.colors.primary,
-          backgroundImage: NetworkImage(
-            'https://images.unsplash.com/photo-1580489944761-15a19d654956?q=80&w=761&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-          ),
+          backgroundImage: user?.imageUrl != null
+              ? NetworkImage(user!.imageUrl!)
+              : null,
+          child: user?.imageUrl != null
+              ? null
+              : Icon(Icons.person, color: Colors.white, size: 40.w),
         ),
       ),
     );
@@ -322,7 +590,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
         Row(
           children: [
             Text(
-              'Hey, Joey Tribbiani',
+              'Hey, ${user?.name}',
               style: context.typography.title.copyWith(
                 fontSize: 18.sp,
                 fontWeight: FontWeight.w600,
@@ -342,20 +610,20 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
   }
 
   /// Main stack containing map, search, distance, and vendor card
-  Widget _buildMapStack(UserHomeProvider provider) {
+  Widget _buildMapStack() {
     return SizedBox(
       height: MediaQuery.sizeOf(context).height,
       child: Stack(
         children: [
-          _buildGoogleMap(provider),
+          _buildGoogleMap(),
           Align(
             alignment: Alignment.topCenter,
             child: GradientOverlay(height: 250.h),
           ),
           _buildHeader(),
-          if (_distanceInKm != null && provider.selectedVendor != null)
+          if (_distanceInKm != null && selectedVendor != null)
             _buildVendorProfileBox(),
-          if (provider.selectedVendor != null) _buildUserVendorCard(provider),
+          if (selectedVendor != null) _buildUserVendorCard(),
         ],
       ),
     );
@@ -366,8 +634,6 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
       margin: EdgeInsets.symmetric(horizontal: 8.w, vertical: 36.h),
       padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 16.h),
       decoration: BoxDecoration(
-        // color: context.colors.primary,
-        // color: Colors.white10,
         borderRadius: BorderRadius.circular(AppRadiuses.largeRadius),
       ),
       width: double.infinity,
@@ -396,31 +662,27 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
   }
 
   /// Google Map widget
-  Widget _buildGoogleMap(UserHomeProvider provider) {
+  Widget _buildGoogleMap() {
     return GoogleMap(
       padding: EdgeInsets.symmetric(vertical: 20.w, horizontal: 16.w),
       initialCameraPosition: CameraPosition(
-        // target: provider.userLocation ?? const LatLng(31.50293, 74.34801),
-        target: provider.userLocation ?? const LatLng(31.4645193, 74.2540502),
+        target: _userLocation ?? const LatLng(31.4645193, 74.2540502),
         zoom: 14.4,
       ),
-      markers: provider.buildMarkers(customMarker: _customMarker),
-      polylines: provider.polylines,
+      markers: buildMarkers(customMarker: _customMarker),
+      polylines: polylines,
       myLocationEnabled: true,
       zoomControlsEnabled: false,
+      compassEnabled: false,
       mapToolbarEnabled: false,
-      myLocationButtonEnabled: true,
+      myLocationButtonEnabled: false,
       onMapCreated: (controller) async {
         if (!_controller.isCompleted) _controller.complete(controller);
         await Future.delayed(const Duration(milliseconds: 200));
         if (_mapStyle.isNotEmpty) controller.setMapStyle(_mapStyle);
       },
       onTap: (pos) {
-        provider.unselectVendor();
-        setState(() {
-          _distanceInKm = null;
-          _isCardExpanded = false;
-        });
+        unselectVendor();
       },
     );
   }
@@ -469,27 +731,25 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
   }
 
   /// Vendor card displayed at bottom
-  Widget _buildUserVendorCard(UserHomeProvider provider) {
-    final selectedVendor = provider.selectedVendor;
-    if (selectedVendor == null) return const SizedBox.shrink();
+  Widget _buildUserVendorCard() {
+    final selected = selectedVendor;
+    if (selected == null) return const SizedBox.shrink();
 
     return VendorCard(
       isExpanded: _isCardExpanded,
       onTap: () => setState(() => _isCardExpanded = !_isCardExpanded),
       distance: _distanceInKm ?? 0.0,
-      vendorName: selectedVendor.name,
-      imageUrl: selectedVendor.profileImage ?? '',
-      vendorAddress: selectedVendor.address ?? '',
-      vendorType: selectedVendor.vendorType,
-      menu: selectedVendor.menu ?? [],
-      // hours: selectedVendor.hours,
-      // hours: selectedVendor.hours ?? [],
-      hoursADay: selectedVendor.hoursADay ?? '',
+      vendorName: selected.name,
+      imageUrl: selected.profileImage ?? '',
+      vendorAddress: selected.address ?? '',
+      vendorType: selected.vendorType,
+      menu: selected.menu ?? [],
+      hoursADay: selected.hoursADay ?? '',
       onGetDirection: () async {
-        if (selectedVendor.location != null) {
+        if (selected.location != null) {
           await _drawRouteToVendor(
-            selectedVendor.location!,
-            provider.selectedVendorIndex ?? 0,
+            selected.location!,
+            _selectedVendorIndex ?? 0,
           );
           setState(() => _isCardExpanded = false);
         } else {

@@ -3,7 +3,9 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:vendr/app/components/my_button.dart';
 import 'package:vendr/app/components/my_scaffold.dart';
 import 'package:vendr/app/utils/extensions/context_extensions.dart';
+import 'package:vendr/model/user/user_model.dart';
 import 'package:vendr/services/common/auth_service.dart';
+import 'package:vendr/services/common/session_manager/session_controller.dart';
 import 'package:vendr/services/user/user_profile_service.dart';
 import 'package:vendr/services/vendor/vendor_profile_service.dart';
 import 'package:vendr/view/profile/widgets/delete_account_dialog.dart';
@@ -17,8 +19,27 @@ class UserProfileScreen extends StatefulWidget {
 }
 
 class _UserProfileState extends State<UserProfileScreen> {
+  final sessionController = SessionController();
+
+  @override
+  void initState() {
+    super.initState();
+    sessionController.addListener(_onSessionChanged);
+  }
+
+  void _onSessionChanged() {
+    if (mounted) setState(() {});
+  }
+
+  @override
+  void dispose() {
+    sessionController.removeListener(_onSessionChanged);
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
+    final UserModel user = sessionController.user!;
     return MyScaffold(
       appBar: AppBar(
         title: Text(
@@ -41,15 +62,18 @@ class _UserProfileState extends State<UserProfileScreen> {
                 child: CircleAvatar(
                   backgroundColor: context.colors.primary,
                   radius: 38.r,
-                  backgroundImage: NetworkImage(
-                    'https://images.unsplash.com/photo-1580489944761-15a19d654956?q=80&w=761&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-                  ),
+                  backgroundImage: user.imageUrl != null
+                      ? NetworkImage(user.imageUrl!)
+                      : null,
+                  child: user.imageUrl != null
+                      ? null
+                      : Icon(Icons.person, color: Colors.white, size: 40.w),
                 ),
               ),
               SizedBox(height: 16.h),
               Text(
                 textAlign: TextAlign.center,
-                'Joey Tribbiani',
+                user.name,
                 style: context.typography.title.copyWith(fontSize: 20.sp),
               ),
               //Menus

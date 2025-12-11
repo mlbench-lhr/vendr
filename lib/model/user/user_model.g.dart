@@ -7,9 +7,9 @@ part of 'user_model.dart';
 // **************************************************************************
 
 UserModel _$UserModelFromJson(Map<String, dynamic> json) => UserModel(
-  id: json['id'] as String?,
+  id: json['_id'] as String?,
   name: json['name'] as String,
-  imageUrl: json['imageUrl'] as String?,
+  imageUrl: json['profile_image'] as String?,
   createdAt: UserModel._fromJsonDateTime(json['createdAt']),
   updatedAt: UserModel._fromJsonDateTime(json['updatedAt']),
   favoriteVendors: (json['favoriteVendors'] as List<dynamic>?)
@@ -18,9 +18,9 @@ UserModel _$UserModelFromJson(Map<String, dynamic> json) => UserModel(
 );
 
 Map<String, dynamic> _$UserModelToJson(UserModel instance) => <String, dynamic>{
-  'id': instance.id,
+  '_id': instance.id,
   'name': instance.name,
-  'imageUrl': instance.imageUrl,
+  'profile_image': instance.imageUrl,
   'createdAt': UserModel._toJsonDateTime(instance.createdAt),
   'updatedAt': UserModel._toJsonDateTime(instance.updatedAt),
   'favoriteVendors': instance.favoriteVendors,

@@ -348,15 +348,11 @@ class AuthService {
   Future<void> fetchProfile(BuildContext context) async {
     try {
       if (_sessionController.userType == UserType.user) {
-        // debugPrint('[$tag] Fetching user profile');
-        // final response = await _userAuth.getCurrentUserProfile();
-        // await _sessionController.saveUser(
-        //   UserModel.fromJson(
-        //     response['user'] as Map<String, dynamic>,
-        //   ),
-        // );
+        final response = await _userAuthRepo.getCurrentUserProfile();
+        await _sessionController.saveUser(
+          UserModel.fromJson(response['user'] as Map<String, dynamic>),
+        );
       } else if (_sessionController.userType == UserType.vendor) {
-        debugPrint('[$tag] Fetching doctor profile');
         final response = await _vendorAuthRepo.getCurrentVendorProfile();
         await _sessionController.saveVendor(
           VendorModel.fromJson(response['vendor'] as Map<String, dynamic>),
@@ -514,6 +510,11 @@ class AuthService {
     try {
       if (isVendor) {
         await _vendorAuthRepo.deleteVendorAccount();
+      } else {
+        await _userAuthRepo.deleteUserAccount();
+      }
+      if (context.mounted) {
+        logout(context);
       } else {
         debugPrint('📍 TO BE IMPLEMENTED');
         // await _vendorAuthRepo.deleteUserAccount();

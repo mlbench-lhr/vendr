@@ -26,12 +26,16 @@ class AppUrl {
 
   static const String deleteVendorAccount =
       '$baseUrl/auth/vendor/delete-account';
+  // Delete User Account
+  static const String deleteUserAccount = '$baseUrl/auth/user/delete-account';
 
   // ========================
   // Profile Endpoints
   // ========================
   static const String getVendorProfile = '$baseUrl/auth/vendor/profile';
+  static const String getUserProfile = '$baseUrl/auth/user/profile';
   static const String vendorProfileUpdate = '$baseUrl/auth/vendor/edit-profile';
+  static const String userProfileUpdate = '$baseUrl/auth/user/edit-profile';
   static const String vendorHoursUpdate = '$baseUrl/auth/vendor/hours';
   static const String uploadProduct = '$baseUrl/auth/vendor/menu/upload';
   static const String deleteProduct = '$baseUrl/auth/vendor/menu';

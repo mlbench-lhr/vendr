@@ -12,8 +12,19 @@ class UserAuthRepository {
     return _apiServices.post(url: AppUrl.userSignup, data: data);
   }
 
+  Future<Map<String, dynamic>> updateuserProfile(
+    Map<String, dynamic> data,
+  ) async {
+    return _apiServices.put(url: AppUrl.userProfileUpdate, data: data);
+  }
+
   Future<Map<String, dynamic>> userLogin(Map<String, dynamic> data) async {
     return _apiServices.post(url: AppUrl.userLogin, data: data);
+  }
+
+  //fetch profile
+  Future<Map<String, dynamic>> getCurrentUserProfile() async {
+    return _apiServices.get(url: AppUrl.getUserProfile);
   }
 
   Future<Map<String, dynamic>> verifySignupOtp(
@@ -39,6 +50,11 @@ class UserAuthRepository {
 
   Future<Map<String, dynamic>> changePassword(Map<String, dynamic> data) async {
     return _apiServices.post(url: AppUrl.changePassword, data: data);
+  }
+
+  // Delete User Account
+  Future<Map<String, dynamic>> deleteUserAccount() async {
+    return _apiServices.delete(url: AppUrl.deleteUserAccount);
   }
 
   //Get notifications (for both user and vendor)

@@ -18,11 +18,12 @@ class UserModel {
 
   Map<String, dynamic> toJson() => _$UserModelToJson(this);
 
-  @JsonKey(name: 'id')
+  @JsonKey(name: '_id') // <-- match API
   final String? id;
 
   final String name;
 
+  @JsonKey(name: 'profile_image') // <-- match API
   final String? imageUrl;
 
   @JsonKey(fromJson: _fromJsonDateTime, toJson: _toJsonDateTime)
