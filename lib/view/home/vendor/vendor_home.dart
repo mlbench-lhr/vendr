@@ -238,6 +238,7 @@ Widget _buildReviewsList(List<SingleReviewModel> reviews) {
                 // content: reviews[index]['content'],
                 name: reviews[index].user.name,
                 rating: reviews[index].rating.toDouble(),
+                imageUrl: reviews[index].user.profileImage,
                 timeStamp: ReviewsService.formatTimeAgo(
                   reviews[index].createdAt,
                 ),

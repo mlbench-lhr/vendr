@@ -515,11 +515,12 @@ class AuthService {
     try {
       if (isVendor) {
         await _vendorAuthRepo.deleteVendorAccount();
-        if (context.mounted) {
-          logout(context);
-        }
       } else {
         debugPrint('📍 TO BE IMPLEMENTED');
+        // await _vendorAuthRepo.deleteUserAccount();
+      }
+      if (context.mounted) {
+        logout(context);
       }
     } catch (e) {
       if (e is AppException) {

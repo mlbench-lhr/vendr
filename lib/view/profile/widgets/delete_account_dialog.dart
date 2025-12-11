@@ -15,9 +15,7 @@ class DeleteAccountDialog extends StatelessWidget {
           'Are you sure you want to delete your account? All the account details will be deleted Permanently.',
       confirmLabel: 'Delete',
       onConfirm: () async {
-        if (isVendor) {
-          authService.deleteAccount(context, isVendor: true);
-        }
+        authService.deleteAccount(context, isVendor: isVendor);
       },
     );
   }
