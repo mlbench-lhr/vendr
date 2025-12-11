@@ -496,6 +496,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
           context.flushBarErrorMessage(message: 'Location not Defined');
         }
       },
+      vendorId: selectedVendor.id!,
     );
   }
 }

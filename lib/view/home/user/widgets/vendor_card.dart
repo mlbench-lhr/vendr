@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:vendr/app/components/menu_item_tile.dart';
 import 'package:vendr/app/components/my_bottom_sheet.dart';
 import 'package:vendr/app/components/my_button.dart';
@@ -18,6 +19,7 @@ class VendorCard extends StatefulWidget {
   final bool isExpanded;
   final VoidCallback onTap;
   final double distance;
+  final String vendorId;
   final String vendorName;
   final String vendorAddress;
   final String vendorType;
@@ -42,6 +44,7 @@ class VendorCard extends StatefulWidget {
     this.expandedBuilder,
     this.onGetDirection,
     required this.imageUrl,
+    required this.vendorId,
   });
 
   @override
@@ -355,9 +358,21 @@ class _VendorCardState extends State<VendorCard> {
               ],
             ),
             const Spacer(),
-            _actionButton(Icons.call_outlined, 'Call'),
+            _actionButton(icon: Icons.call_outlined, label: 'Call'),
             12.width,
-            _actionButton(Icons.share_outlined, 'Share'),
+            _actionButton(
+              icon: Icons.share_outlined,
+              label: 'Share',
+              onPressed: () {
+                SharePlus.instance.share(
+                  ShareParams(
+                    subject: 'Subject',
+                    title: 'Title',
+                    text: '''Check out this vendor ID: ${widget.vendorId}''',
+                  ),
+                );
+              },
+            ),
           ],
         ),
         SizedBox(height: 20.h),
@@ -366,23 +381,30 @@ class _VendorCardState extends State<VendorCard> {
     );
   }
 
-  Widget _actionButton(IconData icon, String label) {
-    return Container(
-      padding: EdgeInsets.symmetric(vertical: 8.w, horizontal: 14.w),
-      decoration: BoxDecoration(
-        color: const Color(0xFF2E323D),
-        borderRadius: BorderRadius.circular(AppRadiuses.mediumRadius),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: [
-          Icon(icon, color: Colors.white, size: 18.w),
-          6.width,
-          Text(
-            label,
-            style: context.typography.title.copyWith(fontSize: 14.sp),
-          ),
-        ],
+  Widget _actionButton({
+    IconData? icon,
+    String? label,
+    VoidCallback? onPressed,
+  }) {
+    return GestureDetector(
+      onTap: onPressed,
+      child: Container(
+        padding: EdgeInsets.symmetric(vertical: 8.w, horizontal: 14.w),
+        decoration: BoxDecoration(
+          color: const Color(0xFF2E323D),
+          borderRadius: BorderRadius.circular(AppRadiuses.mediumRadius),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            Icon(icon, color: Colors.white, size: 18.w),
+            6.width,
+            Text(
+              label ?? '',
+              style: context.typography.title.copyWith(fontSize: 14.sp),
+            ),
+          ],
+        ),
       ),
     );
   }

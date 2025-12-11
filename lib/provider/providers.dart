@@ -7,6 +7,7 @@ import 'package:vendr/provider/user_home_provider.dart';
 
 final List<VendorModel> initialVendors = [
   VendorModel(
+    id: '1harry',
     name: 'Harry Brook',
     address: '15 Maiden Ln Suite 908, New York, NY 10038',
     location: LatLng(31.50293, 74.34801),
@@ -40,6 +41,7 @@ final List<VendorModel> initialVendors = [
         'https://images.unsplash.com/photo-1600891964599-f61ba0e24092?auto=format&fit=crop&w=800&q=80',
   ),
   VendorModel(
+    id: '2emma',
     name: 'Emma Stone',
     email: 'emma@stone.com',
     phone: '09876542',
@@ -65,6 +67,7 @@ final List<VendorModel> initialVendors = [
         'https://images.unsplash.com/photo-1604719312566-8912e9227c6a?q=80&w=1074&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
   ),
   VendorModel(
+    id: '3tom',
     name: 'Tom Hanks',
     address: '34 Wall Street, New York, NY 10005',
     location: LatLng(31.47124, 74.35593),
@@ -108,6 +111,7 @@ final List<VendorModel> initialVendors = [
         'https://images.unsplash.com/photo-1519520104014-df63821cb6f9?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
   ),
   VendorModel(
+    id: '4sophia',
     name: 'Sophia Lee',
     address: '10 Park Ave, New York, NY 10016',
     location: LatLng(31.450, 74.310),

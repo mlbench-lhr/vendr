@@ -10,7 +10,7 @@ class VendorModel {
     required this.email,
     required this.phone,
     required this.vendorType,
-    this.id,
+    required this.id,
     this.verified,
     this.profileImage,
     this.address,

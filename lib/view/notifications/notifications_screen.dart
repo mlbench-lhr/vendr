@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:vendr/app/components/loading_widget.dart';
 import 'package:vendr/app/components/my_scaffold.dart';
 import 'package:vendr/app/utils/extensions/context_extensions.dart';
+import 'package:vendr/model/general/notification_model.dart';
+import 'package:vendr/services/common/notifications_service.dart';
 import 'package:vendr/view/notifications/widgets/notifications_chip.dart';
 
 class NotificationsScreen extends StatefulWidget {
@@ -12,6 +15,12 @@ class NotificationsScreen extends StatefulWidget {
 }
 
 class _NotificationsScreenState extends State<NotificationsScreen> {
+  final _notificationsService = NotificationsService();
+
+  Future<List<NotificationModel>> fetchNotifications() async {
+    return await _notificationsService.getNotifications(context: context);
+  }
+
   @override
   Widget build(BuildContext context) {
     return MyScaffold(
@@ -27,40 +36,43 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       ),
       body: Padding(
         padding: EdgeInsets.all(16.w),
-        child: ListView(
-          children: [
-            NotificationsChip(
-              // imageUrl:
-              //     'https://images.pexels.com/photos/135620/pexels-photo-135620.jpeg',
-              title: 'New Vendor Nearby',
-              description:
-                  'A new vendor registered available in your vicinity, Explore Now',
-            ),
-            SizedBox(height: 20.h),
-            NotificationsChip(
-              // imageUrl:
-              //     'https://images.pexels.com/photos/135620/pexels-photo-135620.jpeg',
-              title: 'New Vendor Nearby',
-              description:
-                  '10 new vendors available in your vicinity, Explore Now',
-            ),
-            SizedBox(height: 20.h),
-            NotificationsChip(
-              imageUrl:
-                  'https://media.istockphoto.com/id/1165683221/photo/chef-presents-something-on-a-black-background.jpg?s=2048x2048&w=is&k=20&c=ApuI0WnwG7GcVjB1hUDfJhNUeybcJa8P6hmYRrMav6Y=',
-              title: 'Favorite Vendor Update',
-              description:
-                  'Your favorite vendor Harry Brook is nearby, Go Check them out!',
-            ),
-            SizedBox(height: 20.h),
-            NotificationsChip(
-              imageUrl:
-                  'https://media.istockphoto.com/id/1165683221/photo/chef-presents-something-on-a-black-background.jpg?s=2048x2048&w=is&k=20&c=ApuI0WnwG7GcVjB1hUDfJhNUeybcJa8P6hmYRrMav6Y=',
-              title: 'Favorite Vendor Update',
-              description:
-                  'Your favorite vendor Harry Brook updated their menu, Check new available options!',
-            ),
-          ],
+        child: FutureBuilder<List<NotificationModel>>(
+          future: fetchNotifications(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: LoadingWidget(color: Colors.white));
+            } else if (snapshot.hasError) {
+              return Center(
+                child: Text(
+                  'Failed to load notifications',
+                  style: context.typography.body,
+                ),
+              );
+            } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+              return Center(
+                child: Text(
+                  'No notifications available',
+                  style: context.typography.body,
+                ),
+              );
+            } else {
+              final notifications = snapshot.data!;
+              return ListView.builder(
+                itemCount: notifications.length,
+                itemBuilder: (context, index) {
+                  final notification = notifications[index];
+                  return Padding(
+                    padding: EdgeInsets.only(bottom: 20.h),
+                    child: NotificationsChip(
+                      imageUrl: notification.image,
+                      title: notification.title,
+                      description: notification.body,
+                    ),
+                  );
+                },
+              );
+            }
+          },
         ),
       ),
     );

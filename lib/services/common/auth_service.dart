@@ -16,7 +16,7 @@ import 'package:vendr/services/common/session_manager/session_controller.dart';
 import 'package:vendr/view/auth/widgets/account_verification_sheet.dart';
 
 class AuthService {
-  static const String tag = 'AuthService';
+  static const String tag = '[AuthService]';
 
   final VendorAuthRepository _vendorAuthRepo = VendorAuthRepository();
   final UserAuthRepository _userAuthRepo = UserAuthRepository();
@@ -345,7 +345,7 @@ class AuthService {
     }
   }
 
-  Future<void> fetchProfile(BuildContext? context) async {
+  Future<void> fetchProfile(BuildContext context) async {
     try {
       if (_sessionController.userType == UserType.user) {
         // debugPrint('[$tag] Fetching user profile');
@@ -363,11 +363,10 @@ class AuthService {
         );
       }
       debugPrint('[$tag] ✅ Profile fetched');
-      debugPrint(
-        '✅  VENDOR FROM SESSION: ${_sessionController.vendor!.toJson()}',
-      );
     } catch (e) {
-      ErrorHandler.handle(context, e, serviceName: tag);
+      if (context.mounted) {
+        ErrorHandler.handle(context, e, serviceName: tag);
+      }
       rethrow;
     }
   }

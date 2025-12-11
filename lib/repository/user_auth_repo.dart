@@ -40,4 +40,9 @@ class UserAuthRepository {
   Future<Map<String, dynamic>> changePassword(Map<String, dynamic> data) async {
     return _apiServices.post(url: AppUrl.changePassword, data: data);
   }
+
+  //Get notifications (for both user and vendor)
+  Future<Map<String, dynamic>> getNotifications() async {
+    return _apiServices.get(url: AppUrl.getNotifications);
+  }
 }
