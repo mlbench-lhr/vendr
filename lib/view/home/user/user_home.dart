@@ -57,6 +57,7 @@ final List<VendorModel> initialVendors = [
     hoursADay: '10 Hours',
     profileImage:
         'https://images.unsplash.com/photo-1600891964599-f61ba0e24092?auto=format&fit=crop&w=800&q=80',
+    id: '1Herry',
   ),
   VendorModel(
     name: 'Emma Stone',
@@ -82,6 +83,7 @@ final List<VendorModel> initialVendors = [
     hoursADay: '10 Hours',
     profileImage:
         'https://images.unsplash.com/photo-1604719312566-8912e9227c6a?q=80&w=1074&auto=format&fit=crop&ixlib=rb-4.1.0',
+    id: '',
   ),
   VendorModel(
     name: 'Tom Hanks',
@@ -125,6 +127,7 @@ final List<VendorModel> initialVendors = [
     hoursADay: '10 Hours',
     profileImage:
         'https://images.unsplash.com/photo-1519520104014-df63821cb6f9?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0',
+    id: '2Tom',
   ),
   VendorModel(
     name: 'Sophia Lee',
@@ -180,6 +183,7 @@ final List<VendorModel> initialVendors = [
     hoursADay: '10 Hours',
     profileImage:
         'https://images.unsplash.com/photo-1762844877991-54c007866283?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0',
+    id: '3Heerry',
   ),
 ];
 
@@ -756,7 +760,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
           context.flushBarErrorMessage(message: 'Location not Defined');
         }
       },
-      vendorId: selectedVendor.id!,
+      vendorId: selectedVendor!.id!,
     );
   }
 }

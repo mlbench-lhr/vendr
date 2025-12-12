@@ -366,9 +366,13 @@ class _VendorCardState extends State<VendorCard> {
               onPressed: () {
                 SharePlus.instance.share(
                   ShareParams(
-                    subject: 'Subject',
-                    title: 'Title',
-                    text: '''Check out this vendor ID: ${widget.vendorId}''',
+                    title: 'Check out this vendor!',
+                    text:
+                        '''Hey, I want to tell you about this amazing vendor!
+                            ID: ${widget.vendorId}
+                            Name: ${widget.vendorName}
+                            Type: ${widget.vendorType}
+                            ''',
                   ),
                 );
               },
