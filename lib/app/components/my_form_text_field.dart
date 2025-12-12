@@ -22,7 +22,7 @@ class MyFormTextField extends StatelessWidget {
     this.onSaved,
     this.initialValue,
     this.readOnly = false,
-    this.borderRadius = 100.0,
+    this.borderRadius = 16.0,
     this.onChanged,
     this.errorText,
     this.isDark = true,

@@ -33,6 +33,7 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
   @override
   void initState() {
     super.initState();
+    debugPrint(' iS vendor: ${widget.isVendor}');
     _reviewsFuture = _fetchData();
   }
 
@@ -118,60 +119,54 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
               return _buildEmptyReviews(context);
             }
 
-            return Stack(
+            return ListView(
               children: [
-                ListView(
-                  children: [
-                    Container(
-                      width: double.infinity,
-                      padding: EdgeInsets.symmetric(
-                        vertical: 12.h,
-                        horizontal: 8.w,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.white12,
-                        borderRadius: BorderRadius.circular(
-                          AppRadiuses.mediumRadius,
-                        ),
-                        border: Border.all(color: Colors.white38),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          _buildRatingDistribution(context),
-                          _buildAverageRating(context),
-                        ],
-                      ),
+                Container(
+                  width: double.infinity,
+                  padding: EdgeInsets.symmetric(
+                    vertical: 12.h,
+                    horizontal: 8.w,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.white12,
+                    borderRadius: BorderRadius.circular(
+                      AppRadiuses.mediumRadius,
                     ),
-                    24.height,
-                    _buildReviewsList(reviews),
-                    if (!widget.isVendor) 100.height,
-                  ],
-                ),
-                if (!widget.isVendor)
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.end,
+                    border: Border.all(color: Colors.white38),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      MyButton(
-                        onPressed: () {
-                          MyBottomSheet.show(
-                            context,
-                            isDismissible: true,
-                            isScrollControlled: true,
-                            enableDrag: true,
-                            backgroundColor: context.colors.primary,
-                            child: AddReviewBottomSheet(),
-                          );
-                        },
-                        label: 'Write Review',
-                      ),
-                      24.height,
+                      _buildRatingDistribution(context),
+                      _buildAverageRating(context),
                     ],
                   ),
+                ),
+                24.height,
+                _buildReviewsList(reviews),
+                if (!widget.isVendor) 100.height,
               ],
             );
           },
         ),
+      ),
+      bottomNavigationBar: Padding(
+        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 32.h),
+        child: widget.isVendor
+            ? const SizedBox.shrink()
+            : MyButton(
+                onPressed: () {
+                  MyBottomSheet.show(
+                    context,
+                    isDismissible: true,
+                    isScrollControlled: true,
+                    enableDrag: true,
+                    backgroundColor: context.colors.primary,
+                    child: AddReviewBottomSheet(),
+                  );
+                },
+                label: 'Write Review',
+              ),
       ),
     );
   }

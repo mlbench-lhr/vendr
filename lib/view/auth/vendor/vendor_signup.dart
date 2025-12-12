@@ -8,7 +8,6 @@ import 'package:vendr/app/components/my_scaffold.dart';
 import 'package:vendr/app/utils/app_constants.dart';
 import 'package:vendr/app/utils/extensions/context_extensions.dart';
 import 'package:vendr/app/utils/extensions/validations_exception.dart';
-import 'package:vendr/generated/assets/assets.gen.dart';
 import 'package:vendr/services/common/auth_service.dart';
 import 'package:vendr/view/auth/widgets/language_menu.dart';
 import 'package:vendr/view/auth/widgets/social_login_btn.dart';

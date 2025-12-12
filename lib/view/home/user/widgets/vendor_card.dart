@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:vendr/app/components/loading_widget.dart';
 import 'package:vendr/app/components/menu_item_tile.dart';
 import 'package:vendr/app/components/my_bottom_sheet.dart';
 import 'package:vendr/app/components/my_button.dart';
@@ -9,7 +10,6 @@ import 'package:vendr/app/components/review_tile.dart';
 import 'package:vendr/app/styles/app_radiuses.dart';
 import 'package:vendr/app/utils/extensions/context_extensions.dart';
 import 'package:vendr/app/utils/extensions/general_extensions.dart';
-import 'package:vendr/model/vendor/vendor_model.dart';
 import 'package:vendr/services/user/user_home_service.dart';
 import 'package:vendr/services/vendor/vendor_home_service.dart';
 import 'package:vendr/view/home/user/widgets/menu_bottom_sheet.dart';
@@ -17,6 +17,7 @@ import 'package:vendr/view/home/vendor/vendor_home.dart';
 
 class VendorCard extends StatefulWidget {
   final bool isExpanded;
+  final bool isLoading;
   final VoidCallback onTap;
   final double distance;
   final String vendorId;
@@ -24,7 +25,7 @@ class VendorCard extends StatefulWidget {
   final String vendorAddress;
   final String vendorType;
   final String imageUrl;
-  final List<MenuItemModel> menu;
+  final int menuLength;
   final List<Map<String, dynamic>>? hours;
   final String? hoursADay;
   final VoidCallback? onGetDirection;
@@ -38,13 +39,14 @@ class VendorCard extends StatefulWidget {
     required this.vendorName,
     required this.vendorAddress,
     required this.vendorType,
-    required this.menu,
+    required this.menuLength,
     this.hours,
     required this.hoursADay,
     this.expandedBuilder,
     this.onGetDirection,
     required this.imageUrl,
     required this.vendorId,
+    required this.isLoading,
   });
 
   @override
@@ -133,37 +135,35 @@ class _VendorCardState extends State<VendorCard> {
               ),
               height: widget.isExpanded ? expandedHeight : collapsedHeight,
               width: widget.isExpanded ? expandedWidth : collapsedWidth,
-              child: SingleChildScrollView(
-                physics: const BouncingScrollPhysics(),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    if (widget.isExpanded)
-                      GestureDetector(
-                        onTap: widget.onTap,
-                        child: Center(
-                          child: Icon(
-                            Icons.keyboard_arrow_down_sharp,
-                            size: 32.w,
-                          ),
-                        ),
+              child: widget.isLoading
+                  ? Center(child: LoadingWidget(color: Colors.white))
+                  : SingleChildScrollView(
+                      physics: const BouncingScrollPhysics(),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          if (widget.isExpanded)
+                            GestureDetector(
+                              onTap: widget.onTap,
+                              child: Center(
+                                child: Icon(
+                                  Icons.keyboard_arrow_down_sharp,
+                                  size: 32.w,
+                                ),
+                              ),
+                            ),
+
+                          ///
+                          ///
+                          ///S T A R T F R O M H E R E !!!
+                          ///
+                          ///
+                          widget.isExpanded
+                              ? _buildExpandedCard(context)
+                              : _buildCollapsedCard(),
+                        ],
                       ),
-                    _buildTopRow(context),
-                    SizedBox(height: widget.isExpanded ? 10.h : 30.h),
-                    if (!widget.isExpanded) _buildInfoRow(context),
-                    SizedBox(height: widget.isExpanded ? 5.h : 12.h),
-                    if (widget.isExpanded)
-                      widget.expandedBuilder != null
-                          ? widget.expandedBuilder!(context)
-                          : _defaultExpandedContent(context),
-                    if (widget.isExpanded) SizedBox(height: 16.h),
-                    if (widget.isExpanded) CardMenuHeading(),
-                    if (widget.isExpanded) _buildMenuItems(items),
-                    if (widget.isExpanded) SizedBox(height: 20.h),
-                    if (widget.isExpanded) _buildVendorHoursAndReviews(context),
-                  ],
-                ),
-              ),
+                    ),
             ),
             if (widget.isExpanded)
               Positioned(
@@ -186,54 +186,88 @@ class _VendorCardState extends State<VendorCard> {
     );
   }
 
+  ///
+  ///
+  ///Build Collapsed Card
+  ///
+  ///
+  Column _buildCollapsedCard() => Column(
+    mainAxisSize: MainAxisSize.min,
+    children: [
+      _buildCollapsedCardHeader(context),
+      SizedBox(height: 32.h),
+      _buildInfoRow(context),
+    ],
+  );
+
+  ///
+  ///
+  ///Build Collapsed Card
+  ///
+  ///
+  Column _buildExpandedCard(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        _buildExpandedCardHeader(context),
+        SizedBox(height: 15.h),
+        widget.expandedBuilder != null
+            ? widget.expandedBuilder!(context)
+            : _defaultExpandedContent(context),
+        SizedBox(height: 16.h),
+        CardMenuHeading(),
+        _buildMenuItems(items),
+        SizedBox(height: 20.h),
+        _buildVendorHoursAndReviews(context),
+      ],
+    );
+  }
+
   /// Top row with avatar and action icon
-  Widget _buildTopRow(BuildContext context) {
+  Widget _buildCollapsedCardHeader(BuildContext context) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         CircleAvatar(
           backgroundColor: context.colors.buttonPrimary,
-          radius: widget.isExpanded ? 42.r : 23.r,
+          radius: 23.r,
           child: CircleAvatar(
-            radius: widget.isExpanded ? 40.r : 21.r,
+            radius: 21.r,
             backgroundColor: context.colors.primary,
             backgroundImage: NetworkImage(widget.imageUrl),
           ),
         ),
-        widget.isExpanded ? const Spacer() : SizedBox(width: 10.w),
-        if (!widget.isExpanded)
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  widget.vendorName,
-                  style: context.typography.label.copyWith(
-                    fontSize: 18.sp,
-                    fontWeight: FontWeight.w600,
-                  ),
+        SizedBox(width: 10.w),
+
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                widget.vendorName,
+                style: context.typography.label.copyWith(
+                  fontSize: 18.sp,
+                  fontWeight: FontWeight.w600,
                 ),
-                SizedBox(height: 4.h),
-                Text(
-                  widget.vendorAddress,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: context.typography.body.copyWith(fontSize: 12.sp),
-                ),
-              ],
-            ),
+              ),
+              SizedBox(height: 4.h),
+              Text(
+                widget.vendorAddress,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: context.typography.body.copyWith(fontSize: 12.sp),
+              ),
+            ],
           ),
+        ),
         Padding(
           padding: EdgeInsets.only(top: 4.h, right: 10.w),
           child: GestureDetector(
-            onTap: widget.isExpanded ? () {} : widget.onGetDirection,
+            onTap: widget.onGetDirection,
             child: CircleAvatar(
               radius: 20.r,
               backgroundColor: const Color(0xFF2E323D),
-              child: widget.isExpanded
-                  ? Icon(Icons.star_outline_rounded, color: Colors.white)
-                  // : const Icon(Icons.route_outlined, color: Colors.white),
-                  : const Icon(Icons.navigation_outlined, color: Colors.white),
+              child: const Icon(Icons.navigation_outlined, color: Colors.white),
             ),
           ),
         ),
@@ -241,7 +275,40 @@ class _VendorCardState extends State<VendorCard> {
     );
   }
 
+  Widget _buildExpandedCardHeader(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        CircleAvatar(
+          backgroundColor: context.colors.buttonPrimary,
+          radius: 42.r,
+          child: CircleAvatar(
+            radius: widget.isExpanded ? 40.r : 21.r,
+            backgroundColor: context.colors.primary,
+            backgroundImage: NetworkImage(widget.imageUrl),
+          ),
+        ),
+        const Spacer(),
+        Padding(
+          padding: EdgeInsets.only(top: 4.h, right: 10.w),
+          child: GestureDetector(
+            onTap: () {
+              debugPrint('❗️To be implemented');
+            },
+            child: CircleAvatar(
+              radius: 20.r,
+              backgroundColor: const Color(0xFF2E323D),
+              child: Icon(Icons.star_outline_rounded, color: Colors.white),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  ///
   /// Info row in collapsed state
+  ///
   Widget _buildInfoRow(BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -261,7 +328,7 @@ class _VendorCardState extends State<VendorCard> {
             context,
             Icons.menu_outlined,
             'Menu',
-            '${widget.menu.length} Products',
+            '${widget.menuLength} Product(s)',
           ),
         ),
         SizedBox(width: 8.w),
@@ -366,9 +433,13 @@ class _VendorCardState extends State<VendorCard> {
               onPressed: () {
                 SharePlus.instance.share(
                   ShareParams(
-                    subject: 'Subject',
-                    title: 'Title',
-                    text: '''Check out this vendor ID: ${widget.vendorId}''',
+                    title: 'Check out this vendor!',
+                    text:
+                        '''Hey, I want to tell you about this amazing vendor!
+                           ID: ${widget.vendorId}
+                           Name: ${widget.vendorName}
+                           Type: ${widget.vendorType}
+                        ''',
                   ),
                 );
               },
@@ -653,7 +724,7 @@ class CardReviewsSectionHeading extends StatelessWidget {
               //TODO: Change to User Homer Service
               context,
               isVendor: false,
-            ); //TODO: change to true
+            );
           },
         ),
       ],

@@ -78,7 +78,7 @@ class _VendorProfileScreenState extends State<VendorProfileScreen> {
               SizedBox(height: 4.h),
               Text(
                 textAlign: TextAlign.center,
-                vendor.email,
+                vendor.email!,
                 style: context.typography.bodySmall.copyWith(fontSize: 14.sp),
               ),
               SizedBox(height: 12.h),
@@ -90,13 +90,13 @@ class _VendorProfileScreenState extends State<VendorProfileScreen> {
                   VendorProfileService.gotoVendorEditProfile(context);
                 },
               ),
-              ProfileMenuTile(
-                title: 'Location',
-                icon: Icons.location_on_outlined,
-                onTap: () {
-                  VendorProfileService.gotoVendorLocation(context);
-                },
-              ),
+              // ProfileMenuTile(
+              //   title: 'Location',
+              //   icon: Icons.location_on_outlined,
+              //   onTap: () {
+              //     VendorProfileService.gotoVendorLocation(context);
+              //   },
+              // ),
               ProfileMenuTile(
                 title: 'Vendor Hours',
                 icon: Icons.alarm_outlined,

@@ -56,6 +56,10 @@ class _VendorHoursScreenState extends State<VendorHoursScreen> {
   final _sessionController = SessionController();
   void setDataFromSession() {
     final vendor = _sessionController.vendor!;
+
+    if (vendor.hours?.days == null) {
+      return;
+    }
     final days = vendor.hours!.days;
     //Monday
     _isMondayEnabled = days.monday.enabled;

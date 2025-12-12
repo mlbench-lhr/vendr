@@ -16,6 +16,7 @@ class AppUrl {
       '$baseUrl/auth/vendor/signup'; //verify otp to complete signup
   static const String verifyUserOtp =
       '$baseUrl/auth/user/signup'; //verify otp to complete signup
+  static const String resendOtp = '$baseUrl/auth/resend-otp';
   static const String forgotPassword = '$baseUrl/auth/forgot-password';
   static const String resetPassword = '$baseUrl/auth/reset-password';
   static const String changePassword = '$baseUrl/auth/change-password';
@@ -28,6 +29,14 @@ class AppUrl {
       '$baseUrl/auth/vendor/delete-account';
   // Delete User Account
   static const String deleteUserAccount = '$baseUrl/auth/user/delete-account';
+
+  // ========================
+  // Home Endpoints
+  // ========================
+  static const String getNearbyVendors = '$baseUrl/auth/user/nearby-vendors';
+
+  static String getVendorDetails(String vendorId) =>
+      '$baseUrl/auth/vendor/$vendorId/details';
 
   // ========================
   // Profile Endpoints

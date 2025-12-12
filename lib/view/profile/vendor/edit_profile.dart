@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:vendr/app/components/my_button.dart';
 import 'package:vendr/app/components/my_dropdown.dart';
 import 'package:vendr/app/components/my_form_text_field.dart';
@@ -7,9 +8,12 @@ import 'package:vendr/app/components/my_scaffold.dart';
 import 'package:vendr/app/utils/app_constants.dart';
 import 'package:vendr/app/utils/extensions/context_extensions.dart';
 import 'package:vendr/app/utils/extensions/flush_bar_extension.dart';
+import 'package:vendr/app/utils/extensions/general_extensions.dart';
 import 'package:vendr/app/utils/extensions/validations_exception.dart';
+import 'package:vendr/env.dart';
 import 'package:vendr/services/common/session_manager/session_controller.dart';
 import 'package:vendr/services/vendor/vendor_profile_service.dart';
+import 'package:vendr/view/profile/widgets/address_autocomplete.dart';
 import 'package:vendr/view/profile/widgets/profile_image_picker.dart';
 
 class VendorEditProfileScreen extends StatefulWidget {
@@ -26,6 +30,9 @@ class _VendorEditProfileScreenState extends State<VendorEditProfileScreen> {
   final _nameController = TextEditingController();
   final _addressController = TextEditingController();
   late String _selectedVendorType;
+  double _lat = 0;
+  double _lng = 0;
+  LatLng? selectedLatLng;
 
   bool isLoading = false;
   late String? _imageUrl;
@@ -39,15 +46,14 @@ class _VendorEditProfileScreenState extends State<VendorEditProfileScreen> {
   final _session = SessionController();
   void setDataFromSession() {
     final vendor = _session.vendor!;
-    final vendorName = vendor.name;
-    final vendorType = vendor.vendorType;
-    final image = vendor.profileImage;
     final address = vendor.address;
     setState(() {
-      _nameController.text = vendorName;
+      _nameController.text = vendor.name;
       _addressController.text = address ?? '';
-      _selectedVendorType = vendorType;
-      _imageUrl = image;
+      _lat = vendor.lat ?? 0;
+      _lng = vendor.lng ?? 0;
+      _selectedVendorType = vendor.vendorType;
+      _imageUrl = vendor.profileImage;
       debugPrint('here ${vendor.profileImage}');
     });
   }
@@ -84,7 +90,6 @@ class _VendorEditProfileScreenState extends State<VendorEditProfileScreen> {
                   },
                 ),
                 SizedBox(height: 24.h),
-                SizedBox(height: 16.h),
                 Text(
                   'Name',
                   style: context.typography.title.copyWith(fontSize: 18.sp),
@@ -105,23 +110,56 @@ class _VendorEditProfileScreenState extends State<VendorEditProfileScreen> {
                   },
                 ),
                 SizedBox(height: 16.h),
-                Text(
-                  'Address',
-                  style: context.typography.title.copyWith(fontSize: 18.sp),
+                Row(
+                  children: [
+                    Text(
+                      'Address',
+                      style: context.typography.title.copyWith(fontSize: 18.sp),
+                    ),
+                    4.width,
+                    Text(
+                      '(Optional)',
+                      style: context.typography.bodySmall.copyWith(),
+                    ),
+                  ],
                 ),
                 SizedBox(height: 10.h),
-                MyFormTextField(
-                  hint: 'Enter shop address',
+
+                ///
+                ///
+                ///Address autocomplete
+                ///
+                ///
+                AddressAutocompleteTextField(
                   controller: _addressController,
+                  apiKey: Env.placesApiKey,
                   readOnly: isLoading,
-                  textCapitalization: TextCapitalization.none,
+                  hint: 'Enter shop address',
+                  onAddressSelected: (AddressResult result) {
+                    _addressController.text = result.address;
+                    _lat = result.latitude;
+                    _lng = result.longitude;
+                    if (mounted) {
+                      setState(() {
+                        selectedLatLng = LatLng(_lat, _lng);
+                        debugPrint(' L A T. L N G. S E T');
+                      });
+                    }
+                  },
                   validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Address is required.';
+                    if (value == null &&
+                        value!.isNotEmpty &&
+                        _lat == 0 &&
+                        _lng == 0) {
+                      return 'LatLng not set';
                     }
                     return null;
                   },
                 ),
+
+                ///
+                ///END: Address autocomplete
+                ///
                 SizedBox(height: 16.h),
                 Text(
                   'Type',
@@ -161,6 +199,10 @@ class _VendorEditProfileScreenState extends State<VendorEditProfileScreen> {
                       context,
                       name: _nameController.text,
                       shopAddress: _addressController.text,
+                      lat: _lat,
+                      lng: _lng,
+                      // lat: 37.787634,
+                      // lng: -122.404137,
                       vendorType: _selectedVendorType,
                       imageUrl: _imageUrl,
                       onSuccess: () {

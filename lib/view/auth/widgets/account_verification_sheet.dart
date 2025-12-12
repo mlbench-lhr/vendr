@@ -24,6 +24,8 @@ class AccountVerificationSheet extends StatefulWidget {
 }
 
 class _AccountVerificationSheetState extends State<AccountVerificationSheet> {
+  final _authService = AuthService();
+
   final pinController = TextEditingController();
   final authService = AuthService();
   bool isResendAvailable = false;
@@ -50,18 +52,13 @@ class _AccountVerificationSheetState extends State<AccountVerificationSheet> {
   }
 
   Future<void> _sendOrResendOTP() async {
-    // setState(() => isSendingOtp = true);
-    // await signupService.sendOtp(context: context, email: widget.email).then((
-    //   _,
-    // ) {
-    //   _startTimer();
-    //   if (mounted) {
-    //     setState(() => isSendingOtp = false);
-    //   }
-    // });
-
-    debugPrint('TO BE ADDED IN API....');
-    context.flushBarErrorMessage(message: 'TO BE ADDED IN API....');
+    setState(() => isSendingOtp = true);
+    await authService.resendSignupOtp(context, widget.email).then((_) {
+      _startTimer();
+      if (mounted) {
+        setState(() => isSendingOtp = false);
+      }
+    });
   }
 
   @override

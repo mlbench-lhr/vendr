@@ -592,6 +592,22 @@ class AuthService {
     );
   }
 
+  //Resend Signup otp
+  Future<void> resendSignupOtp(BuildContext context, String email) async {
+    final data = {'email': email};
+    try {
+      await _vendorAuthRepo.resendSignupOtp(data);
+      if (context.mounted) {
+        context.flushBarSuccessMessage(message: 'OTP resent to your email.');
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ErrorHandler.handle(context, e, serviceName: tag);
+      }
+    }
+  }
+  //END: Resend signup otp
+
   /// Signs out the currently signed-in user (keeps account cached info).
   // Future<void> signOut() => _google.signOut();
 

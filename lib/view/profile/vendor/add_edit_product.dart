@@ -468,10 +468,6 @@ class _ServingSectionState extends State<ServingSection> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'ID: ${widget.id}',
-                  style: context.typography.body.copyWith(fontSize: 9.sp),
-                ),
-                Text(
                   'Serving',
                   style: context.typography.title.copyWith(fontSize: 18.sp),
                 ),

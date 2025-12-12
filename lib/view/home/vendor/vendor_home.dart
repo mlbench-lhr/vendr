@@ -106,8 +106,7 @@ class _VendorHomeScreenState extends State<VendorHomeScreen> {
                   LocationSection(location: vendor.address),
                   SizedBox(height: 24.h),
                   //Menu heading
-                  if (vendor.menu != null)
-                    MenuHeading(productsCount: vendor.menu!.length),
+                  MenuHeading(productsCount: vendor.menu?.length ?? 0),
                 ],
               ),
             ),
@@ -120,9 +119,9 @@ class _VendorHomeScreenState extends State<VendorHomeScreen> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
+                  VendorHoursHeading(),
+                  SizedBox(height: 16.h),
                   if (vendor.hours != null) ...[
-                    VendorHoursHeading(),
-                    SizedBox(height: 16.h),
                     Wrap(
                       spacing: 10.w,
                       runSpacing: 10.w,
@@ -173,9 +172,15 @@ class _VendorHomeScreenState extends State<VendorHomeScreen> {
                         ),
                       ],
                     ),
-                    SizedBox(height: 24.h),
-                  ],
-
+                  ] else
+                    Padding(
+                      padding: EdgeInsets.symmetric(vertical: 8.h),
+                      child: Text(
+                        textAlign: TextAlign.center,
+                        'Working hours not added yet.',
+                      ),
+                    ),
+                  SizedBox(height: 24.h),
                   ReviewsSectionHeading(),
                   SizedBox(height: 16.h),
                   //Reviews
@@ -191,12 +196,12 @@ class _VendorHomeScreenState extends State<VendorHomeScreen> {
   }
 
   Widget _buildMenuItems(List<MenuItemModel> menuItems) {
-    return menuItems.isNotEmpty
-        ? Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              SizedBox(height: 8.h),
-              SizedBox(
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        SizedBox(height: 8.h),
+        menuItems.isNotEmpty
+            ? SizedBox(
                 width: double.infinity,
                 height: 200,
                 child: ListView.separated(
@@ -215,11 +220,18 @@ class _VendorHomeScreenState extends State<VendorHomeScreen> {
                     return SizedBox(width: 16.w);
                   },
                 ),
+              )
+            : Padding(
+                padding: EdgeInsets.symmetric(vertical: 8.h),
+                child: Text(
+                  textAlign: TextAlign.center,
+                  'No menu items found.',
+                  // style: context.typography.body.copyWith(fontSize: 14.sp),
+                ),
               ),
-              SizedBox(height: 24.h),
-            ],
-          )
-        : SizedBox.shrink();
+        SizedBox(height: 24.h),
+      ],
+    );
   }
 }
 
@@ -251,7 +263,7 @@ Widget _buildReviewsList(List<SingleReviewModel> reviews) {
           ),
         )
       : Padding(
-          padding: EdgeInsets.only(top: 12.h),
+          padding: const EdgeInsets.symmetric(vertical: 8.0),
           child: Text('No reviews found.'),
         );
 }
@@ -348,34 +360,32 @@ class MenuHeading extends StatelessWidget {
   final int productsCount;
   @override
   Widget build(BuildContext context) {
-    return productsCount > 0
-        ? Row(
-            children: [
-              CircleAvatar(
-                radius: 18.r,
-                backgroundColor: Colors.white24,
-                child: Icon(
-                  Icons.receipt_outlined,
-                  color: Colors.white,
-                  size: 20.w,
-                ),
-              ),
-              SizedBox(width: 12.w),
-              Text(
-                'Menu',
-                style: context.typography.title.copyWith(
-                  fontWeight: FontWeight.w700,
-                  fontSize: 18.sp,
-                ),
-              ),
-              const Spacer(),
-              Text(
-                '$productsCount Products',
-                style: context.typography.body.copyWith(fontSize: 14.sp),
-              ),
-            ],
-          )
-        : SizedBox.shrink();
+    return
+    //  productsCount > 0
+    //     ?
+    Row(
+      children: [
+        CircleAvatar(
+          radius: 18.r,
+          backgroundColor: Colors.white24,
+          child: Icon(Icons.receipt_outlined, color: Colors.white, size: 20.w),
+        ),
+        SizedBox(width: 12.w),
+        Text(
+          'Menu',
+          style: context.typography.title.copyWith(
+            fontWeight: FontWeight.w700,
+            fontSize: 18.sp,
+          ),
+        ),
+        const Spacer(),
+        Text(
+          '$productsCount Products',
+          style: context.typography.body.copyWith(fontSize: 14.sp),
+        ),
+      ],
+    );
+    // : SizedBox.shrink();
   }
 }
 

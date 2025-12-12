@@ -24,6 +24,13 @@ class VendorAuthRepository {
     return _apiServices.post(url: AppUrl.verifyVendorOtp, data: data);
   }
 
+  //Resend OTP
+  Future<Map<String, dynamic>> resendSignupOtp(
+    Map<String, dynamic> data,
+  ) async {
+    return _apiServices.post(url: AppUrl.resendOtp, data: data);
+  }
+
   //Profile management
   Future<Map<String, dynamic>> updateVendorProfile(
     Map<String, dynamic> data,

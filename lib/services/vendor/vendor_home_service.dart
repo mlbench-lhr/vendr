@@ -54,6 +54,7 @@ class VendorHomeService {
   static String getVendorWorkingHoursToday() {
     final VendorModel vendor = SessionController().vendor!;
     final weekday = DateTime.now().weekday;
+    if (vendor.hours == null) return '0 hours';
     // Pick today's schedule automatically
     final day = switch (weekday) {
       DateTime.monday => vendor.hours!.days.monday,

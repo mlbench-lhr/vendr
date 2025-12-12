@@ -56,9 +56,4 @@ class UserAuthRepository {
   Future<Map<String, dynamic>> deleteUserAccount() async {
     return _apiServices.delete(url: AppUrl.deleteUserAccount);
   }
-
-  //Get notifications (for both user and vendor)
-  Future<Map<String, dynamic>> getNotifications() async {
-    return _apiServices.get(url: AppUrl.getNotifications);
-  }
 }

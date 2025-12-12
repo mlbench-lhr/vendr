@@ -7,20 +7,22 @@ part 'vendor_model.g.dart';
 class VendorModel {
   VendorModel({
     required this.name,
-    required this.email,
-    required this.phone,
+    this.email,
+    this.phone,
     required this.vendorType,
     required this.id,
     this.verified,
     this.profileImage,
     this.address,
     this.routes,
-    this.location,
     this.menu,
     this.hours,
     this.hoursADay,
+    this.totalMenuItems,
     this.provider,
     this.reviews,
+    this.lat,
+    this.lng,
   });
 
   factory VendorModel.fromJson(Map<String, dynamic> json) =>
@@ -28,16 +30,12 @@ class VendorModel {
 
   Map<String, dynamic> toJson() => _$VendorModelToJson(this);
 
-  // ------------------------
-  // Vendor Fields
-  // ------------------------
-
   @JsonKey(name: '_id')
   final String? id;
 
   final String name;
-  final String email;
-  final String phone;
+  final String? email;
+  final String? phone;
 
   @JsonKey(name: 'vendor_type')
   final String vendorType;
@@ -53,37 +51,22 @@ class VendorModel {
 
   final List<Map<String, dynamic>>? routes;
 
-  // Hours (nested)
+  // NEW FIELDS (replace LatLng)
+  final double? lat;
+  final double? lng;
+
   final HoursModel? hours;
 
-  final String? hoursADay;
+  @JsonKey(name: 'todays_hours_count')
+  final int? hoursADay;
 
-  // Location mapping from JSON → LatLng
-  @JsonKey(fromJson: _latLngFromJson, toJson: _latLngToJson)
-  final LatLng? location;
+  @JsonKey(name: 'total_menus')
+  final int? totalMenuItems;
 
-  // Menus array from API
   @JsonKey(name: 'menus')
   final List<MenuItemModel>? menu;
 
   final ReviewsModel? reviews;
-
-  // ------------------------
-  // LatLng Converters
-  // ------------------------
-
-  static LatLng? _latLngFromJson(Map<String, dynamic>? json) {
-    if (json == null) return null;
-    return LatLng(
-      (json['lat'] as num).toDouble(),
-      (json['lng'] as num).toDouble(),
-    );
-  }
-
-  static Map<String, dynamic>? _latLngToJson(LatLng? v) {
-    if (v == null) return null;
-    return {"lat": v.latitude, "lng": v.longitude};
-  }
 }
 
 //

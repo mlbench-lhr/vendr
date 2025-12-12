@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:vendr/app/utils/service_error_handler.dart';
 import 'package:vendr/model/general/notification_model.dart';
-import 'package:vendr/repository/user_auth_repo.dart';
+
+import 'package:vendr/repository/user_home_repo.dart';
 
 class NotificationsService {
   static const String tag = '[AuthService]';
-  final UserAuthRepository _userAuthRepo = UserAuthRepository();
+  final UserHomeRepository _userHomeRepo = UserHomeRepository();
 
   ///
   ///Get Notifications
@@ -14,7 +15,7 @@ class NotificationsService {
     required BuildContext context,
   }) async {
     try {
-      final response = await _userAuthRepo.getNotifications();
+      final response = await _userHomeRepo.getNotifications();
 
       debugPrint("🔔 Notifications Response $response");
 

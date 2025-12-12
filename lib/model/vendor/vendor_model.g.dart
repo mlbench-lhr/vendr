@@ -8,8 +8,8 @@ part of 'vendor_model.dart';
 
 VendorModel _$VendorModelFromJson(Map<String, dynamic> json) => VendorModel(
   name: json['name'] as String,
-  email: json['email'] as String,
-  phone: json['phone'] as String,
+  email: json['email'] as String?,
+  phone: json['phone'] as String?,
   vendorType: json['vendor_type'] as String,
   id: json['_id'] as String?,
   verified: json['verified'] as bool?,
@@ -18,20 +18,20 @@ VendorModel _$VendorModelFromJson(Map<String, dynamic> json) => VendorModel(
   routes: (json['routes'] as List<dynamic>?)
       ?.map((e) => e as Map<String, dynamic>)
       .toList(),
-  location: VendorModel._latLngFromJson(
-    json['location'] as Map<String, dynamic>?,
-  ),
   menu: (json['menus'] as List<dynamic>?)
       ?.map((e) => MenuItemModel.fromJson(e as Map<String, dynamic>))
       .toList(),
   hours: json['hours'] == null
       ? null
       : HoursModel.fromJson(json['hours'] as Map<String, dynamic>),
-  hoursADay: json['hoursADay'] as String?,
+  hoursADay: (json['todays_hours_count'] as num?)?.toInt(),
+  totalMenuItems: (json['total_menus'] as num?)?.toInt(),
   provider: json['provider'] as String?,
   reviews: json['reviews'] == null
       ? null
       : ReviewsModel.fromJson(json['reviews'] as Map<String, dynamic>),
+  lat: (json['lat'] as num?)?.toDouble(),
+  lng: (json['lng'] as num?)?.toDouble(),
 );
 
 Map<String, dynamic> _$VendorModelToJson(VendorModel instance) =>
@@ -46,9 +46,11 @@ Map<String, dynamic> _$VendorModelToJson(VendorModel instance) =>
       'profile_image': instance.profileImage,
       'shop_address': instance.address,
       'routes': instance.routes,
+      'lat': instance.lat,
+      'lng': instance.lng,
       'hours': instance.hours,
-      'hoursADay': instance.hoursADay,
-      'location': VendorModel._latLngToJson(instance.location),
+      'todays_hours_count': instance.hoursADay,
+      'total_menus': instance.totalMenuItems,
       'menus': instance.menu,
       'reviews': instance.reviews,
     };

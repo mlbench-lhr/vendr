@@ -60,9 +60,11 @@ class VendorProfileService {
     String? imageUrl,
     String? vendorType,
     String? shopAddress,
+    double? lat,
+    double? lng,
     VoidCallback? onSuccess,
   }) async {
-    final vendor = _sessionController.vendor;
+    final VendorModel? vendor = _sessionController.vendor;
 
     final Map<String, dynamic> data = {
       if (name != null && vendor?.name != name) 'name': name,
@@ -72,6 +74,8 @@ class VendorProfileService {
         'vendor_type': vendorType,
       if (shopAddress != null && vendor?.address != shopAddress)
         'shop_address': shopAddress,
+      if (lat != null && vendor?.lat != lat) 'lat': lat,
+      if (lng != null && vendor?.lng != lng) 'lng': lng,
     };
     try {
       await _vendorAuthRepo.updateVendorProfile(data);
