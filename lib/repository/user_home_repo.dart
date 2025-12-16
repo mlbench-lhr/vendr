@@ -19,4 +19,22 @@ class UserHomeRepository {
   }) async {
     return _apiServices.get(url: AppUrl.getVendorDetails(vendorId));
   }
+
+  //get reviews
+  Future<Map<String, dynamic>> getVendorReviews({
+    String query = '',
+    required String vendorId,
+  }) async {
+    return _apiServices.get(
+      url: '${AppUrl.getVendorReviewsById(vendorId)}?$query',
+    );
+  }
+
+  //add to favorites
+  Future<Map<String, dynamic>> addToFavorites({
+    required String vendorId,
+  }) async {
+    final data = {'vendorId': vendorId};
+    return _apiServices.post(url: AppUrl.addToFavorites, data: data);
+  }
 }

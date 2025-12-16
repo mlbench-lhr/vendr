@@ -8,20 +8,49 @@ part of 'user_model.dart';
 
 UserModel _$UserModelFromJson(Map<String, dynamic> json) => UserModel(
   id: json['_id'] as String?,
+  email: json['email'] as String,
   name: json['name'] as String,
   imageUrl: json['profile_image'] as String?,
   createdAt: UserModel._fromJsonDateTime(json['createdAt']),
   updatedAt: UserModel._fromJsonDateTime(json['updatedAt']),
   favoriteVendors: (json['favoriteVendors'] as List<dynamic>?)
-      ?.map((e) => e as String)
+      ?.map((e) => FavoriteVendorModel.fromJson(e as Map<String, dynamic>))
       .toList(),
+  newVendorAlert: json['new_vendor_alert'] as bool?,
+  distanceBasedAlert: json['distance_based_alert'] as bool?,
+  favoriteVendorAlert: json['favorite_vendor_alert'] as bool?,
 );
 
 Map<String, dynamic> _$UserModelToJson(UserModel instance) => <String, dynamic>{
   '_id': instance.id,
   'name': instance.name,
+  'email': instance.email,
   'profile_image': instance.imageUrl,
   'createdAt': UserModel._toJsonDateTime(instance.createdAt),
   'updatedAt': UserModel._toJsonDateTime(instance.updatedAt),
   'favoriteVendors': instance.favoriteVendors,
+  'new_vendor_alert': instance.newVendorAlert,
+  'distance_based_alert': instance.distanceBasedAlert,
+  'favorite_vendor_alert': instance.favoriteVendorAlert,
+};
+
+FavoriteVendorModel _$FavoriteVendorModelFromJson(Map<String, dynamic> json) =>
+    FavoriteVendorModel(
+      id: json['_id'] as String,
+      name: json['name'] as String,
+      email: json['email'] as String?,
+      phone: json['phone'] as String?,
+      vendorType: json['vendor_type'] as String?,
+      imageUrl: json['profile_image'] as String?,
+    );
+
+Map<String, dynamic> _$FavoriteVendorModelToJson(
+  FavoriteVendorModel instance,
+) => <String, dynamic>{
+  '_id': instance.id,
+  'name': instance.name,
+  'email': instance.email,
+  'phone': instance.phone,
+  'vendor_type': instance.vendorType,
+  'profile_image': instance.imageUrl,
 };

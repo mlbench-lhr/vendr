@@ -39,7 +39,7 @@ class VendorProfileService {
     Navigator.pushNamed(context, RoutesName.vendorChangeEmail);
   }
 
-  static void gotoVendorAddProduct(
+  static void gotoAddEditProduct(
     BuildContext context,
     bool isEdit,
     MenuItemModel? product,

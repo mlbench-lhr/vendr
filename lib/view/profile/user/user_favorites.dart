@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:vendr/app/components/my_scaffold.dart';
 import 'package:vendr/app/utils/extensions/context_extensions.dart';
+import 'package:vendr/model/user/user_model.dart';
+import 'package:vendr/services/common/session_manager/session_controller.dart';
 import 'package:vendr/view/profile/user/widgets/favorite_chip.dart';
 
 class UserFavouritsScreen extends StatefulWidget {
@@ -12,13 +14,16 @@ class UserFavouritsScreen extends StatefulWidget {
 }
 
 class _UserFavouritsScreenState extends State<UserFavouritsScreen> {
+  final _sessionController = SessionController();
   @override
   Widget build(BuildContext context) {
+    final List<FavoriteVendorModel> favoriteVendors =
+        _sessionController.user?.favoriteVendors ?? [];
     return MyScaffold(
       appBar: AppBar(
         centerTitle: true,
         title: Text(
-          'Favorite Venders',
+          'Favorite Vendors',
           style: context.typography.title.copyWith(
             fontSize: 20.sp,
             fontWeight: FontWeight.w600,
@@ -27,30 +32,31 @@ class _UserFavouritsScreenState extends State<UserFavouritsScreen> {
       ),
       body: Padding(
         padding: EdgeInsets.all(16.w),
-        child: ListView(
-          children: [
-            FavoriteChip(
-              name: 'Harry Brook',
-              venderType: 'Product Vender',
-              imageUrl:
-                  'https://images.unsplash.com/photo-1580489944761-15a19d654956?q=80&w=761&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-            ),
-            SizedBox(height: 16.h),
-            FavoriteChip(
-              name: 'James Smith',
-              venderType: 'Fast food vender',
-              imageUrl:
-                  'https://images.unsplash.com/photo-1716068107414-fad614ac83a3?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-            ),
-            SizedBox(height: 16.h),
-            FavoriteChip(
-              name: 'William Persons',
-              venderType: 'Fruit Vender',
-              imageUrl:
-                  'https://media.istockphoto.com/id/2209841249/photo/refrigeration-chamber-with-close-up-of-fruits-and-vegetables-in-the-crates.jpg?s=2048x2048&w=is&k=20&c=mGv4KJiTGVTTSdi6RJoDKz6bZe5BaMPMu8WdjJcXiro=',
-            ),
-          ],
-        ),
+        child: favoriteVendors.isNotEmpty
+            ? ListView.builder(
+                itemCount: favoriteVendors.length,
+                itemBuilder: (context, index) {
+                  final vendor = favoriteVendors[index];
+                  return Padding(
+                    padding: EdgeInsets.only(bottom: 16.h),
+                    child: FavoriteChip(
+                      vendorId: vendor.id,
+                      name: vendor.name,
+                      venderType: vendor.vendorType ?? '',
+                      imageUrl: vendor.imageUrl,
+                      onRemove: () {
+                        setState(() {});
+                      },
+                    ),
+                  );
+                },
+              )
+            : Center(
+                child: Text(
+                  'No Favorite vendors found.',
+                  style: context.typography.body.copyWith(),
+                ),
+              ),
       ),
     );
   }

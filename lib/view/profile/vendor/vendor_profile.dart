@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:vendr/app/components/my_button.dart';
 import 'package:vendr/app/components/my_scaffold.dart';
 import 'package:vendr/app/utils/extensions/context_extensions.dart';
@@ -90,6 +91,7 @@ class _VendorProfileScreenState extends State<VendorProfileScreen> {
                   VendorProfileService.gotoVendorEditProfile(context);
                 },
               ),
+
               // ProfileMenuTile(
               //   title: 'Location',
               //   icon: Icons.location_on_outlined,
@@ -97,6 +99,13 @@ class _VendorProfileScreenState extends State<VendorProfileScreen> {
               //     VendorProfileService.gotoVendorLocation(context);
               //   },
               // ),
+              ProfileMenuTile(
+                title: 'Location',
+                icon: Icons.location_on_outlined,
+                onTap: () {
+                  Geolocator.openAppSettings();
+                },
+              ),
               ProfileMenuTile(
                 title: 'Vendor Hours',
                 icon: Icons.alarm_outlined,

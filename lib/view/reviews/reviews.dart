@@ -13,12 +13,14 @@ import 'package:vendr/app/utils/extensions/general_extensions.dart';
 import 'package:vendr/generated/assets/assets.gen.dart';
 import 'package:vendr/model/vendor/vendor_model.dart';
 import 'package:vendr/services/common/reviews_service.dart';
+import 'package:vendr/services/user/user_home_service.dart';
 import 'package:vendr/services/vendor/vendor_home_service.dart';
 import 'package:vendr/view/reviews/widgets/add_review_bottom_sheet.dart';
 
 class ReviewsScreen extends StatefulWidget {
-  const ReviewsScreen({super.key, required this.isVendor});
+  const ReviewsScreen({super.key, required this.isVendor, this.vendorId});
   final bool isVendor;
+  final String? vendorId;
 
   @override
   State<ReviewsScreen> createState() => _ReviewsScreenState();
@@ -33,15 +35,23 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
   @override
   void initState() {
     super.initState();
-    debugPrint(' iS vendor: ${widget.isVendor}');
     _reviewsFuture = _fetchData();
   }
 
   Future<ReviewsModel?> _fetchData() async {
     try {
-      final ReviewsModel? response = await VendorHomeService().getVendorReviews(
-        context,
-      );
+      // final ReviewsModel? response = await VendorHomeService().getVendorReviews(
+      //   context,
+      // );
+      late final ReviewsModel? response;
+      if (widget.isVendor) {
+        response = await VendorHomeService().getVendorReviews(context);
+      } else {
+        response = await UserHomeService().getVendorReviews(
+          vendorId: widget.vendorId as String,
+          context,
+        );
+      }
 
       if (response == null) return null;
 

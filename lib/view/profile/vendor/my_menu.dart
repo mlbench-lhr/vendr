@@ -70,7 +70,7 @@ class _VendorMyMenuScreenState extends State<VendorMyMenuScreen> {
             child: IconButton(
               onPressed: () {
                 //add new product
-                VendorProfileService.gotoVendorAddProduct(context, false, null);
+                VendorProfileService.gotoAddEditProduct(context, false, null);
               },
               icon: Icon(Icons.add_circle_outline, color: Colors.white),
             ),
@@ -89,7 +89,7 @@ class _VendorMyMenuScreenState extends State<VendorMyMenuScreen> {
                     return MenuItemTile(
                       onTap: () {
                         //edit product
-                        VendorProfileService.gotoVendorAddProduct(
+                        VendorProfileService.gotoAddEditProduct(
                           context,
                           true,
                           item,

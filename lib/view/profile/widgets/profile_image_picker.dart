@@ -119,7 +119,9 @@ class _ImagePickerAvatarState extends State<ImagePickerAvatar> {
                       fit: BoxFit.contain,
                     ),
             ),
-            child: _isBusy ? const Center(child: LoadingWidget()) : null,
+            child: _isBusy
+                ? const Center(child: LoadingWidget(color: Colors.white))
+                : null,
           ),
           Positioned(
             top: 0,

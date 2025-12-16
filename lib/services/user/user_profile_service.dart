@@ -30,11 +30,22 @@ class UserProfileService {
     BuildContext context, {
     String? name,
     String? imageUrl,
+    bool? newVendorAlert,
+    bool? distanceBasedAlert,
+    bool? favoriteVendorAlert,
     VoidCallback? onSuccess,
   }) async {
     final user = _sessionController.user;
     final Map<String, dynamic> data = {
       if (name != null && user!.name != name) 'name': name,
+      if (newVendorAlert != null && user!.newVendorAlert != newVendorAlert)
+        'new_vendor_alert': newVendorAlert,
+      if (distanceBasedAlert != null &&
+          user!.distanceBasedAlert != distanceBasedAlert)
+        'distance_based_alert': distanceBasedAlert,
+      if (favoriteVendorAlert != null &&
+          user!.favoriteVendorAlert != favoriteVendorAlert)
+        'favorite_vendor_alert': favoriteVendorAlert,
       if (imageUrl != null && user!.imageUrl != imageUrl)
         'profile_image': imageUrl,
     };
@@ -46,6 +57,27 @@ class UserProfileService {
       }
     } catch (e) {
       if (context.mounted) ErrorHandler.handle(context, e, serviceName: tag);
+    }
+  }
+
+  ///
+  ///addToFavorites
+  ///
+  Future<void> removeFromFavorites(
+    BuildContext context, {
+    required String vendorId,
+    VoidCallback? onRemoved,
+  }) async {
+    try {
+      await _userAuthRepo.removeFromFavorites(vendorId: vendorId);
+      onRemoved?.call();
+      if (context.mounted) {
+        await AuthService().fetchProfile(context);
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ErrorHandler.handle(context, e, serviceName: tag);
+      }
     }
   }
 }

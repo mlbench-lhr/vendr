@@ -19,7 +19,7 @@ class LanguageMenu extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final languages = [Language('en', 'English'), Language('fr', 'French')];
+    final languages = [Language('en', 'English'), Language('es', 'Spanish')];
 
     return PopupMenuButton<Language>(
       color: Colors.white,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:vendr/app/components/my_button.dart';
 import 'package:vendr/app/components/my_scaffold.dart';
 import 'package:vendr/app/utils/extensions/context_extensions.dart';
@@ -70,12 +71,20 @@ class _UserProfileState extends State<UserProfileScreen> {
                       : Icon(Icons.person, color: Colors.white, size: 40.w),
                 ),
               ),
+
               SizedBox(height: 16.h),
               Text(
                 textAlign: TextAlign.center,
                 user.name,
                 style: context.typography.title.copyWith(fontSize: 20.sp),
               ),
+              SizedBox(height: 4.h),
+              Text(
+                textAlign: TextAlign.center,
+                user.email,
+                style: context.typography.bodySmall.copyWith(fontSize: 14.sp),
+              ),
+              SizedBox(height: 12.h),
               //Menus
               ProfileMenuTile(
                 title: 'Edit Profile',
@@ -88,6 +97,13 @@ class _UserProfileState extends State<UserProfileScreen> {
               //   title: 'Location',
               //   icon: Icons.my_location_outlined,
               // ),
+              ProfileMenuTile(
+                title: 'Location',
+                icon: Icons.location_on_outlined,
+                onTap: () {
+                  Geolocator.openAppSettings();
+                },
+              ),
               ProfileMenuTile(
                 title: 'Favorite Venders',
                 icon: Icons.star_border_outlined,

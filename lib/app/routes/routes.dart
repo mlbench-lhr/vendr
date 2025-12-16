@@ -2,6 +2,7 @@ import 'dart:developer';
 import 'package:vendr/app/routes/routes_name.dart';
 import 'package:vendr/app/routes/unknown_page.dart';
 import 'package:flutter/material.dart';
+import 'package:vendr/model/vendor/vendor_model.dart';
 import 'package:vendr/view/auth/forgot_password/forgot_password.dart';
 import 'package:vendr/view/auth/forgot_password/new_password.dart';
 import 'package:vendr/view/auth/login.dart';
@@ -59,8 +60,6 @@ class Routes {
     RoutesName.languages: (_) => const LanguagesScreen(),
     RoutesName.vendorChangePhoneNumber: (_) => const ChangePhoneNumberScreen(),
     RoutesName.vendorChangeEmail: (_) => const ChangeEmailScreen(),
-
-    RoutesName.userMenu: (_) => const UserMenuScreen(),
   };
 
   static Route<dynamic> generateRoute(RouteSettings settings) {
@@ -99,10 +98,20 @@ class Routes {
             product: args['product'],
           ),
         );
+      //Vendor Menu (User Side)
+      case RoutesName.userMenu:
+        final args = _getArgs(settings, requiredKeys: ['menu']);
+        return MaterialPageRoute(
+          builder: (_) =>
+              UserMenuScreen(menuList: args['menu'] as List<MenuItemModel>),
+        );
       case RoutesName.reviews:
         final args = _getArgs(settings, requiredKeys: ['isVendor']);
         return MaterialPageRoute(
-          builder: (_) => ReviewsScreen(isVendor: args['isVendor'] as bool),
+          builder: (_) => ReviewsScreen(
+            isVendor: args['isVendor'] as bool,
+            vendorId: args['vendorId'],
+          ),
         );
       default:
         final builder = _routes[settings.name];

@@ -65,7 +65,7 @@ class VendorAuthRepository {
     return _apiServices.get(url: AppUrl.getVendorProfile);
   }
 
-  //fetch profile
+  //get reviews
   Future<Map<String, dynamic>> getReviews({String query = ''}) async {
     return _apiServices.get(url: '${AppUrl.getVendorReviews}?$query');
   }

@@ -35,17 +35,25 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
   final formKey = GlobalKey<FormState>();
 
   final List<String> servingTypes = [
-    'Single Serving',
-    '2 Servings',
-    '3 Servings',
-    '4 Servings',
-    '5 Servings',
+    '1 Unit',
+    '2 Units',
+    '5 Units',
+    '10 Units',
   ];
-  final List<String> prices = ['\$100', '\$200', '\$300'];
+  // final List<String> prices = ['\$100', '\$200', '\$300'];
+  final List<String> prices = List.generate(
+    200, // (100 / 0.5) = 200 items
+    (index) {
+      final value = (index + 1) * 0.5;
+      return value % 1 == 0
+          ? '\$${value.toInt()}'
+          : '\$${value.toStringAsFixed(1)}';
+    },
+  );
 
   // Use consistent keys: 'id', 'serving', 'price'
   List<Map<String, dynamic>> servings = [
-    {'id': 1, 'serving': 'Single Serving', 'price': '\$100'},
+    {'id': 1, 'serving': '1 Unit', 'price': '\$1'},
   ];
 
   Set<String> categories = {};

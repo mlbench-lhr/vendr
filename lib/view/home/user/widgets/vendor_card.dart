@@ -10,14 +10,16 @@ import 'package:vendr/app/components/review_tile.dart';
 import 'package:vendr/app/styles/app_radiuses.dart';
 import 'package:vendr/app/utils/extensions/context_extensions.dart';
 import 'package:vendr/app/utils/extensions/general_extensions.dart';
+import 'package:vendr/model/user/user_model.dart';
+import 'package:vendr/model/vendor/vendor_model.dart';
+import 'package:vendr/services/common/session_manager/session_controller.dart';
 import 'package:vendr/services/user/user_home_service.dart';
-import 'package:vendr/services/vendor/vendor_home_service.dart';
+import 'package:vendr/services/user/user_profile_service.dart';
 import 'package:vendr/view/home/user/widgets/menu_bottom_sheet.dart';
 import 'package:vendr/view/home/vendor/vendor_home.dart';
 
 class VendorCard extends StatefulWidget {
   final bool isExpanded;
-  final bool isLoading;
   final VoidCallback onTap;
   final double distance;
   final String vendorId;
@@ -46,7 +48,6 @@ class VendorCard extends StatefulWidget {
     this.onGetDirection,
     required this.imageUrl,
     required this.vendorId,
-    required this.isLoading,
   });
 
   @override
@@ -54,56 +55,68 @@ class VendorCard extends StatefulWidget {
 }
 
 class _VendorCardState extends State<VendorCard> {
-  // Sample data
-  final List<Map<String, dynamic>> items = [
-    {
-      'id': 1,
-      'name': 'Veggie tomato mix',
-      'price': '\$100',
-      'imageUrl':
-          'https://assets.bonappetit.com/photos/5d4356436f98a4000898782b/4:3/w_3376,h_2532,c_limit/Basically-Ratatouille-Pasta.jpg',
-    },
-    {
-      'id': 2,
-      'name': 'Moi-moi and ekpa.',
-      'price': '\$150',
-      'imageUrl':
-          'https://img-global.cpcdn.com/recipes/ca64e4220565f1b8/680x781cq80/ekuru-white-moi-moi-recipe-main-photo.jpg',
-    },
-    {
-      'id': 3,
-      'name': 'Egg and cucumber recipe',
-      'price': '\$80',
-      'imageUrl':
-          'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQSLE0q7GC9bUMkvUVCNH0tmVRaohM_jTeEyw&s',
-    },
-  ];
+  ///
+  ///Check if card is expanded
+  ///
+  @override
+  void didUpdateWidget(covariant VendorCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
 
-  final List<Map<String, dynamic>> reviews = [
-    {
-      'id': 1,
-      'name': 'Cameron Williamson',
-      'rating': 4.0,
-      'time_stamp': '2 mins ago',
-      'content':
-          'Consequat velit qui adipisicing sunt do repe nderit ad laborum tempor ullamco.',
-    },
-    {
-      'id': 2,
-      'name': 'Jane Cooper',
-      'rating': 2.5,
-      'time_stamp': '4 hours ago',
-      'content':
-          'Velit qui adipisicing sunt do repe nderit ad laborum tempor ullamco.',
-    },
-    {
-      'id': 3,
-      'name': 'James Smith',
-      'rating': 5.0,
-      'time_stamp': '1 day ago',
-      'content': 'Adipisicing qui sunt do repe nderit ad laborum.',
-    },
-  ];
+    // Detect change from false → true
+    if (!oldWidget.isExpanded && widget.isExpanded) {
+      debugPrint('EXPANDED!!!');
+      getVendorDetails();
+    }
+  }
+
+  final _userHomeService = UserHomeService();
+  final userProfileService = UserProfileService();
+  bool isLoading = false;
+  VendorModel? selectedVendorDetails;
+
+  Future<void> getVendorDetails() async {
+    setState(() {
+      isLoading = true;
+    });
+    //Load vendor profile
+    final response = await _userHomeService.getVendorDetails(
+      context: context,
+      vendorId: widget.vendorId,
+    );
+    if (response != null) {
+      setState(() {
+        selectedVendorDetails = response;
+      });
+    }
+    setState(() {
+      isLoading = false;
+    });
+  }
+
+  bool isFavorite = false;
+
+  final _sessionController = SessionController();
+
+  void checkIfFavorite() {
+    final List<FavoriteVendorModel> favoriteVendors =
+        _sessionController.user?.favoriteVendors ?? [];
+
+    final bool exists = favoriteVendors.any(
+      (vendor) => vendor.id == widget.vendorId,
+    );
+
+    if (exists) {
+      setState(() {
+        isFavorite = true;
+      });
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    checkIfFavorite();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -135,7 +148,7 @@ class _VendorCardState extends State<VendorCard> {
               ),
               height: widget.isExpanded ? expandedHeight : collapsedHeight,
               width: widget.isExpanded ? expandedWidth : collapsedWidth,
-              child: widget.isLoading
+              child: isLoading
                   ? Center(child: LoadingWidget(color: Colors.white))
                   : SingleChildScrollView(
                       physics: const BouncingScrollPhysics(),
@@ -215,8 +228,9 @@ class _VendorCardState extends State<VendorCard> {
             ? widget.expandedBuilder!(context)
             : _defaultExpandedContent(context),
         SizedBox(height: 16.h),
-        CardMenuHeading(),
-        _buildMenuItems(items),
+        CardMenuHeading(menu: selectedVendorDetails?.menu ?? []),
+        // _buildMenuItems(items),
+        _buildMenuItems(selectedVendorDetails?.menu ?? []),
         SizedBox(height: 20.h),
         _buildVendorHoursAndReviews(context),
       ],
@@ -292,13 +306,29 @@ class _VendorCardState extends State<VendorCard> {
         Padding(
           padding: EdgeInsets.only(top: 4.h, right: 10.w),
           child: GestureDetector(
-            onTap: () {
-              debugPrint('❗️To be implemented');
+            onTap: () async {
+              setState(() {
+                isFavorite = !isFavorite;
+              });
+              if (isFavorite) {
+                await _userHomeService.addToFavorites(
+                  context,
+                  vendorId: widget.vendorId,
+                );
+              } else {
+                await userProfileService.removeFromFavorites(
+                  context,
+                  vendorId: widget.vendorId,
+                );
+              }
             },
             child: CircleAvatar(
               radius: 20.r,
               backgroundColor: const Color(0xFF2E323D),
-              child: Icon(Icons.star_outline_rounded, color: Colors.white),
+              child: Icon(
+                isFavorite ? Icons.star_rounded : Icons.star_outline_rounded,
+                color: Colors.white,
+              ),
             ),
           ),
         ),
@@ -356,41 +386,61 @@ class _VendorCardState extends State<VendorCard> {
           children: [
             VendorHoursCard(
               day: 'Monday',
-              startTime: '09:00 AM',
-              endTime: '06:00 PM',
+              startTime: selectedVendorDetails?.hours!.days.monday.start,
+              endTime: selectedVendorDetails?.hours!.days.monday.end,
+              isEnabled:
+                  selectedVendorDetails?.hours!.days.monday.enabled ?? false,
             ),
             VendorHoursCard(
               day: 'Tuesday',
-              startTime: '09:00 AM',
-              endTime: '06:00 PM',
+              // startTime: '09:00 AM',
+              // endTime: '06:00 PM',
+              startTime: selectedVendorDetails?.hours!.days.tuesday.start,
+              endTime: selectedVendorDetails?.hours!.days.tuesday.end,
+              isEnabled:
+                  selectedVendorDetails?.hours!.days.tuesday.enabled ?? false,
             ),
             VendorHoursCard(
               day: 'Wednesday',
-              startTime: '09:00 AM',
-              endTime: '06:00 PM',
+              startTime: selectedVendorDetails?.hours!.days.wednesday.start,
+              endTime: selectedVendorDetails?.hours!.days.wednesday.end,
+              isEnabled:
+                  selectedVendorDetails?.hours!.days.wednesday.enabled ?? false,
             ),
             VendorHoursCard(
               day: 'Thursday',
-              startTime: '09:00 AM',
-              endTime: '06:00 PM',
+              startTime: selectedVendorDetails?.hours!.days.thursday.start,
+              endTime: selectedVendorDetails?.hours!.days.thursday.end,
+              isEnabled:
+                  selectedVendorDetails?.hours!.days.thursday.enabled ?? false,
             ),
             VendorHoursCard(
               day: 'Friday',
-              startTime: '09:00 AM',
-              endTime: '06:00 PM',
+              startTime: selectedVendorDetails?.hours!.days.friday.start,
+              endTime: selectedVendorDetails?.hours!.days.friday.end,
+              isEnabled:
+                  selectedVendorDetails?.hours!.days.friday.enabled ?? false,
             ),
             VendorHoursCard(
               day: 'Saturday',
-              startTime: '09:00 AM',
-              endTime: '06:00 PM',
+              startTime: selectedVendorDetails?.hours!.days.saturday.start,
+              endTime: selectedVendorDetails?.hours!.days.saturday.end,
+              isEnabled:
+                  selectedVendorDetails?.hours!.days.saturday.enabled ?? false,
             ),
-            VendorHoursCard(day: 'Sunday', isEnabled: true),
+            VendorHoursCard(
+              day: 'Sunday',
+              startTime: selectedVendorDetails?.hours!.days.sunday.start,
+              endTime: selectedVendorDetails?.hours!.days.sunday.end,
+              isEnabled:
+                  selectedVendorDetails?.hours!.days.sunday.enabled ?? false,
+            ),
           ],
         ),
         SizedBox(height: 24.h),
-        CardReviewsSectionHeading(),
-        _buildReviewsList(reviews),
-        SizedBox(height: 56.h),
+        CardReviewsSectionHeading(vendorId: widget.vendorId),
+        _buildReviewsList(selectedVendorDetails?.reviews?.list ?? []),
+        SizedBox(height: 75.h),
       ],
     );
   }
@@ -507,7 +557,7 @@ class _VendorCardState extends State<VendorCard> {
                   ),
                   SizedBox(width: 6.w),
                   Text(
-                    '${widget.distance.toStringAsFixed(0)}m',
+                    '${widget.distance.toString()}km',
                     style: TextStyle(fontSize: 10.sp),
                   ),
                 ],
@@ -525,11 +575,11 @@ class _VendorCardState extends State<VendorCard> {
     );
   }
 
-  Widget _buildMenuItems(List<Map<String, dynamic>> menuItems) {
+  Widget _buildMenuItems(List<MenuItemModel> menuItems) {
     return SizedBox(
+      width: double.infinity,
       height: 200.h,
       child: ListView.separated(
-        padding: EdgeInsets.only(left: 16.w),
         scrollDirection: Axis.horizontal,
         shrinkWrap: true,
         itemCount: menuItems.length,
@@ -542,13 +592,13 @@ class _VendorCardState extends State<VendorCard> {
                 enableDrag: true,
                 isScrollControlled: true,
                 backgroundColor: context.colors.primary,
-                child: MenuBottomSheet(),
+                child: MenuBottomSheet(menuItem: menuItems[index]),
                 // child: AddReviewBottomSheet(),
               );
             },
-            name: menuItems[index]['name'],
-            price: menuItems[index]['price'],
-            imageUrl: menuItems[index]['imageUrl'],
+            name: menuItems[index].itemName,
+            price: menuItems[index].servings.first.servingPrice,
+            imageUrl: menuItems[index].imageUrl,
           );
         },
         separatorBuilder: (_, __) => SizedBox(width: 16.w),
@@ -556,22 +606,29 @@ class _VendorCardState extends State<VendorCard> {
     );
   }
 
-  Widget _buildReviewsList(List<Map<String, dynamic>> reviews) {
-    return ListView.separated(
-      padding: EdgeInsets.symmetric(vertical: 16.h),
-      physics: const NeverScrollableScrollPhysics(),
-      shrinkWrap: true,
-      itemCount: reviews.length,
-      itemBuilder: (context, index) {
-        return ReviewTile(
-          name: reviews[index]['name'],
-          rating: reviews[index]['rating'],
-          timeStamp: reviews[index]['time_stamp'],
-          content: reviews[index]['content'],
-        );
-      },
-      separatorBuilder: (_, __) => SizedBox(height: 12.h),
-    );
+  Widget _buildReviewsList(List<SingleReviewModel> reviews) {
+    return reviews.isNotEmpty
+        ? ListView.separated(
+            padding: EdgeInsets.symmetric(vertical: 16.h),
+            physics: const NeverScrollableScrollPhysics(),
+            shrinkWrap: true,
+            itemCount: reviews.length,
+            itemBuilder: (context, index) {
+              return ReviewTile(
+                name: reviews[index].user.name,
+                rating: reviews[index].rating.toDouble(),
+                timeStamp: reviews[index].createdAt.toString(),
+                content: reviews[index].message,
+              );
+            },
+            separatorBuilder: (_, __) => SizedBox(height: 12.h),
+          )
+        : Center(
+            child: Padding(
+              padding: EdgeInsets.symmetric(vertical: 12.h),
+              child: Text('No reviews found.'),
+            ),
+          );
   }
 }
 
@@ -620,8 +677,8 @@ Widget _infoItem(
 }
 
 class CardMenuHeading extends StatelessWidget {
-  const CardMenuHeading({super.key});
-
+  const CardMenuHeading({super.key, required this.menu});
+  final List<MenuItemModel> menu;
   @override
   Widget build(BuildContext context) {
     return Row(
@@ -648,7 +705,7 @@ class CardMenuHeading extends StatelessWidget {
         const Spacer(),
         InkWell(
           onTap: () {
-            UserHomeService.gotoVendorMenu(context);
+            UserHomeService.gotoVendorMenu(context, menu);
           },
           child: Text(
             'See All',
@@ -695,8 +752,8 @@ class CardVendorHoursHeading extends StatelessWidget {
 }
 
 class CardReviewsSectionHeading extends StatelessWidget {
-  const CardReviewsSectionHeading({super.key});
-
+  const CardReviewsSectionHeading({super.key, required this.vendorId});
+  final String vendorId;
   @override
   Widget build(BuildContext context) {
     return Row(
@@ -720,10 +777,10 @@ class CardReviewsSectionHeading extends StatelessWidget {
           isDark: true,
           fontSize: 14.sp,
           onPressed: () {
-            VendorHomeService.gotoReviews(
-              //TODO: Change to User Homer Service
+            UserHomeService.gotoReviews(
               context,
               isVendor: false,
+              vendorId: vendorId,
             );
           },
         ),

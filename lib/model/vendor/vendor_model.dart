@@ -1,5 +1,4 @@
 import 'package:json_annotation/json_annotation.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 part 'vendor_model.g.dart';
 
@@ -23,6 +22,7 @@ class VendorModel {
     this.reviews,
     this.lat,
     this.lng,
+    this.distanceInKm,
   });
 
   factory VendorModel.fromJson(Map<String, dynamic> json) =>
@@ -67,6 +67,9 @@ class VendorModel {
   final List<MenuItemModel>? menu;
 
   final ReviewsModel? reviews;
+
+  @JsonKey(name: 'distance_in_km')
+  final double? distanceInKm;
 }
 
 //

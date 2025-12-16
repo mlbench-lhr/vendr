@@ -56,4 +56,12 @@ class UserAuthRepository {
   Future<Map<String, dynamic>> deleteUserAccount() async {
     return _apiServices.delete(url: AppUrl.deleteUserAccount);
   }
+
+  //add to favorites
+  Future<Map<String, dynamic>> removeFromFavorites({
+    required String vendorId,
+  }) async {
+    final data = {'vendorId': vendorId};
+    return _apiServices.post(url: AppUrl.removeFromFavorites, data: data);
+  }
 }

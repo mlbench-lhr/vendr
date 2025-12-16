@@ -20,18 +20,6 @@ class VendorHomeService {
     );
   }
 
-  // Future<Map<String, dynamic>> getVendorReviews(
-  //   BuildContext context, {
-  //   required String productId,
-  // }) async {
-  //   try {
-  //     final response = await _vendorAuthRepo.getReviews();
-  //     return response;
-  //   } catch (e) {
-  //     if (context.mounted) ErrorHandler.handle(context, e, serviceName: tag);
-  //     return {};
-  //   }
-  // }
   Future<ReviewsModel?> getVendorReviews(BuildContext context) async {
     try {
       //TODO: pagination

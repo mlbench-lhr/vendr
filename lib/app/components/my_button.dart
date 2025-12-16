@@ -53,7 +53,7 @@ class MyButton extends StatelessWidget {
         ),
         icon: isLoading ? null : icon,
         label: isLoading
-            ? LoadingWidget(size: 24.sp, color: context.colors.cardPrimary)
+            ? LoadingWidget(size: 24.sp, color: context.colors.primary)
             : Text(
                 label,
                 style: context.typography.button.copyWith(

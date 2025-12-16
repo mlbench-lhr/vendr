@@ -302,6 +302,9 @@ class AuthService {
       _sessionController.userType = UserType.user;
       await _sessionController.saveUserType();
       if (context.mounted) {
+        await fetchProfile(context);
+      }
+      if (context.mounted) {
         goToUserHome(context);
       }
       debugPrint('[$tag] ✅ User login success');

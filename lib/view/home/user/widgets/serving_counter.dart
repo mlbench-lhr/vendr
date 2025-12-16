@@ -1,92 +1,103 @@
 import 'package:flutter/material.dart';
 
 class ServingCounter extends StatefulWidget {
-  const ServingCounter({super.key});
-
+  const ServingCounter({
+    super.key,
+    required this.onServingChanged,
+    required this.servingsLength,
+  });
+  final ValueChanged<int> onServingChanged;
+  final int servingsLength;
   @override
   State<ServingCounter> createState() => _ServingCounterState();
 }
 
 class _ServingCounterState extends State<ServingCounter> {
+  final List<int> units = [1, 2, 5, 10];
+
   late FixedExtentScrollController _controller;
-  int selected = 1;
+  int selectedIndex = 0;
 
   @override
   void initState() {
     super.initState();
-    _controller = FixedExtentScrollController(initialItem: selected);
+    _controller = FixedExtentScrollController(initialItem: selectedIndex);
   }
 
   void increment() {
-    if (selected < 10) {
-      selected++;
+    if (selectedIndex < units.length - 1) {
+      selectedIndex++;
       _controller.animateToItem(
-        selected,
-        duration: Duration(milliseconds: 200),
+        selectedIndex,
+        duration: const Duration(milliseconds: 180),
         curve: Curves.easeOut,
       );
-      setState(() {});
+      setState(() {
+        widget.onServingChanged(selectedIndex);
+      });
     }
   }
 
   void decrement() {
-    if (selected > 0) {
-      selected--;
+    if (selectedIndex > 0) {
+      selectedIndex--;
       _controller.animateToItem(
-        selected,
-        duration: Duration(milliseconds: 200),
+        selectedIndex,
+        duration: const Duration(milliseconds: 180),
         curve: Curves.easeOut,
       );
-      setState(() {});
+      setState(() {
+        widget.onServingChanged(selectedIndex);
+      });
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: 100,
-      height: 240,
+      width: 120,
       child: Column(
-        mainAxisSize: MainAxisSize.min,
+        mainAxisSize: MainAxisSize.min, // ⭐ IMPORTANT
         children: [
           GestureDetector(
             onTap: decrement,
             child: const Padding(
-              padding: EdgeInsets.all(12.0),
+              padding: EdgeInsets.symmetric(vertical: 8),
               child: Text(
                 "-",
-                style: TextStyle(fontSize: 32, color: Colors.white70),
+                style: TextStyle(fontSize: 28, color: Colors.white70),
               ),
             ),
           ),
 
           SizedBox(
-            height: 100,
-            width: 100,
+            height: 100, // reduced
             child: ListWheelScrollView.useDelegate(
               controller: _controller,
               physics: const FixedExtentScrollPhysics(),
-              itemExtent: 50,
+              itemExtent: 40, // reduced
               onSelectedItemChanged: (index) {
-                selected = index;
+                selectedIndex = index;
                 setState(() {});
               },
               perspective: 0.003,
-              diameterRatio: 1.2,
+              diameterRatio: 1.3,
               childDelegate: ListWheelChildBuilderDelegate(
+                childCount: widget.servingsLength,
                 builder: (context, index) {
-                  if (index < 0 || index > 10) return null;
-
-                  final isSelected = index == selected;
+                  final isSelected = index == selectedIndex;
 
                   return Center(
                     child: Text(
-                      index.toString().padLeft(2, '0'),
+                      "${units[index]}",
                       style: TextStyle(
-                        fontSize: isSelected ? 32 : 26,
+                        fontSize: isSelected ? 26 : 20,
                         color: isSelected
                             ? Colors.white
-                            : Colors.white.withOpacity(0.2),
+                            : Colors.white.withOpacity(0.3),
+                        fontWeight: isSelected
+                            ? FontWeight.w600
+                            : FontWeight.normal,
                       ),
                     ),
                   );
@@ -98,10 +109,10 @@ class _ServingCounterState extends State<ServingCounter> {
           GestureDetector(
             onTap: increment,
             child: const Padding(
-              padding: EdgeInsets.all(12.0),
+              padding: EdgeInsets.symmetric(vertical: 8),
               child: Text(
                 "+",
-                style: TextStyle(fontSize: 32, color: Colors.white70),
+                style: TextStyle(fontSize: 28, color: Colors.white70),
               ),
             ),
           ),

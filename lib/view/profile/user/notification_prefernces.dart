@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:vendr/app/components/my_button.dart';
 import 'package:vendr/app/components/my_scaffold.dart';
 import 'package:vendr/app/utils/extensions/context_extensions.dart';
+import 'package:vendr/app/utils/extensions/flush_bar_extension.dart';
+import 'package:vendr/model/user/user_model.dart';
+import 'package:vendr/services/common/session_manager/session_controller.dart';
+import 'package:vendr/services/user/user_profile_service.dart';
 import 'package:vendr/view/profile/widgets/prefernces_chip.dart';
 
 class NotificationPreferncesScreen extends StatefulWidget {
@@ -14,9 +19,29 @@ class NotificationPreferncesScreen extends StatefulWidget {
 
 class _NotificationPreferncesScreenState
     extends State<NotificationPreferncesScreen> {
-  bool newVendorAlert = true;
-  bool distanceBasedAlerts = true;
-  bool favoriteVendorNotifications = true;
+  bool isLoading = false;
+
+  final _sessionController = SessionController();
+  final _userProfileService = UserProfileService();
+
+  late bool newVendorAlert = true;
+  late bool distanceBasedAlert = true;
+  late bool favoriteVendorAlert = true;
+
+  void setValuesFromSession() {
+    final UserModel user = _sessionController.user!;
+    setState(() {
+      newVendorAlert = user.newVendorAlert ?? false;
+      distanceBasedAlert = user.distanceBasedAlert ?? false;
+      favoriteVendorAlert = user.favoriteVendorAlert ?? false;
+    });
+  }
+
+  @override
+  void initState() {
+    setValuesFromSession();
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -33,7 +58,7 @@ class _NotificationPreferncesScreenState
       ),
       body: Padding(
         padding: EdgeInsets.all(16.w),
-        child: ListView(
+        child: Column(
           children: [
             PreferncesChip(
               label: 'New Vendor Alerts',
@@ -47,21 +72,45 @@ class _NotificationPreferncesScreenState
             SizedBox(height: 15.h),
             PreferncesChip(
               label: 'Distance-based Alerts',
-              value: distanceBasedAlerts,
+              value: distanceBasedAlert,
               onChange: (bool newValue) {
                 setState(() {
-                  distanceBasedAlerts = newValue;
+                  distanceBasedAlert = newValue;
                 });
               },
             ),
             SizedBox(height: 15.h),
             PreferncesChip(
               label: 'Favorite Vendor Notifications',
-              value: favoriteVendorNotifications,
+              value: favoriteVendorAlert,
               onChange: (bool newValue) {
                 setState(() {
-                  favoriteVendorNotifications = newValue;
+                  favoriteVendorAlert = newValue;
                 });
+              },
+            ),
+            const Spacer(),
+            MyButton(
+              isLoading: isLoading,
+              label: 'Save',
+              onPressed: () async {
+                if (mounted) {
+                  setState(() => isLoading = true);
+                }
+                await _userProfileService.updateUserProfile(
+                  context,
+                  newVendorAlert: newVendorAlert,
+                  favoriteVendorAlert: favoriteVendorAlert,
+                  distanceBasedAlert: distanceBasedAlert,
+                  onSuccess: () {
+                    context.flushBarSuccessMessage(
+                      message: 'Settings updated successfully!',
+                    );
+                  },
+                );
+                if (mounted) {
+                  setState(() => isLoading = false);
+                }
               },
             ),
           ],

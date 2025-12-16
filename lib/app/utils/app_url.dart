@@ -37,6 +37,10 @@ class AppUrl {
 
   static String getVendorDetails(String vendorId) =>
       '$baseUrl/auth/vendor/$vendorId/details';
+  static String getVendorReviewsById(String vendorId) =>
+      '$baseUrl/auth/reviews/$vendorId';
+
+  static const String addToFavorites = '$baseUrl/auth/add-favorite';
 
   // ========================
   // Profile Endpoints
@@ -52,6 +56,8 @@ class AppUrl {
   static const String getNotifications = '$baseUrl/auth/notifications';
   static const String editProduct =
       '$baseUrl/auth/vendor/menu/edit/'; // $baseUrl/auth/vendor/menu/edit/productId
+
+  static const String removeFromFavorites = '$baseUrl/auth/remove-favorite';
 
   // ========================
   // Upload Endpoints

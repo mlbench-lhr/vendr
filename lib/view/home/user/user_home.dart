@@ -225,7 +225,6 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
   // UI states
   double? _distanceInKm;
   bool _isCardExpanded = false;
-  bool isVendorProfileLoading = false;
 
   // final List<VendorModel> vendors = List<VendorModel>.from(initialVendors);
   List<VendorModel> nearbyVendors = [];
@@ -776,29 +775,10 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
     return VendorCard(
       vendorId: selectedVendor!.id!,
       isExpanded: _isCardExpanded,
-      isLoading: isVendorProfileLoading,
       onTap: () async {
         setState(() => _isCardExpanded = !_isCardExpanded);
-        if (_isCardExpanded) {
-          setState(() {
-            isVendorProfileLoading = true;
-          });
-          //Load vendor profile
-          final response = await _userHomeService.getVendorDetails(
-            //TODO: Start from here #muttas
-            context: context,
-            vendorId: selected.id!,
-          );
-          if (response != null) {
-            debugPrint('RESPONSE IS: $response');
-          }
-          setState(() {
-            isVendorProfileLoading = false;
-          });
-        }
       },
-
-      distance: _distanceInKm ?? 0.0,
+      distance: selected.distanceInKm ?? 0.0,
       vendorName: selected.name,
       imageUrl: selected.profileImage ?? '',
       vendorAddress: selected.address ?? '',

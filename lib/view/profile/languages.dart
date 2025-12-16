@@ -16,14 +16,14 @@ class _LanguagesScreenState extends State<LanguagesScreen> {
   List<Map<String, dynamic>> locales = [
     {'name': 'English', 'code': 'en'},
     {'name': 'Spanish', 'code': 'es'},
-    {'name': 'French', 'code': 'fr'},
-    {'name': 'German', 'code': 'de'},
-    {'name': 'Chinese (Mandarin)', 'code': 'zh'},
-    {'name': 'Russian', 'code': 'ru'},
-    {'name': 'Portuguese', 'code': 'pt'},
-    {'name': 'Italian', 'code': 'it'},
-    {'name': 'Arabic', 'code': 'ar'},
-    {'name': 'Dutch', 'code': 'nl'},
+    // {'name': 'French', 'code': 'fr'},
+    // {'name': 'German', 'code': 'de'},
+    // {'name': 'Chinese (Mandarin)', 'code': 'zh'},
+    // {'name': 'Russian', 'code': 'ru'},
+    // {'name': 'Portuguese', 'code': 'pt'},
+    // {'name': 'Italian', 'code': 'it'},
+    // {'name': 'Arabic', 'code': 'ar'},
+    // {'name': 'Dutch', 'code': 'nl'},
   ];
 
   @override

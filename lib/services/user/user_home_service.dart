@@ -1,26 +1,44 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:vendr/app/routes/routes_name.dart';
+import 'package:vendr/app/utils/extensions/flush_bar_extension.dart';
 import 'package:vendr/app/utils/service_error_handler.dart';
 import 'package:vendr/model/vendor/vendor_model.dart';
 import 'package:vendr/repository/user_home_repo.dart';
+import 'package:vendr/services/common/auth_service.dart';
 
 class UserHomeService {
   final String tag = '[UserHomeService]';
   final UserHomeRepository _userHomeRepo = UserHomeRepository();
 
+  ///
+  ///gotoNotifications
+  ///
   static void gotoNotifications(BuildContext context) {
     Navigator.pushNamed(context, RoutesName.notificationScreen);
   }
 
+  ///
+  ///gotoSearch
+  ///
   static void gotoSearch(BuildContext context) {
     Navigator.pushNamed(context, RoutesName.userSearch);
   }
 
-  static void gotoVendorMenu(BuildContext context) {
-    Navigator.pushNamed(context, RoutesName.userMenu);
+  ///
+  ///gotoVendorMenu
+  ///
+  static void gotoVendorMenu(BuildContext context, List<MenuItemModel>? menu) {
+    Navigator.pushNamed(
+      context,
+      arguments: {'menu': menu},
+      RoutesName.userMenu,
+    );
   }
 
+  ///
+  ///_buildQueryString
+  ///
   String _buildQueryString(Map<String, dynamic> params) {
     final queryParts = <String>[];
 
@@ -62,6 +80,9 @@ class UserHomeService {
   //   }
   // }
 
+  ///
+  ///getNearbyVendors
+  ///
   Future<List<VendorModel>> getNearbyVendors({
     required BuildContext context,
     required LatLng? location,
@@ -102,20 +123,80 @@ class UserHomeService {
     }
   }
 
+  ///
+  ///getVendorDetails
+  ///
   Future<VendorModel?> getVendorDetails({
     required BuildContext context,
     required String vendorId,
   }) async {
     try {
       final response = await _userHomeRepo.getVendorDetails(vendorId: vendorId);
+      debugPrint('vendor deails $response');
       debugPrint('✅ Vendor Details fetched successfully!');
 
-      return VendorModel.fromJson(response);
+      return VendorModel.fromJson(response['vendor']);
     } catch (e) {
       if (context.mounted) {
         ErrorHandler.handle(context, e, serviceName: tag);
       }
       return null;
+    }
+  }
+
+  static void gotoReviews(
+    BuildContext context, {
+    bool isVendor = true,
+    required String vendorId,
+  }) {
+    Navigator.pushNamed(
+      context,
+      arguments: {'isVendor': isVendor, 'vendorId': vendorId},
+      RoutesName.reviews,
+    );
+  }
+
+  ///
+  ///getVendorReviews
+  ///
+  Future<ReviewsModel?> getVendorReviews(
+    BuildContext context, {
+    required String vendorId,
+  }) async {
+    try {
+      //TODO: pagination
+      final response = await _userHomeRepo.getVendorReviews(
+        vendorId: vendorId,
+        query: '?page=1&limit=99',
+      ); //pagination will be later
+      return ReviewsModel.fromJson(response);
+    } catch (e) {
+      if (context.mounted) {
+        ErrorHandler.handle(context, e, serviceName: tag);
+      }
+      return null;
+    }
+  }
+
+  ///
+  ///addToFavorites
+  ///
+  Future<void> addToFavorites(
+    BuildContext context, {
+    required String vendorId,
+  }) async {
+    try {
+      await _userHomeRepo.addToFavorites(vendorId: vendorId);
+      if (context.mounted) {
+        await AuthService().fetchProfile(context);
+      }
+      // if (context.mounted) {
+      //   context.flushBarSuccessMessage(message: 'Vendor added to favorites');
+      // }
+    } catch (e) {
+      if (context.mounted) {
+        ErrorHandler.handle(context, e, serviceName: tag);
+      }
     }
   }
 }

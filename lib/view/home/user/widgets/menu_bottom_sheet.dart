@@ -3,13 +3,21 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:vendr/app/styles/app_radiuses.dart';
 import 'package:vendr/app/utils/extensions/context_extensions.dart';
 import 'package:vendr/app/utils/extensions/general_extensions.dart';
+import 'package:vendr/model/vendor/vendor_model.dart';
 import 'package:vendr/view/home/user/widgets/serving_counter.dart';
 
-class MenuBottomSheet extends StatelessWidget {
-  const MenuBottomSheet({super.key});
+class MenuBottomSheet extends StatefulWidget {
+  const MenuBottomSheet({super.key, required this.menuItem});
+  final MenuItemModel menuItem;
 
   @override
+  State<MenuBottomSheet> createState() => _MenuBottomSheetState();
+}
+
+class _MenuBottomSheetState extends State<MenuBottomSheet> {
+  @override
   Widget build(BuildContext context) {
+    int selectedServing = 0;
     return Container(
       padding: EdgeInsets.symmetric(vertical: 16.w),
       height: 500.h,
@@ -40,7 +48,7 @@ class MenuBottomSheet extends StatelessWidget {
                         children: [
                           Text(
                             textAlign: TextAlign.left,
-                            'Sandwiches or Wraps',
+                            widget.menuItem.category ?? '',
                             style: context.typography.body.copyWith(
                               fontWeight: FontWeight.w500,
                               color: Colors.white70,
@@ -50,7 +58,7 @@ class MenuBottomSheet extends StatelessWidget {
                             width: 250.w,
                             child: Text(
                               textAlign: TextAlign.left,
-                              'Spicy Chicken Wrap',
+                              widget.menuItem.itemName,
                               style: context.typography.body.copyWith(
                                 fontSize: 34.sp,
                                 fontWeight: FontWeight.w700,
@@ -61,7 +69,7 @@ class MenuBottomSheet extends StatelessWidget {
                       ),
                       Text(
                         textAlign: TextAlign.left,
-                        '\$24.00',
+                        widget.menuItem.servings[selectedServing].servingPrice,
                         style: context.typography.body.copyWith(
                           fontSize: 20.sp,
                           fontWeight: FontWeight.w600,
@@ -72,7 +80,17 @@ class MenuBottomSheet extends StatelessWidget {
                 ),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [ServingCounter(), MenuDetailsImage()],
+                  children: [
+                    ServingCounter(
+                      onServingChanged: (int value) {
+                        setState(() {
+                          selectedServing = value;
+                        });
+                      },
+                      servingsLength: widget.menuItem.servings.length,
+                    ),
+                    MenuDetailsImage(imageUrl: widget.menuItem.imageUrl),
+                  ],
                 ),
                 12.height,
                 Padding(
@@ -86,7 +104,7 @@ class MenuBottomSheet extends StatelessWidget {
                       ),
                       12.height,
                       Text(
-                        'Enjoy a mouthwatering Spicy Chicken Wrap that combines tender chicken breast, fresh vegetables, and zesty sauce, all wrapped in a warm tortilla. This delightful wrap offers a perfect balance of flavors, with a kick of spice that will tantalize your taste buds.',
+                        widget.menuItem.itemDescription ?? '',
                         style: context.typography.bodySmall.copyWith(),
                       ),
                       16.height,
@@ -103,8 +121,8 @@ class MenuBottomSheet extends StatelessWidget {
 }
 
 class MenuDetailsImage extends StatelessWidget {
-  const MenuDetailsImage({super.key});
-
+  const MenuDetailsImage({super.key, required this.imageUrl});
+  final String? imageUrl;
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -116,14 +134,11 @@ class MenuDetailsImage extends StatelessWidget {
           topLeft: Radius.circular(AppRadiuses.hundredRadius),
         ),
         border: Border.all(color: Colors.white12, width: 1.w),
-        image: DecorationImage(
-          fit: BoxFit.cover,
-          image: NetworkImage(
-            //TODO: image will be dynamic
-            'https://img-global.cpcdn.com/recipes/ca64e4220565f1b8/680x781cq80/ekuru-white-moi-moi-recipe-main-photo.jpg',
-          ),
-        ),
+        image: imageUrl != null
+            ? DecorationImage(fit: BoxFit.cover, image: NetworkImage(imageUrl!))
+            : null,
       ),
+      child: imageUrl == null ? Icon(Icons.restaurant_menu, size: 72.w) : null,
     );
   }
 }
