@@ -88,7 +88,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
         .getNearbyVendors(
           context: context,
           location: _userLocation,
-          maxDistance: 999999,
+          maxDistance: 5,
         );
     setState(() {
       nearbyVendors = vendorsResponse;
@@ -234,8 +234,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
       CameraUpdate.newCameraPosition(
         CameraPosition(
           target: _userLocation ?? const LatLng(31.4645193, 74.2540502),
-          // zoom: 15,
-          zoom: 2,
+          zoom: 15,
         ),
       ),
     );
