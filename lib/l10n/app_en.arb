@@ -119,6 +119,8 @@
     "profile_update_successfullu": "Profile updated successfully!",
     "notification_preferences": "Notification Preferences",
     "new_vendor_alerts": "New Vendor Alerts",
+    "failed_to_load": "Failed to load notifications",
+    "no_notification_ava": "No notifications available",
     "distance_based_alert": "Distance-based Alerts",
     "favourite_vendor_notifications": "Favorite Vendor Notifications",
     "favorite_venders_notifications": "Favorite Vendor Notifications",

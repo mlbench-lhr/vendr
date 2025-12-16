@@ -19,6 +19,7 @@ import 'package:vendr/view/reviews/widgets/add_review_bottom_sheet.dart';
 
 class ReviewsScreen extends StatefulWidget {
   const ReviewsScreen({super.key, required this.isVendor, this.vendorId});
+
   final bool isVendor;
   final String? vendorId;
 
@@ -27,75 +28,122 @@ class ReviewsScreen extends StatefulWidget {
 }
 
 class _ReviewsScreenState extends State<ReviewsScreen> {
-  late Future<ReviewsModel?> _reviewsFuture;
+  final List<SingleReviewModel> _reviews = [];
+  final ScrollController _scrollController = ScrollController();
 
-  // Internal analyzed structure: { 'average': double, 'totalReviews': int, 'distribution': { '5.0': double, ... } }
+  bool _isLoading = false;
+  bool _hasMore = true;
+
+  int _page = 1;
+  final int _limit = 50;
+
+  /// { average, totalReviews, distribution }
   final Map<String, dynamic> _ratingAnalysis = {};
 
   @override
   void initState() {
     super.initState();
-    _reviewsFuture = _fetchData();
+    _fetchData();
+
+    _scrollController.addListener(() {
+      if (_scrollController.position.pixels >=
+              _scrollController.position.maxScrollExtent - 100 &&
+          !_isLoading &&
+          _hasMore) {
+        _fetchData();
+      }
+    });
   }
 
-  Future<ReviewsModel?> _fetchData() async {
+  // ============================
+  // FETCH + PAGINATION (MERGED)
+  // ============================
+  Future<void> _fetchData() async {
+    if (_isLoading || !_hasMore) return;
+
+    setState(() => _isLoading = true);
+
+    ReviewsModel? response;
+
     try {
-      // final ReviewsModel? response = await VendorHomeService().getVendorReviews(
-      //   context,
-      // );
-      late final ReviewsModel? response;
       if (widget.isVendor) {
-        response = await VendorHomeService().getVendorReviews(context);
+        response = await VendorHomeService().getVendorReviews(
+          context: context,
+          page: _page,
+          limit: _limit,
+        );
       } else {
         response = await UserHomeService().getVendorReviews(
-          vendorId: widget.vendorId as String,
           context,
+          vendorId: widget.vendorId!,
         );
       }
-
-      if (response == null) return null;
-
-      // Build distribution (1..5) based on provided response.list
-      final List<SingleReviewModel> reviewsList = response.list;
-
-      final Map<int, int> counts = {1: 0, 2: 0, 3: 0, 4: 0, 5: 0};
-      for (final r in reviewsList) {
-        final star = (r.rating < 1)
-            ? 1
-            : (r.rating > 5)
-            ? 5
-            : r.rating;
-        counts[star] = (counts[star] ?? 0) + 1;
-      }
-
-      final int totalReviews = response.totalReviews;
-      final Map<String, double> distribution = {
-        for (var i = 5; i >= 1; i--) '$i.0': 0.0,
-      };
-
-      if (totalReviews > 0) {
-        for (var i = 1; i <= 5; i++) {
-          distribution['$i.0'] = (counts[i]! / totalReviews);
-        }
-      }
-
-      final average = response.averageRating;
-
-      _ratingAnalysis
-        ..clear()
-        ..addAll({
-          'average': double.parse(average.toStringAsFixed(1)),
-          'totalReviews': totalReviews,
-          'distribution': distribution,
-        });
-
-      return response;
-    } catch (e) {
-      debugPrint('Error fetching reviews: $e');
-      return null;
+    } catch (_) {
+      if (mounted) setState(() => _isLoading = false);
+      return;
     }
+
+    if (!mounted) return;
+
+    if (response != null && response.list.isNotEmpty) {
+      setState(() {
+        _reviews.addAll(response!.list);
+        _page++;
+        _hasMore = response.list.length == _limit;
+        _updateRatingAnalysis();
+      });
+    } else {
+      _hasMore = false;
+    }
+
+    setState(() => _isLoading = false);
   }
 
+  // ============================
+  // RATING ANALYSIS (MERGED)
+  // ============================
+  void _updateRatingAnalysis() {
+    final Map<int, int> counts = {1: 0, 2: 0, 3: 0, 4: 0, 5: 0};
+
+    for (final r in _reviews) {
+      final star = r.rating.clamp(1, 5);
+      counts[star] = (counts[star] ?? 0) + 1;
+    }
+
+    final int totalReviews = _reviews.length;
+
+    final Map<String, double> distribution = {
+      for (int i = 5; i >= 1; i--) '$i.0': 0.0,
+    };
+
+    if (totalReviews > 0) {
+      for (int i = 1; i <= 5; i++) {
+        distribution['$i.0'] = counts[i]! / totalReviews;
+      }
+    }
+
+    final double average = totalReviews > 0
+        ? _reviews.map((e) => e.rating).reduce((a, b) => a + b) / totalReviews
+        : 0.0;
+
+    _ratingAnalysis
+      ..clear()
+      ..addAll({
+        'average': double.parse(average.toStringAsFixed(1)),
+        'totalReviews': totalReviews,
+        'distribution': distribution,
+      });
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  // ============================
+  // UI
+  // ============================
   @override
   Widget build(BuildContext context) {
     return MyScaffold(
@@ -110,61 +158,43 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
         centerTitle: true,
       ),
       body: Padding(
-        padding: EdgeInsets.only(top: 16.w, right: 16.w, left: 16.w),
-        child: FutureBuilder<ReviewsModel?>(
-          future: _reviewsFuture,
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(child: LoadingWidget(color: Colors.white));
-            }
-
-            if (snapshot.hasError || !snapshot.hasData) {
-              return _buildEmptyReviews(context);
-            }
-
-            final ReviewsModel data = snapshot.data!;
-            final List<SingleReviewModel> reviews = data.list;
-
-            if (reviews.isEmpty) {
-              return _buildEmptyReviews(context);
-            }
-
-            return ListView(
-              children: [
-                Container(
-                  width: double.infinity,
-                  padding: EdgeInsets.symmetric(
-                    vertical: 12.h,
-                    horizontal: 8.w,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.white12,
-                    borderRadius: BorderRadius.circular(
-                      AppRadiuses.mediumRadius,
+        padding: EdgeInsets.symmetric(horizontal: 16.w),
+        child: _reviews.isEmpty && _isLoading
+            ? const Center(child: LoadingWidget(color: Colors.white))
+            : _reviews.isEmpty
+            ? _buildEmptyReviews(context)
+            : ListView(
+                controller: _scrollController,
+                children: [
+                  16.height,
+                  _buildHeader(context),
+                  24.height,
+                  _buildReviewsList(),
+                  if (_isLoading)
+                    const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 20),
+                      child: Center(child: CircularProgressIndicator()),
                     ),
-                    border: Border.all(color: Colors.white38),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      _buildRatingDistribution(context),
-                      _buildAverageRating(context),
-                    ],
-                  ),
-                ),
-                24.height,
-                _buildReviewsList(reviews),
-                if (!widget.isVendor) 100.height,
-              ],
-            );
-          },
-        ),
+                  if (!_hasMore)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 20),
+                      child: Center(
+                        child: Text(
+                          'No more reviews',
+                          style: context.typography.subtitle,
+                        ),
+                      ),
+                    ),
+                  if (!widget.isVendor) 100.height,
+                ],
+              ),
       ),
-      bottomNavigationBar: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 32.h),
-        child: widget.isVendor
-            ? const SizedBox.shrink()
-            : MyButton(
+      bottomNavigationBar: widget.isVendor
+          ? const SizedBox.shrink()
+          : Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 24.h),
+              child: MyButton(
+                label: 'Write Review',
                 onPressed: () {
                   MyBottomSheet.show(
                     context,
@@ -172,12 +202,110 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
                     isScrollControlled: true,
                     enableDrag: true,
                     backgroundColor: context.colors.primary,
-                    child: AddReviewBottomSheet(),
+                    child: AddReviewBottomSheet(vendorId: widget.vendorId!),
                   );
                 },
-                label: 'Write Review',
               ),
+            ),
+    );
+  }
+
+  // ============================
+  // WIDGETS
+  // ============================
+  Widget _buildHeader(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.symmetric(vertical: 12.h, horizontal: 8.w),
+      decoration: BoxDecoration(
+        color: Colors.white12,
+        borderRadius: BorderRadius.circular(AppRadiuses.mediumRadius),
+        border: Border.all(color: Colors.white38),
       ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          _buildRatingDistribution(context),
+          _buildAverageRating(context),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildReviewsList() {
+    return ListView.separated(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: _reviews.length,
+      itemBuilder: (context, index) {
+        final r = _reviews[index];
+        return ReviewTile(
+          name: r.user.name.isNotEmpty ? r.user.name : 'User',
+          rating: r.rating.toDouble(),
+          timeStamp: ReviewsService.formatTimeAgo(r.createdAt),
+          content: r.message,
+        );
+      },
+      separatorBuilder: (_, __) => Padding(
+        padding: EdgeInsets.symmetric(vertical: 12.h),
+        child: Divider(thickness: 1.5.h),
+      ),
+    );
+  }
+
+  Widget _buildAverageRating(BuildContext context) {
+    final average = _ratingAnalysis['average'] ?? 0.0;
+    final total = _ratingAnalysis['totalReviews'] ?? 0;
+
+    return Column(
+      children: [
+        Text(
+          average.toString(),
+          style: context.typography.title.copyWith(
+            fontSize: 40.sp,
+            fontWeight: FontWeight.w600,
+            color: context.colors.cardPrimary,
+          ),
+        ),
+        RatingBarIndicator(
+          rating: average,
+          itemSize: 17.w,
+          itemBuilder: (_, __) =>
+              const Icon(Icons.star_rounded, color: Colors.amber),
+        ),
+        12.height,
+        Text('$total Reviews'),
+      ],
+    );
+  }
+
+  Widget _buildRatingDistribution(BuildContext context) {
+    final distribution =
+        _ratingAnalysis['distribution'] as Map<String, double>? ?? {};
+
+    return Column(
+      children: List.generate(5, (index) {
+        final star = 5 - index;
+        return Padding(
+          padding: EdgeInsets.only(bottom: 8.h),
+          child: _buildRatingBar(context, star, distribution['$star.0'] ?? 0.0),
+        );
+      }),
+    );
+  }
+
+  Widget _buildRatingBar(BuildContext context, int star, double percentage) {
+    return Row(
+      children: [
+        Text('$star'),
+        const Icon(Icons.star_rounded, color: Colors.amber),
+        LinearPercentIndicator(
+          width: 170.w,
+          lineHeight: 7.5.h,
+          percent: percentage,
+          backgroundColor: Colors.white24,
+          progressColor: context.colors.buttonPrimary,
+        ),
+      ],
     );
   }
 
@@ -196,121 +324,6 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
           ),
         ],
       ),
-    );
-  }
-
-  // build reviews list
-  SizedBox _buildReviewsList(List<SingleReviewModel> reviews) {
-    return SizedBox(
-      child: ListView.separated(
-        physics: const NeverScrollableScrollPhysics(),
-        shrinkWrap: true,
-        itemCount: reviews.length,
-        itemBuilder: (BuildContext context, int index) {
-          final SingleReviewModel r = reviews[index];
-
-          final name = r.user.name.isNotEmpty ? r.user.name : 'User';
-          final rating = r.rating.toDouble();
-          final timeStamp = ReviewsService.formatTimeAgo(r.createdAt);
-          final content = r.message;
-
-          return ReviewTile(
-            name: name,
-            rating: rating,
-            timeStamp: timeStamp,
-            content: content,
-          );
-        },
-        separatorBuilder: (BuildContext context, int index) {
-          return Padding(
-            padding: EdgeInsets.symmetric(vertical: 12.h),
-            child: Divider(thickness: 1.5.h),
-          );
-        },
-      ),
-    );
-  }
-
-  Widget _buildAverageRating(BuildContext context) {
-    final averageRating = _ratingAnalysis['average'] as double? ?? 0.0;
-    final totalReviews = _ratingAnalysis['totalReviews'] as int? ?? 0;
-
-    return Padding(
-      padding: EdgeInsets.only(left: 0.w),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            averageRating.toStringAsFixed(1),
-            style: context.typography.title.copyWith(
-              fontSize: 40.sp,
-              fontWeight: FontWeight.w600,
-              color: context.colors.cardPrimary,
-            ),
-          ),
-          RatingBarIndicator(
-            itemPadding: EdgeInsets.only(right: 2.w),
-            rating: averageRating,
-            itemSize: 17.w,
-            itemBuilder: (context, _) =>
-                const Icon(Icons.star_rounded, color: Colors.amber),
-          ),
-          SizedBox(height: 12.h),
-          Text(
-            '$totalReviews Reviews',
-            style: context.typography.subtitle.copyWith(
-              fontSize: 12.sp,
-              fontWeight: FontWeight.w600,
-              color: context.colors.textPrimary,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildRatingDistribution(BuildContext context) {
-    final distribution =
-        _ratingAnalysis['distribution'] as Map<String, dynamic>? ?? {};
-
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        for (int i = 5; i >= 1; i--)
-          Padding(
-            padding: EdgeInsets.only(bottom: i > 1 ? 10.h : 0),
-            child: _buildRatingBar(
-              context,
-              i,
-              distribution['$i.0'] as double? ?? 0.0,
-            ),
-          ),
-      ],
-    );
-  }
-
-  Widget _buildRatingBar(BuildContext context, int star, double percentage) {
-    return Row(
-      children: [
-        Text(
-          '$star',
-          style: context.typography.subtitle.copyWith(
-            fontSize: 12.sp,
-            fontWeight: FontWeight.w500,
-            color: context.colors.cardSecondary,
-          ),
-        ),
-        SizedBox(width: 5.w),
-        Icon(Icons.star_rounded, size: 16.w, color: Colors.amber),
-        LinearPercentIndicator(
-          barRadius: Radius.circular(120.r),
-          width: 170.w,
-          lineHeight: 7.5.h,
-          percent: percentage,
-          backgroundColor: Colors.white24,
-          progressColor: context.colors.buttonPrimary,
-        ),
-      ],
     );
   }
 }

@@ -51,7 +51,6 @@ class Routes {
     RoutesName.userFavorites: (_) => const UserFavouritsScreen(),
     RoutesName.changePassword: (_) => const ChangePasswordScreen(),
     RoutesName.notificationScreen: (_) => const NotificationsScreen(),
-    RoutesName.userSearch: (_) => const UserSearchScreen(),
     RoutesName.notificationPerefrences: (_) =>
         const NotificationPreferncesScreen(),
     RoutesName.vendorEditProfile: (_) => const VendorEditProfileScreen(),
@@ -113,6 +112,15 @@ class Routes {
             vendorId: args['vendorId'],
           ),
         );
+      case RoutesName.userSearch:
+        final args = _getArgs(settings, requiredKeys: ['onVendorSelected']);
+        return MaterialPageRoute(
+          builder: (_) => UserSearchScreen(
+            onVendorSelected:
+                args['onVendorSelected'] as ValueChanged<VendorModel>,
+          ),
+        );
+
       default:
         final builder = _routes[settings.name];
         if (builder != null) {

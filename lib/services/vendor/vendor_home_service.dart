@@ -20,12 +20,27 @@ class VendorHomeService {
     );
   }
 
-  Future<ReviewsModel?> getVendorReviews(BuildContext context) async {
+  // Future<Map<String, dynamic>> getVendorReviews(
+  //   BuildContext context, {
+  //   required String productId,
+  // }) async {
+  //   try {
+  //     final response = await _vendorAuthRepo.getReviews();
+  //     return response;
+  //   } catch (e) {
+  //     if (context.mounted) ErrorHandler.handle(context, e, serviceName: tag);
+  //     return {};
+  //   }
+  // }
+  Future<ReviewsModel?> getVendorReviews({
+    required BuildContext context,
+    int page = 1,
+    int limit = 50,
+  }) async {
     try {
-      //TODO: pagination
       final response = await _vendorAuthRepo.getReviews(
-        query: '?page=1&limit=99',
-      ); //pagination will be later
+        query: '?page=$page&limit=$limit',
+      );
       return ReviewsModel.fromJson(response);
     } catch (e) {
       if (context.mounted) {

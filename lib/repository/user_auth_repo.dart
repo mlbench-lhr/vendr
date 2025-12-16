@@ -64,4 +64,35 @@ class UserAuthRepository {
     final data = {'vendorId': vendorId};
     return _apiServices.post(url: AppUrl.removeFromFavorites, data: data);
   }
+
+  //Add User Review
+  Future<Map<String, dynamic>> addUserReview(Map<String, dynamic> data) async {
+    return _apiServices.post(url: AppUrl.addUserReview, data: data);
+  }
+
+  //Search Vendors
+  Future<Map<String, dynamic>> searchVendors({required String query}) async {
+    // Trim and ensure query is string
+    final safeQuery = (query.trim().isEmpty) ? '' : query.trim();
+
+    // If empty, skip backend call and return empty results
+    if (safeQuery.isEmpty) {
+      return {'success': true, 'vendors': []};
+    }
+
+    final uri = Uri.parse(
+      AppUrl.searchVendors,
+    ).replace(queryParameters: {'query': safeQuery});
+
+    debugPrint('Search Vendor API URL: ${uri.toString()}'); // debug
+
+    final response = await _apiServices.get(url: uri.toString());
+
+    // Ensure success key exists
+    if (response['success'] is! bool) {
+      return {'success': false, 'vendors': []};
+    }
+
+    return response;
+  }
 }
