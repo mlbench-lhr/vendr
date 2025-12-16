@@ -31,7 +31,8 @@ class SessionController extends ChangeNotifier {
   UserType? userType;
 
   String? get token => _token;
-  String? get refreshToken => _refreshToken;
+  String? get refreshToken =>
+      _refreshToken; //TODO: Refresh token logic isn't implemented yet.
   UserModel? get user => _user;
   VendorModel? get vendor => _vendor;
   bool get isLoggedIn => _token != null;

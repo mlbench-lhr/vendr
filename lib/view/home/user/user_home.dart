@@ -6,11 +6,9 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
-import 'package:http/http.dart';
 import 'package:vendr/app/components/loading_widget.dart';
 import 'package:vendr/app/components/my_bottom_sheet.dart';
 import 'package:vendr/app/components/my_text_field.dart';
-import 'package:vendr/app/styles/app_durations.dart';
 import 'package:vendr/app/styles/app_radiuses.dart';
 import 'package:vendr/app/utils/app_constants.dart';
 import 'package:vendr/app/utils/extensions/context_extensions.dart';
@@ -25,177 +23,6 @@ import 'package:vendr/services/user/user_profile_service.dart';
 import 'package:vendr/view/home/user/widgets/location_permission_required.dart';
 import 'package:vendr/view/home/user/widgets/vendor_card.dart';
 import 'package:vendr/view/home/vendor/vendor_home.dart';
-
-/// Initial vendor list (as provided)
-// final List<VendorModel> initialVendors = [
-//   VendorModel(
-//     name: 'Harry Brook',
-//     address: '15 Maiden Ln Suite 908, New York, NY 10038',
-//     // lat: 31.50293,
-//     // lng: 74.34801,
-//     lat: 37.785100,
-//     lng: -122.406000,
-//     phone: '09876542',
-//     email: 'harry@brook.com',
-//     vendorType: 'Food vendor',
-//     menu: [
-//       MenuItemModel(
-//         itemName: 'First Item',
-//         servings: [
-//           ServingModel(servingQuantity: 'Single Serving', servingPrice: '\$73'),
-//         ],
-//       ),
-//       MenuItemModel(
-//         itemName: 'Second Item',
-//         servings: [
-//           ServingModel(servingQuantity: 'Single Serving', servingPrice: '\$73'),
-//         ],
-//       ),
-//       MenuItemModel(
-//         itemName: 'Third Item',
-//         servings: [
-//           ServingModel(servingQuantity: 'Single Serving', servingPrice: '\$73'),
-//         ],
-//       ),
-//     ],
-//     hoursADay: '10 Hours',
-//     profileImage:
-//         'https://images.unsplash.com/photo-1600891964599-f61ba0e24092?auto=format&fit=crop&w=800&q=80',
-//     id: '1harry',
-//   ),
-//   VendorModel(
-//     id: '2emma',
-//     name: 'Emma Stone',
-//     email: 'emma@stone.com',
-//     phone: '09876542',
-//     address: '22 Broadway, New York, NY 10007',
-
-//     // lat: 31.46719,
-//     // lng: 74.26598,
-//     lat: 37.786300,
-//     lng: -122.405450,
-//     vendorType: 'Grocery vendor',
-//     menu: [
-//       MenuItemModel(
-//         itemName: 'First Item',
-//         servings: [
-//           ServingModel(servingQuantity: 'Single Serving', servingPrice: '\$73'),
-//         ],
-//       ),
-//       MenuItemModel(
-//         itemName: 'Second Item',
-//         servings: [
-//           ServingModel(servingQuantity: 'Single Serving', servingPrice: '\$73'),
-//         ],
-//       ),
-//     ],
-//     hoursADay: '10 Hours',
-//     profileImage:
-//         'https://images.unsplash.com/photo-1604719312566-8912e9227c6a?q=80&w=1074&auto=format&fit=crop&ixlib=rb-4.1.0',
-//   ),
-//   VendorModel(
-//     name: 'Tom Hanks',
-//     address: '34 Wall Street, New York, NY 10005',
-//     lat: 31.47124,
-//     lng: 74.35593,
-//     vendorType: 'Electronics vendor',
-//     phone: '09876542',
-//     email: 'tom@hank.com',
-//     menu: [
-//       MenuItemModel(
-//         itemName: 'First Item',
-//         servings: [
-//           ServingModel(servingQuantity: 'Single Serving', servingPrice: '\$73'),
-//         ],
-//       ),
-//       MenuItemModel(
-//         itemName: 'Second Item',
-//         servings: [
-//           ServingModel(servingQuantity: 'Single Serving', servingPrice: '\$73'),
-//         ],
-//       ),
-//       MenuItemModel(
-//         itemName: 'Third Item',
-//         servings: [
-//           ServingModel(servingQuantity: 'Single Serving', servingPrice: '\$73'),
-//         ],
-//       ),
-//       MenuItemModel(
-//         itemName: 'Fourth Item',
-//         servings: [
-//           ServingModel(servingQuantity: 'Single Serving', servingPrice: '\$73'),
-//         ],
-//       ),
-//       MenuItemModel(
-//         itemName: 'Fifth Item',
-//         servings: [
-//           ServingModel(servingQuantity: 'Single Serving', servingPrice: '\$73'),
-//         ],
-//       ),
-//     ],
-//     hoursADay: '10 Hours',
-//     profileImage:
-//         'https://images.unsplash.com/photo-1519520104014-df63821cb6f9?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0',
-//     id: '3tom',
-//   ),
-//   VendorModel(
-//     id: '4sophia',
-//     name: 'Sophia Lee',
-//     address: '10 Park Ave, New York, NY 10016',
-//     lat: 31.450,
-//     lng: 74.310,
-//     vendorType: 'Clothing vendor',
-//     phone: '09876542',
-//     email: 'sophia@lee.com',
-//     menu: [
-//       MenuItemModel(
-//         itemName: 'First Item',
-//         servings: [
-//           ServingModel(servingQuantity: 'Single Serving', servingPrice: '\$73'),
-//         ],
-//       ),
-//       MenuItemModel(
-//         itemName: 'Second Item',
-//         servings: [
-//           ServingModel(servingQuantity: 'Single Serving', servingPrice: '\$73'),
-//         ],
-//       ),
-//       MenuItemModel(
-//         itemName: 'Third Item',
-//         servings: [
-//           ServingModel(servingQuantity: 'Single Serving', servingPrice: '\$73'),
-//         ],
-//       ),
-//       MenuItemModel(
-//         itemName: 'Fourth Item',
-//         servings: [
-//           ServingModel(servingQuantity: 'Single Serving', servingPrice: '\$73'),
-//         ],
-//       ),
-//       MenuItemModel(
-//         itemName: 'Fifth Item',
-//         servings: [
-//           ServingModel(servingQuantity: 'Single Serving', servingPrice: '\$73'),
-//         ],
-//       ),
-//       MenuItemModel(
-//         itemName: 'Sixth Item',
-//         servings: [
-//           ServingModel(servingQuantity: 'Single Serving', servingPrice: '\$73'),
-//         ],
-//       ),
-//       MenuItemModel(
-//         itemName: 'Seventh Item',
-//         servings: [
-//           ServingModel(servingQuantity: 'Single Serving', servingPrice: '\$73'),
-//         ],
-//       ),
-//     ],
-//     hoursADay: '10 Hours',
-//     profileImage:
-//         'https://images.unsplash.com/photo-1762844877991-54c007866283?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0',
-//   ),
-// ];
 
 class UserHomeScreen extends StatefulWidget {
   const UserHomeScreen({super.key});
@@ -259,7 +86,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
         .getNearbyVendors(
           context: context,
           location: _userLocation,
-          maxDistance: 5,
+          maxDistance: 999999,
         );
     setState(() {
       nearbyVendors = vendorsResponse;
@@ -384,7 +211,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
 
       final position = await Geolocator.getCurrentPosition(
         locationSettings: const LocationSettings(
-          accuracy: LocationAccuracy.high,
+          accuracy: LocationAccuracy.bestForNavigation,
         ),
       );
 
@@ -406,7 +233,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
         CameraPosition(
           target: _userLocation ?? const LatLng(31.4645193, 74.2540502),
           // zoom: 15,
-          zoom: 15,
+          zoom: 2,
         ),
       ),
     );

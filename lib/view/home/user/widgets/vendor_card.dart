@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:vendr/app/components/loading_widget.dart';
 import 'package:vendr/app/components/menu_item_tile.dart';
 import 'package:vendr/app/components/my_bottom_sheet.dart';
@@ -9,6 +10,7 @@ import 'package:vendr/app/components/my_text_button.dart';
 import 'package:vendr/app/components/review_tile.dart';
 import 'package:vendr/app/styles/app_radiuses.dart';
 import 'package:vendr/app/utils/extensions/context_extensions.dart';
+import 'package:vendr/app/utils/extensions/flush_bar_extension.dart';
 import 'package:vendr/app/utils/extensions/general_extensions.dart';
 import 'package:vendr/model/user/user_model.dart';
 import 'package:vendr/model/vendor/vendor_model.dart';
@@ -380,64 +382,71 @@ class _VendorCardState extends State<VendorCard> {
       children: [
         CardVendorHoursHeading(hoursADay: widget.hoursADay ?? '0'),
         SizedBox(height: 16.h),
-        Wrap(
-          spacing: 10.w,
-          runSpacing: 10.w,
-          children: [
-            VendorHoursCard(
-              day: 'Monday',
-              startTime: selectedVendorDetails?.hours!.days.monday.start,
-              endTime: selectedVendorDetails?.hours!.days.monday.end,
-              isEnabled:
-                  selectedVendorDetails?.hours!.days.monday.enabled ?? false,
-            ),
-            VendorHoursCard(
-              day: 'Tuesday',
-              // startTime: '09:00 AM',
-              // endTime: '06:00 PM',
-              startTime: selectedVendorDetails?.hours!.days.tuesday.start,
-              endTime: selectedVendorDetails?.hours!.days.tuesday.end,
-              isEnabled:
-                  selectedVendorDetails?.hours!.days.tuesday.enabled ?? false,
-            ),
-            VendorHoursCard(
-              day: 'Wednesday',
-              startTime: selectedVendorDetails?.hours!.days.wednesday.start,
-              endTime: selectedVendorDetails?.hours!.days.wednesday.end,
-              isEnabled:
-                  selectedVendorDetails?.hours!.days.wednesday.enabled ?? false,
-            ),
-            VendorHoursCard(
-              day: 'Thursday',
-              startTime: selectedVendorDetails?.hours!.days.thursday.start,
-              endTime: selectedVendorDetails?.hours!.days.thursday.end,
-              isEnabled:
-                  selectedVendorDetails?.hours!.days.thursday.enabled ?? false,
-            ),
-            VendorHoursCard(
-              day: 'Friday',
-              startTime: selectedVendorDetails?.hours!.days.friday.start,
-              endTime: selectedVendorDetails?.hours!.days.friday.end,
-              isEnabled:
-                  selectedVendorDetails?.hours!.days.friday.enabled ?? false,
-            ),
-            VendorHoursCard(
-              day: 'Saturday',
-              startTime: selectedVendorDetails?.hours!.days.saturday.start,
-              endTime: selectedVendorDetails?.hours!.days.saturday.end,
-              isEnabled:
-                  selectedVendorDetails?.hours!.days.saturday.enabled ?? false,
-            ),
-            VendorHoursCard(
-              day: 'Sunday',
-              startTime: selectedVendorDetails?.hours!.days.sunday.start,
-              endTime: selectedVendorDetails?.hours!.days.sunday.end,
-              isEnabled:
-                  selectedVendorDetails?.hours!.days.sunday.enabled ?? false,
-            ),
-          ],
-        ),
-        SizedBox(height: 24.h),
+        if (selectedVendorDetails?.hours != null) ...[
+          Wrap(
+            spacing: 10.w,
+            runSpacing: 10.w,
+            children: [
+              VendorHoursCard(
+                day: 'Monday',
+                startTime: selectedVendorDetails?.hours!.days.monday.start,
+                endTime: selectedVendorDetails?.hours!.days.monday.end,
+                isEnabled:
+                    selectedVendorDetails?.hours!.days.monday.enabled ?? false,
+              ),
+              VendorHoursCard(
+                day: 'Tuesday',
+                // startTime: '09:00 AM',
+                // endTime: '06:00 PM',
+                startTime: selectedVendorDetails?.hours!.days.tuesday.start,
+                endTime: selectedVendorDetails?.hours!.days.tuesday.end,
+                isEnabled:
+                    selectedVendorDetails?.hours!.days.tuesday.enabled ?? false,
+              ),
+              VendorHoursCard(
+                day: 'Wednesday',
+                startTime: selectedVendorDetails?.hours!.days.wednesday.start,
+                endTime: selectedVendorDetails?.hours!.days.wednesday.end,
+                isEnabled:
+                    selectedVendorDetails?.hours!.days.wednesday.enabled ??
+                    false,
+              ),
+              VendorHoursCard(
+                day: 'Thursday',
+                startTime: selectedVendorDetails?.hours!.days.thursday.start,
+                endTime: selectedVendorDetails?.hours!.days.thursday.end,
+                isEnabled:
+                    selectedVendorDetails?.hours!.days.thursday.enabled ??
+                    false,
+              ),
+              VendorHoursCard(
+                day: 'Friday',
+                startTime: selectedVendorDetails?.hours!.days.friday.start,
+                endTime: selectedVendorDetails?.hours!.days.friday.end,
+                isEnabled:
+                    selectedVendorDetails?.hours!.days.friday.enabled ?? false,
+              ),
+              VendorHoursCard(
+                day: 'Saturday',
+                startTime: selectedVendorDetails?.hours!.days.saturday.start,
+                endTime: selectedVendorDetails?.hours!.days.saturday.end,
+                isEnabled:
+                    selectedVendorDetails?.hours!.days.saturday.enabled ??
+                    false,
+              ),
+              VendorHoursCard(
+                day: 'Sunday',
+                startTime: selectedVendorDetails?.hours!.days.sunday.start,
+                endTime: selectedVendorDetails?.hours!.days.sunday.end,
+                isEnabled:
+                    selectedVendorDetails?.hours!.days.sunday.enabled ?? false,
+              ),
+            ],
+          ),
+          SizedBox(height: 14.h),
+        ],
+
+        SizedBox(height: 10.h),
         CardReviewsSectionHeading(vendorId: widget.vendorId),
         _buildReviewsList(selectedVendorDetails?.reviews?.list ?? []),
         SizedBox(height: 75.h),
@@ -475,7 +484,34 @@ class _VendorCardState extends State<VendorCard> {
               ],
             ),
             const Spacer(),
-            _actionButton(icon: Icons.call_outlined, label: 'Call'),
+            _actionButton(
+              icon: Icons.call_outlined,
+              label: 'Call',
+              onPressed: () async {
+                if (selectedVendorDetails?.phone != null) {
+                  debugPrint(
+                    'Launching dialer: ${selectedVendorDetails!.phone}',
+                  );
+                  final Uri uri = Uri(
+                    scheme: 'tel',
+                    path: selectedVendorDetails!.phone,
+                  );
+
+                  if (await canLaunchUrl(uri)) {
+                    await launchUrl(uri);
+                  } else {
+                    debugPrint('Could not launch dialer');
+                    if (context.mounted) {
+                      context.flushBarErrorMessage(
+                        message: 'Could not launch dialer',
+                      );
+                    }
+                  }
+                } else {
+                  debugPrint('❌ Phone number is null');
+                }
+              },
+            ),
             12.width,
             _actionButton(
               icon: Icons.share_outlined,
@@ -576,34 +612,36 @@ class _VendorCardState extends State<VendorCard> {
   }
 
   Widget _buildMenuItems(List<MenuItemModel> menuItems) {
-    return SizedBox(
-      width: double.infinity,
-      height: 200.h,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        shrinkWrap: true,
-        itemCount: menuItems.length,
-        itemBuilder: (context, index) {
-          return MenuItemTile(
-            onTap: () {
-              MyBottomSheet.show(
-                context,
-                isDismissible: true,
-                enableDrag: true,
-                isScrollControlled: true,
-                backgroundColor: context.colors.primary,
-                child: MenuBottomSheet(menuItem: menuItems[index]),
-                // child: AddReviewBottomSheet(),
-              );
-            },
-            name: menuItems[index].itemName,
-            price: menuItems[index].servings.first.servingPrice,
-            imageUrl: menuItems[index].imageUrl,
-          );
-        },
-        separatorBuilder: (_, __) => SizedBox(width: 16.w),
-      ),
-    );
+    return menuItems.isNotEmpty
+        ? SizedBox(
+            width: double.infinity,
+            height: 200.h,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              shrinkWrap: true,
+              itemCount: menuItems.length,
+              itemBuilder: (context, index) {
+                return MenuItemTile(
+                  onTap: () {
+                    MyBottomSheet.show(
+                      context,
+                      isDismissible: true,
+                      enableDrag: true,
+                      isScrollControlled: true,
+                      backgroundColor: context.colors.primary,
+                      child: MenuBottomSheet(menuItem: menuItems[index]),
+                      // child: AddReviewBottomSheet(),
+                    );
+                  },
+                  name: menuItems[index].itemName,
+                  price: menuItems[index].servings.first.servingPrice,
+                  imageUrl: menuItems[index].imageUrl,
+                );
+              },
+              separatorBuilder: (_, __) => SizedBox(width: 16.w),
+            ),
+          )
+        : SizedBox.shrink();
   }
 
   Widget _buildReviewsList(List<SingleReviewModel> reviews) {
@@ -617,11 +655,11 @@ class _VendorCardState extends State<VendorCard> {
               return ReviewTile(
                 name: reviews[index].user.name,
                 rating: reviews[index].rating.toDouble(),
-                timeStamp: reviews[index].createdAt.toString(),
+                timeStamp: _formatDate(reviews[index].createdAt),
                 content: reviews[index].message,
               );
             },
-            separatorBuilder: (_, __) => SizedBox(height: 12.h),
+            separatorBuilder: (_, _) => SizedBox(height: 12.h),
           )
         : Center(
             child: Padding(
@@ -630,6 +668,10 @@ class _VendorCardState extends State<VendorCard> {
             ),
           );
   }
+}
+
+String _formatDate(DateTime date) {
+  return '${date.month}/${date.day}/${date.year}';
 }
 
 /// Reusable info item row
@@ -701,7 +743,7 @@ class CardMenuHeading extends StatelessWidget {
           ),
         ),
         SizedBox(width: 6.w),
-        Text('25 Products', style: TextStyle(fontSize: 10.sp)),
+        Text('${menu.length} Products', style: TextStyle(fontSize: 10.sp)),
         const Spacer(),
         InkWell(
           onTap: () {

@@ -55,7 +55,7 @@ class _UserProfileState extends State<UserProfileScreen> {
       body: Center(
         child: Padding(
           padding: EdgeInsets.symmetric(vertical: 16.w),
-          child: Column(
+          child: ListView(
             children: [
               CircleAvatar(
                 radius: 40.r,
@@ -144,7 +144,7 @@ class _UserProfileState extends State<UserProfileScreen> {
                 },
                 showArrow: false,
               ),
-              const Spacer(),
+              SizedBox(height: 24.h),
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: 16.w),
                 child: MyButton(

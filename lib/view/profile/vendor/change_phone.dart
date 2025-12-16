@@ -57,7 +57,7 @@ class _ChangePhoneNumberScreenState extends State<ChangePhoneNumberScreen> {
                 // Allows digits (0-9) and the plus sign (+)
                 FilteringTextInputFormatter.allow(RegExp(r'[0-9+]')),
               ],
-              hint: 'Enter new phone number',
+              hint: 'Enter old phone number',
               suffixIcon: Icon(Icons.phone_outlined),
               controller: _phoneController,
             ),

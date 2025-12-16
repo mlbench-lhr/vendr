@@ -1,5 +1,8 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:vendr/app/components/menu_item_tile.dart';
 import 'package:vendr/app/components/my_scaffold.dart';
 import 'package:vendr/app/components/my_text_button.dart';
@@ -12,6 +15,7 @@ import 'package:vendr/services/common/reviews_service.dart';
 import 'package:vendr/services/common/session_manager/session_controller.dart';
 import 'package:vendr/services/user/user_home_service.dart';
 import 'package:vendr/services/vendor/vendor_home_service.dart';
+import 'package:web_socket_channel/web_socket_channel.dart';
 
 class VendorHomeScreen extends StatefulWidget {
   const VendorHomeScreen({super.key});
@@ -28,12 +32,93 @@ class _VendorHomeScreenState extends State<VendorHomeScreen> {
   @override
   void initState() {
     super.initState();
+    //request permissoin
     sessionController.addListener(_onSessionChanged);
+    _requestLocationPermission();
   }
+
+  ///
+  ///Location permission and Websockets
+  ///
+  Future<bool> _requestLocationPermission() async {
+    try {
+      LocationPermission permission = await Geolocator.checkPermission();
+
+      // Already granted
+      if (permission == LocationPermission.whileInUse ||
+          permission == LocationPermission.always) {
+        // initializeWebSockets();  //TODO: uncomment after backend completion
+        return true;
+      }
+
+      // Not granted yet. Request
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+
+        if (permission == LocationPermission.whileInUse ||
+            permission == LocationPermission.always) {
+          // initializeWebSockets(); //TODO: uncomment after backend completion
+          return true; // granted after request
+        }
+      }
+
+      // Denied forever or still denied
+      return false;
+    } catch (e) {
+      debugPrint('Location permission error: $e');
+      return false;
+    }
+  }
+
+  late final WebSocketChannel channel;
+  void initializeWebSockets() {
+    debugPrint('🔌 Initializing web sockets...');
+    try {
+      //init websockets
+      channel = WebSocketChannel.connect(Uri.parse('wss://yourserver.com/ws'));
+      //send location continuosly
+      Geolocator.getPositionStream(
+        locationSettings: const LocationSettings(
+          accuracy: LocationAccuracy.high,
+          distanceFilter: 5,
+        ),
+      ).listen((position) {
+        sendVendorLocation(
+          vendorId: "vendor_123",
+          lat: position.latitude,
+          lng: position.longitude,
+        );
+      });
+    } catch (e) {
+      debugPrint('Websockets connection failed. Error: $e');
+    }
+  }
+
+  void sendVendorLocation({
+    required String vendorId,
+    required double lat,
+    required double lng,
+  }) {
+    final data = {
+      "type": "VENDOR_LOCATION",
+      "vendorId": vendorId,
+      "lat": lat,
+      "lng": lng,
+      "timestamp": DateTime.now().toIso8601String(),
+    };
+
+    channel.sink.add(jsonEncode(data));
+  }
+
+  ///
+  ///END: Location permission and Websockets
+  ///
 
   void _onSessionChanged() {
     if (mounted) setState(() {});
   }
+
+  /// Fetch user's current location
 
   @override
   void dispose() {

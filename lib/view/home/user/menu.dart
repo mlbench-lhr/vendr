@@ -15,50 +15,6 @@ class UserMenuScreen extends StatefulWidget {
 }
 
 class _UserMenuScreenState extends State<UserMenuScreen> {
-  // List<Map<String, dynamic>> items = [
-  //   {
-  //     'id': 1,
-  //     'name': 'Veggie tomato mix',
-  //     'price': '\$100',
-  //     'imageUrl':
-  //         'https://assets.bonappetit.com/photos/5d4356436f98a4000898782b/4:3/w_3376,h_2532,c_limit/Basically-Ratatouille-Pasta.jpg',
-  //   },
-  //   {
-  //     'id': 2,
-  //     'name': 'Moi-moi and ekpa.',
-  //     'price': '\$150',
-  //     'imageUrl':
-  //         'https://img-global.cpcdn.com/recipes/ca64e4220565f1b8/680x781cq80/ekuru-white-moi-moi-recipe-main-photo.jpg',
-  //   },
-  //   {
-  //     'id': 3,
-  //     'name': 'Egg and cucumber recipe',
-  //     'price': '\$80',
-  //     'imageUrl':
-  //         'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQSLE0q7GC9bUMkvUVCNH0tmVRaohM_jTeEyw&s',
-  //   },
-  //   {
-  //     'id': 4,
-  //     'name': 'Veggie tomato mix',
-  //     'price': '\$100',
-  //     'imageUrl':
-  //         'https://assets.bonappetit.com/photos/5d4356436f98a4000898782b/4:3/w_3376,h_2532,c_limit/Basically-Ratatouille-Pasta.jpg',
-  //   },
-  //   {
-  //     'id': 5,
-  //     'name': 'Moi-moi and ekpa.',
-  //     'price': '\$150',
-  //     'imageUrl':
-  //         'https://img-global.cpcdn.com/recipes/ca64e4220565f1b8/680x781cq80/ekuru-white-moi-moi-recipe-main-photo.jpg',
-  //   },
-  //   {
-  //     'id': 6,
-  //     'name': 'Egg and cucumber recipe',
-  //     'price': '\$80',
-  //     'imageUrl':
-  //         'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQSLE0q7GC9bUMkvUVCNH0tmVRaohM_jTeEyw&s',
-  //   },
-  // ];
   @override
   Widget build(BuildContext context) {
     return MyScaffold(
@@ -74,31 +30,38 @@ class _UserMenuScreenState extends State<UserMenuScreen> {
       ),
       body: Padding(
         padding: EdgeInsets.all(16.w),
-        child: Wrap(
-          spacing: 14.w,
-          runSpacing: 14.w,
-          children: [
-            ...widget.menuList.map((item) {
-              return MenuItemTile(
-                onTap: () {
-                  //show bottom sheet
-                  MyBottomSheet.show(
-                    context,
-                    isDismissible: true,
-                    enableDrag: true,
-                    isScrollControlled: true,
-                    backgroundColor: context.colors.primary,
-                    child: MenuBottomSheet(menuItem: item),
-                    // child: AddReviewBottomSheet(),
-                  );
-                },
-                name: item.itemName,
-                price: item.servings.first.servingPrice,
-                imageUrl: item.imageUrl,
-              );
-            }),
-          ],
-        ),
+        child: widget.menuList.isNotEmpty
+            ? Wrap(
+                spacing: 14.w,
+                runSpacing: 14.w,
+                children: [
+                  ...widget.menuList.map((item) {
+                    return MenuItemTile(
+                      onTap: () {
+                        //show bottom sheet
+                        MyBottomSheet.show(
+                          context,
+                          isDismissible: true,
+                          enableDrag: true,
+                          isScrollControlled: true,
+                          backgroundColor: context.colors.primary,
+                          child: MenuBottomSheet(menuItem: item),
+                          // child: AddReviewBottomSheet(),
+                        );
+                      },
+                      name: item.itemName,
+                      price: item.servings.first.servingPrice,
+                      imageUrl: item.imageUrl,
+                    );
+                  }),
+                ],
+              )
+            : Center(
+                child: Text(
+                  'No menu items found.',
+                  style: context.typography.body.copyWith(),
+                ),
+              ),
       ),
     );
   }
