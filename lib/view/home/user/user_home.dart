@@ -10,6 +10,7 @@ import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:vendr/app/components/loading_widget.dart';
 import 'package:vendr/app/components/my_bottom_sheet.dart';
 import 'package:vendr/app/components/my_text_field.dart';
+import 'package:vendr/app/routes/routes_name.dart';
 import 'package:vendr/app/styles/app_radiuses.dart';
 import 'package:vendr/app/utils/app_constants.dart';
 import 'package:vendr/app/utils/extensions/context_extensions.dart';
@@ -21,6 +22,7 @@ import 'package:vendr/model/vendor/vendor_model.dart';
 import 'package:vendr/services/common/session_manager/session_controller.dart';
 import 'package:vendr/services/user/user_home_service.dart';
 import 'package:vendr/services/user/user_profile_service.dart';
+import 'package:vendr/view/home/user/user_search.dart';
 import 'package:vendr/view/home/user/widgets/location_permission_required.dart';
 import 'package:vendr/view/home/user/widgets/vendor_card.dart';
 import 'package:vendr/view/home/vendor/vendor_home.dart';
@@ -382,11 +384,18 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
   /// Draw route from user to vendor
   Future<void> _drawRouteToVendor(LatLng vendor, int index) async {
     final user = _userLocation;
-    if (user == null) return;
+
+    if (user == null) {
+      // If user location is not available, just move camera to vendor
+      final controller = await _controller.future;
+      controller.animateCamera(CameraUpdate.newLatLngZoom(vendor, 15));
+      selectVendor(index);
+      return;
+    }
 
     clearPolylines();
 
-    // Calculate straight-line distance
+    // Calculate distance
     final meters = Geolocator.distanceBetween(
       user.latitude,
       user.longitude,
@@ -405,7 +414,6 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
       );
 
       if (result.points.isEmpty) {
-        // Draw straight dashed line if no route
         addOrReplacePolyline(
           Polyline(
             polylineId: PolylineId('straight_$index'),
@@ -416,7 +424,6 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
           ),
         );
       } else {
-        // Draw actual route
         final coords = result.points
             .map((p) => LatLng(p.latitude, p.longitude))
             .toList();
@@ -430,7 +437,9 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
         );
       }
 
-      _zoomMapToBounds(user, vendor);
+      // Move camera to vendor after drawing route
+      final controller = await _controller.future;
+      controller.animateCamera(CameraUpdate.newLatLngZoom(vendor, 15));
     } catch (e) {
       debugPrint('Error creating route: $e');
     }
@@ -695,7 +704,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
   Widget _buildSearchField() {
     return GestureDetector(
       onTap: () {
-        UserHomeService.gotoSearch(context);
+        openVendorSearch(); // NEW: open search screen
       },
       child: AbsorbPointer(
         child: MyTextField(
@@ -704,6 +713,27 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
           hint: 'Search Vendors',
         ),
       ),
+    );
+  }
+
+  /// Open User Search Screen and handle selected vendor
+  Future<void> openVendorSearch() async {
+    Navigator.pushNamed(
+      context,
+      RoutesName.userSearch,
+      arguments: {
+        'onVendorSelected': (VendorModel vendor) {
+          final index = vendors.indexWhere((v) => v.id == vendor.id);
+          if (index != -1) {
+            selectVendor(index);
+
+            // Move camera to selected vendor
+            if (_userLocation != null && vendors[index].location != null) {
+              _drawRouteToVendor(vendors[index].location!, index);
+            }
+          }
+        },
+      },
     );
   }
 

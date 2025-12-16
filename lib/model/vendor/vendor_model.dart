@@ -3,14 +3,18 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 part 'vendor_model.g.dart';
 
+/// ------------------------------------------------
+///                VendorModel
+/// ------------------------------------------------
 @JsonSerializable()
 class VendorModel {
   VendorModel({
-    required this.name,
-    required this.email,
-    required this.phone,
-    required this.vendorType,
     required this.id,
+    required this.name,
+    required this.vendorType,
+    this.email = '',
+    this.phone = '',
+    this.provider,
     this.verified,
     this.profileImage,
     this.address,
@@ -19,24 +23,41 @@ class VendorModel {
     this.menu,
     this.hours,
     this.hoursADay,
-    this.provider,
     this.reviews,
   });
 
-  factory VendorModel.fromJson(Map<String, dynamic> json) =>
-      _$VendorModelFromJson(json);
+  factory VendorModel.fromJson(Map<String, dynamic> json) {
+    final model = _$VendorModelFromJson(json);
+    return VendorModel(
+      id: model.id,
+      name: model.name,
+      vendorType: model.vendorType,
+      email: model.email,
+      phone: model.phone,
+      provider: model.provider,
+      verified: model.verified,
+      profileImage: model.profileImage,
+      address: model.address,
+      routes: model.routes,
+      menu: model.menu,
+      hours: model.hours,
+      hoursADay: model.hoursADay,
+      reviews: model.reviews,
+      location: VendorModel._fromTopLevelJson(json),
+    );
+  }
 
   Map<String, dynamic> toJson() => _$VendorModelToJson(this);
-
-  // ------------------------
-  // Vendor Fields
-  // ------------------------
 
   @JsonKey(name: '_id')
   final String? id;
 
   final String name;
+
+  @JsonKey(defaultValue: '')
   final String email;
+
+  @JsonKey(defaultValue: '')
   final String phone;
 
   @JsonKey(name: 'vendor_type')
@@ -53,45 +74,56 @@ class VendorModel {
 
   final List<Map<String, dynamic>>? routes;
 
-  // Hours (nested)
   final HoursModel? hours;
-
   final String? hoursADay;
 
-  // Location mapping from JSON → LatLng
+  /// ✅ Fixed LatLng parsing: support top-level `lat` and `lng`
   @JsonKey(fromJson: _latLngFromJson, toJson: _latLngToJson)
   final LatLng? location;
 
-  // Menus array from API
   @JsonKey(name: 'menus')
   final List<MenuItemModel>? menu;
 
+  /// 🔥 IMPORTANT:
+  /// Search API DOES NOT return reviews
+  /// Ignoring prevents runtime crashes
+  @JsonKey(ignore: true)
   final ReviewsModel? reviews;
 
   // ------------------------
   // LatLng Converters
   // ------------------------
 
-  static LatLng? _latLngFromJson(Map<String, dynamic>? json) {
-    if (json == null) return null;
-    return LatLng(
-      (json['lat'] as num).toDouble(),
-      (json['lng'] as num).toDouble(),
-    );
+  static LatLng? _latLngFromJson(dynamic json) {
+    if (json is Map<String, dynamic>) {
+      final lat = json['lat'];
+      final lng = json['lng'];
+      if (lat != null && lng != null) {
+        return LatLng((lat as num).toDouble(), (lng as num).toDouble());
+      }
+    }
+    return null;
   }
 
   static Map<String, dynamic>? _latLngToJson(LatLng? v) {
     if (v == null) return null;
-    return {"lat": v.latitude, "lng": v.longitude};
+    return {'lat': v.latitude, 'lng': v.longitude};
+  }
+
+  /// Helper to create LatLng from top-level fields
+  static LatLng? _fromTopLevelJson(Map<String, dynamic> json) {
+    final lat = json['lat'];
+    final lng = json['lng'];
+    if (lat != null && lng != null) {
+      return LatLng((lat as num).toDouble(), (lng as num).toDouble());
+    }
+    return null;
   }
 }
 
-//
-// -----------------------------
-//      MenuItemModel
-// -----------------------------
-//
-
+/// ------------------------------------------------
+///                MenuItemModel
+/// ------------------------------------------------
 @JsonSerializable()
 class MenuItemModel {
   MenuItemModel({
@@ -127,12 +159,9 @@ class MenuItemModel {
   final List<ServingModel> servings;
 }
 
-//
-// -----------------------------
-//      ServingModel
-// -----------------------------
-//
-
+/// ------------------------------------------------
+///                ServingModel
+/// ------------------------------------------------
 @JsonSerializable()
 class ServingModel {
   ServingModel({required this.servingQuantity, required this.servingPrice});
@@ -149,12 +178,9 @@ class ServingModel {
   final String servingPrice;
 }
 
-//
-// -----------------------------
-//      HoursModel
-// -----------------------------
-//
-
+/// ------------------------------------------------
+///                HoursModel
+/// ------------------------------------------------
 @JsonSerializable()
 class HoursModel {
   HoursModel({required this.days});
@@ -206,12 +232,9 @@ class DayHours {
   final String end;
 }
 
-//
-// -----------------------------
-//      ReviewsModel
-// -----------------------------
-//
-
+/// ------------------------------------------------
+///                ReviewsModel
+/// ------------------------------------------------
 class ReviewsModel {
   final double averageRating;
   final int totalReviews;
@@ -223,15 +246,6 @@ class ReviewsModel {
     required this.list,
   });
 
-  // factory ReviewsModel.fromJson(Map<String, dynamic> json) {
-  //   return ReviewsModel(
-  //     averageRating: (json['average_rating'] ?? 0).toDouble(),
-  //     totalReviews: json['total_reviews'] ?? 0,
-  //     list: (json['list'] as List? ?? [])
-  //         .map((e) => SingleReviewModel.fromJson(e))
-  //         .toList(),
-  //   );
-  // }
   factory ReviewsModel.fromJson(Map<String, dynamic> json) {
     return ReviewsModel(
       averageRating: (json['average_rating'] ?? 0).toDouble(),
@@ -246,7 +260,7 @@ class ReviewsModel {
     return {
       'average_rating': averageRating,
       'total_reviews': totalReviews,
-      'list': list.map((e) => e.toJson()).toList(),
+      'reviews': list.map((e) => e.toJson()).toList(),
     };
   }
 }

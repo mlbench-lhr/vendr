@@ -7,20 +7,19 @@ part of 'vendor_model.dart';
 // **************************************************************************
 
 VendorModel _$VendorModelFromJson(Map<String, dynamic> json) => VendorModel(
-  name: json['name'] as String,
-  email: json['email'] as String,
-  phone: json['phone'] as String,
-  vendorType: json['vendor_type'] as String,
   id: json['_id'] as String?,
+  name: json['name'] as String,
+  vendorType: json['vendor_type'] as String,
+  email: json['email'] as String? ?? '',
+  phone: json['phone'] as String? ?? '',
+  provider: json['provider'] as String?,
   verified: json['verified'] as bool?,
   profileImage: json['profile_image'] as String?,
   address: json['shop_address'] as String?,
   routes: (json['routes'] as List<dynamic>?)
       ?.map((e) => e as Map<String, dynamic>)
       .toList(),
-  location: VendorModel._latLngFromJson(
-    json['location'] as Map<String, dynamic>?,
-  ),
+  location: VendorModel._latLngFromJson(json['location']),
   menu: (json['menus'] as List<dynamic>?)
       ?.map((e) => MenuItemModel.fromJson(e as Map<String, dynamic>))
       .toList(),
@@ -28,10 +27,6 @@ VendorModel _$VendorModelFromJson(Map<String, dynamic> json) => VendorModel(
       ? null
       : HoursModel.fromJson(json['hours'] as Map<String, dynamic>),
   hoursADay: json['hoursADay'] as String?,
-  provider: json['provider'] as String?,
-  reviews: json['reviews'] == null
-      ? null
-      : ReviewsModel.fromJson(json['reviews'] as Map<String, dynamic>),
 );
 
 Map<String, dynamic> _$VendorModelToJson(VendorModel instance) =>
@@ -50,7 +45,6 @@ Map<String, dynamic> _$VendorModelToJson(VendorModel instance) =>
       'hoursADay': instance.hoursADay,
       'location': VendorModel._latLngToJson(instance.location),
       'menus': instance.menu,
-      'reviews': instance.reviews,
     };
 
 MenuItemModel _$MenuItemModelFromJson(Map<String, dynamic> json) =>

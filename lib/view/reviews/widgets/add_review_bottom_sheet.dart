@@ -3,11 +3,15 @@ import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:vendr/app/components/my_button.dart';
 import 'package:vendr/app/components/my_text_field.dart';
+import 'package:vendr/app/data/exception/app_exceptions.dart';
 import 'package:vendr/app/styles/app_radiuses.dart';
 import 'package:vendr/app/utils/extensions/context_extensions.dart';
+import 'package:vendr/app/utils/extensions/flush_bar_extension.dart';
+import 'package:vendr/services/user/user_home_service.dart';
 
 class AddReviewBottomSheet extends StatefulWidget {
-  const AddReviewBottomSheet({super.key});
+  final String vendorId; // pass vendorId to the sheet
+  const AddReviewBottomSheet({super.key, required this.vendorId});
 
   @override
   State<AddReviewBottomSheet> createState() => _AddReviewBottomSheetState();
@@ -17,9 +21,55 @@ class _AddReviewBottomSheetState extends State<AddReviewBottomSheet> {
   double rating = 0;
   final TextEditingController feedbackController = TextEditingController();
   bool isLoading = false;
+
+  Future<void> _submitReview() async {
+    if (isLoading) return;
+
+    final msg = feedbackController.text.trim();
+    if (rating == 0 || msg.isEmpty) {
+      context.flushBarErrorMessage(
+        message: 'Please provide rating and feedback',
+      );
+      return;
+    }
+
+    setState(() => isLoading = true);
+
+    try {
+      await UserHomeService().submitReview(
+        message: msg,
+        vendorId: widget.vendorId,
+        rating: rating.toInt(),
+        context: context,
+      );
+
+      if (!mounted) return;
+
+      context.flushBarSuccessMessage(message: 'Review added successfully');
+
+      // ✅ close only on success (safe)
+      Future.delayed(const Duration(milliseconds: 300), () {
+        if (mounted) {
+          Navigator.of(context).pop(true);
+        }
+      });
+    } on AppException catch (e) {
+      if (!mounted) return;
+
+      context.flushBarErrorMessage(message: e.userMessage);
+    } catch (_) {
+      if (!mounted) return;
+
+      context.flushBarErrorMessage(message: 'Something went wrong');
+    } finally {
+      if (mounted) {
+        setState(() => isLoading = false);
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    // Return a transparent scaffold so the background stays clear
     return Padding(
       padding: EdgeInsets.all(16.w),
       child: Column(
@@ -57,7 +107,7 @@ class _AddReviewBottomSheetState extends State<AddReviewBottomSheet> {
           SizedBox(height: 10.h),
           RatingBar.builder(
             unratedColor: Colors.white,
-            itemBuilder: (_, __) =>
+            itemBuilder: (_, _) =>
                 Icon(Icons.star_rounded, size: 17.w, color: Colors.amber),
             onRatingUpdate: (value) {
               setState(() => rating = value);
@@ -81,9 +131,7 @@ class _AddReviewBottomSheetState extends State<AddReviewBottomSheet> {
           MyButton(
             isLoading: isLoading,
             label: 'Add',
-            onPressed: () {
-              debugPrint('Reviews add press');
-            },
+            onPressed: _submitReview,
           ),
         ],
       ),

@@ -32,12 +32,15 @@ class VendorHomeService {
   //     return {};
   //   }
   // }
-  Future<ReviewsModel?> getVendorReviews(BuildContext context) async {
+  Future<ReviewsModel?> getVendorReviews({
+    required BuildContext context,
+    int page = 1,
+    int limit = 50,
+  }) async {
     try {
-      //TODO: pagination
       final response = await _vendorAuthRepo.getReviews(
-        query: '?page=1&limit=99',
-      ); //pagination will be later
+        query: '?page=$page&limit=$limit',
+      );
       return ReviewsModel.fromJson(response);
     } catch (e) {
       if (context.mounted) {

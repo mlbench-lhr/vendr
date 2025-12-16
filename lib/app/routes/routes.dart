@@ -2,6 +2,7 @@ import 'dart:developer';
 import 'package:vendr/app/routes/routes_name.dart';
 import 'package:vendr/app/routes/unknown_page.dart';
 import 'package:flutter/material.dart';
+import 'package:vendr/model/vendor/vendor_model.dart';
 import 'package:vendr/view/auth/forgot_password/forgot_password.dart';
 import 'package:vendr/view/auth/forgot_password/new_password.dart';
 import 'package:vendr/view/auth/login.dart';
@@ -50,7 +51,6 @@ class Routes {
     RoutesName.userFavorites: (_) => const UserFavouritsScreen(),
     RoutesName.changePassword: (_) => const ChangePasswordScreen(),
     RoutesName.notificationScreen: (_) => const NotificationsScreen(),
-    RoutesName.userSearch: (_) => const UserSearchScreen(),
     RoutesName.notificationPerefrences: (_) =>
         const NotificationPreferncesScreen(),
     RoutesName.vendorEditProfile: (_) => const VendorEditProfileScreen(),
@@ -104,6 +104,15 @@ class Routes {
         return MaterialPageRoute(
           builder: (_) => ReviewsScreen(isVendor: args['isVendor'] as bool),
         );
+      case RoutesName.userSearch:
+        final args = _getArgs(settings, requiredKeys: ['onVendorSelected']);
+        return MaterialPageRoute(
+          builder: (_) => UserSearchScreen(
+            onVendorSelected:
+                args['onVendorSelected'] as ValueChanged<VendorModel>,
+          ),
+        );
+
       default:
         final builder = _routes[settings.name];
         if (builder != null) {
