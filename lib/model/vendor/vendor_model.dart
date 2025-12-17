@@ -119,20 +119,62 @@ class MenuItemModel {
 // -----------------------------
 //
 
+// @JsonSerializable()
+// class ServingModel {
+//   ServingModel({
+//     this.id,
+//     required this.servingQuantity,
+//     required this.servingPrice,
+//   });
+
+//   factory ServingModel.fromJson(Map<String, dynamic> json) =>
+//       _$ServingModelFromJson(json);
+
+//   Map<String, dynamic> toJson() => _$ServingModelToJson(this);
+
+//   final int? id;
+
+//   @JsonKey(name: 'serving')
+//   final String servingQuantity;
+
+//   @JsonKey(name: 'price')
+//   final String servingPrice;
+// }
+
 @JsonSerializable()
 class ServingModel {
-  ServingModel({required this.servingQuantity, required this.servingPrice});
+  ServingModel({
+    this.id,
+    required this.servingQuantity,
+    required this.servingPrice,
+  });
 
   factory ServingModel.fromJson(Map<String, dynamic> json) =>
       _$ServingModelFromJson(json);
 
   Map<String, dynamic> toJson() => _$ServingModelToJson(this);
 
+  final int? id;
+
   @JsonKey(name: 'serving')
   final String servingQuantity;
 
   @JsonKey(name: 'price')
   final String servingPrice;
+
+  // ----------------------------
+  // copyWith for immutable updates
+  ServingModel copyWith({
+    int? id,
+    String? servingQuantity,
+    String? servingPrice,
+  }) {
+    return ServingModel(
+      id: id ?? this.id,
+      servingQuantity: servingQuantity ?? this.servingQuantity,
+      servingPrice: servingPrice ?? this.servingPrice,
+    );
+  }
 }
 
 //

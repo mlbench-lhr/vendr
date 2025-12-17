@@ -7,7 +7,7 @@ import 'package:vendr/services/common/auth_service.dart';
 import 'package:vendr/services/common/session_manager/session_controller.dart';
 
 class VendorProfileService {
-  String tag = '[Vendor Profile Service]';
+  String tag = 'Vendor Profile Service';
   final _sessionController = SessionController();
   final _vendorAuthRepo = VendorAuthRepository();
 
@@ -123,7 +123,7 @@ class VendorProfileService {
     String? imageUrl,
     String? category,
     String? description,
-    List<Map<String, dynamic>>? servings,
+    List<ServingModel>? servings,
     VoidCallback? onSuccess,
   }) async {
     final Map<String, dynamic> data = {
@@ -132,7 +132,7 @@ class VendorProfileService {
       'servings': servings,
       'description': description,
       'image_url': imageUrl,
-      // 'image': imageUrl,
+      'image': imageUrl,
     };
 
     try {

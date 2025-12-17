@@ -81,26 +81,28 @@ class _VendorMyMenuScreenState extends State<VendorMyMenuScreen> {
       body: Padding(
         padding: EdgeInsets.all(16.w),
         child: menuItems.isNotEmpty
-            ? Wrap(
-                spacing: 14.w,
-                runSpacing: 14.w,
-                children: [
-                  ...menuItems.map((item) {
-                    return MenuItemTile(
-                      onTap: () {
-                        //edit product
-                        VendorProfileService.gotoAddEditProduct(
-                          context,
-                          true,
-                          item,
-                        ); //isEdit = true
-                      },
-                      name: item.itemName,
-                      price: item.servings.first.servingPrice,
-                      imageUrl: item.imageUrl,
-                    );
-                  }),
-                ],
+            ? SingleChildScrollView(
+                child: Wrap(
+                  spacing: 14.w,
+                  runSpacing: 14.w,
+                  children: [
+                    ...menuItems.map((item) {
+                      return MenuItemTile(
+                        onTap: () {
+                          //edit product
+                          VendorProfileService.gotoAddEditProduct(
+                            context,
+                            true,
+                            item,
+                          ); //isEdit = true
+                        },
+                        name: item.itemName,
+                        price: item.servings.first.servingPrice,
+                        imageUrl: item.imageUrl,
+                      );
+                    }),
+                  ],
+                ),
               )
             : Center(
                 child: Text(

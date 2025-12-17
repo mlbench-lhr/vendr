@@ -25,7 +25,7 @@ class _ServingCounterState extends State<ServingCounter> {
   }
 
   void increment() {
-    if (selectedIndex < units.length - 1) {
+    if (selectedIndex < widget.servingsLength - 1) {
       selectedIndex++;
       _controller.animateToItem(
         selectedIndex,
@@ -65,13 +65,13 @@ class _ServingCounterState extends State<ServingCounter> {
               padding: EdgeInsets.symmetric(vertical: 8),
               child: Text(
                 "-",
-                style: TextStyle(fontSize: 28, color: Colors.white70),
+                style: TextStyle(fontSize: 34, color: Colors.white70),
               ),
             ),
           ),
 
           SizedBox(
-            height: 100, // reduced
+            height: 90, // reduced
             child: ListWheelScrollView.useDelegate(
               controller: _controller,
               physics: const FixedExtentScrollPhysics(),
@@ -112,7 +112,7 @@ class _ServingCounterState extends State<ServingCounter> {
               padding: EdgeInsets.symmetric(vertical: 8),
               child: Text(
                 "+",
-                style: TextStyle(fontSize: 28, color: Colors.white70),
+                style: TextStyle(fontSize: 34, color: Colors.white70),
               ),
             ),
           ),

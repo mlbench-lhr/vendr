@@ -52,8 +52,8 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
   );
 
   // Use consistent keys: 'id', 'serving', 'price'
-  List<Map<String, dynamic>> servings = [
-    {'id': 1, 'serving': '1 Unit', 'price': '\$1'},
+  List<ServingModel> existingServings = [
+    ServingModel(id: 1, servingQuantity: '1 Unit', servingPrice: '\$1'),
   ];
 
   Set<String> categories = {};
@@ -93,39 +93,44 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
 
   void setExistingProductData() {
     if (widget.isEdit && widget.product != null) {
+      //product name
       _productNameController.text = widget.product!.itemName;
+      //description
       _productDescriptionController.text =
           widget.product!.itemDescription ?? '';
+      //category
       selectedCategory = widget.product!.category ?? selectedCategory;
-      debugPrint('Selected Category is: ${widget.product!.category}');
-      debugPrint('SET : Selected Category is: $selectedCategory');
+      //image
       _imageUrl = widget.product!.imageUrl ?? '';
-
-      // If product has servings (depending on your API model),
-      // map them into `servings`. Uncomment/adapt if your API returns servings.
-      // if (widget.product!.servings != null && widget.product!.servings.isNotEmpty) {
-      //   servings = [];
-      //   int idCounter = 1;
-      //   for (final s in widget.product!.servings) {
-      //     servings.add({
-      //       'id': idCounter++,
-      //       'serving': s['serving'] ?? servingTypes.first,
-      //       'price': s['price'] ?? prices.first,
-      //     });
-      //   }
-      // }
+      //servings
+      if (
+      // widget.product!.servings != null &&
+      widget.product!.servings.isNotEmpty) {
+        existingServings = [];
+        int idCounter = 1;
+        for (final s in widget.product!.servings) {
+          existingServings.add(
+            ServingModel(
+              id: idCounter++,
+              servingQuantity: s.servingQuantity,
+              servingPrice: s.servingPrice,
+            ),
+          );
+        }
+      }
     }
   }
 
   int _indexOfId(int id) {
-    return servings.indexWhere((s) => s['id'] == id);
+    return existingServings.indexWhere((s) => s.id == id);
   }
 
   @override
   Widget build(BuildContext context) {
+    final vendor = _session.vendor;
     // Build a set of currently chosen serving types (for filtering)
-    final Set<String> chosenTypes = servings
-        .map((s) => (s['serving'] ?? '') as String)
+    final Set<String> chosenTypes = existingServings
+        .map((s) => s.servingQuantity)
         .where((s) => s.isNotEmpty)
         .toSet();
 
@@ -225,6 +230,8 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
               MyFormTextField(
                 borderRadius: 16.r,
                 maxLines: 5,
+                keyboardType: TextInputType.multiline,
+                textInputAction: TextInputAction.newline,
                 hint: 'Add product description here...',
                 textCapitalization: TextCapitalization.none,
                 controller: _productDescriptionController,
@@ -238,10 +245,10 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
               ),
               16.height,
               // Map servings to ServingSection, computing available serving types per section
-              ...servings.map((serving) {
-                final int id = serving['id'] as int;
-                final String currentServingValue = serving['serving'] as String;
-                final String currentPriceValue = serving['price'] as String;
+              ...existingServings.map((serving) {
+                final int id = serving.id as int;
+                final String currentServingValue = serving.servingQuantity;
+                final String currentPriceValue = serving.servingPrice;
 
                 // Use chosenTypes set to compute available types for this section
                 // Include this section's current serving so it doesn't vanish.
@@ -263,9 +270,9 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
                   priceValue: currentPriceValue,
                   onRemove: () {
                     debugPrint('Removed id: $id');
-                    if (servings.length > 1) {
+                    if (existingServings.length > 1) {
                       setState(() {
-                        servings.removeWhere((item) => item['id'] == id);
+                        existingServings.removeWhere((item) => item.id == id);
                       });
                       debugPrint('Removed id = $id');
                     } else {
@@ -274,33 +281,45 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
                       );
                     }
                   },
+                  // onServingUpdate: (String value) {
+                  //   final idx = _indexOfId(id);
+                  //   if (idx != -1) {
+                  //     setState(() {
+                  //       servings[idx]['serving'] = value;
+                  //     });
+                  //   }
+                  // },
                   onServingUpdate: (String value) {
-                    debugPrint('ID TO BE UPDATED $id to $value');
                     final idx = _indexOfId(id);
                     if (idx != -1) {
                       setState(() {
-                        servings[idx]['serving'] = value;
+                        existingServings[idx] = existingServings[idx].copyWith(
+                          servingQuantity: value,
+                        );
                       });
                     }
                   },
+
                   onPriceUpdate: (String value) {
-                    debugPrint('ID TO BE UPDATED $id price to $value');
                     final idx = _indexOfId(id);
                     if (idx != -1) {
                       setState(() {
-                        servings[idx]['price'] = value;
+                        // servings[idx]['price'] = value;
+                        existingServings[idx] = existingServings[idx].copyWith(
+                          servingPrice: value,
+                        );
                       });
                     }
                   },
                 );
               }),
               10.height,
-              if (servings.length < servingTypes.length)
+              if (existingServings.length < servingTypes.length)
                 AddNewBtn(
                   // when adding new serving, pick the first unused serving type if possible
                   addServing: () {
-                    final Set<String> chosen = servings
-                        .map((s) => (s['serving'] ?? '') as String)
+                    final Set<String> chosen = existingServings
+                        .map((s) => s.servingQuantity)
                         .where((s) => s.isNotEmpty)
                         .toSet();
                     final String newServingType = servingTypes.firstWhere(
@@ -308,17 +327,24 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
                       orElse: () => servingTypes.first,
                     );
 
-                    int newId = servings.isNotEmpty
-                        ? (servings.last['id'] as int) + 1
+                    int newId = existingServings.isNotEmpty
+                        ? (existingServings.last.id as int) + 1
                         : 1;
                     debugPrint('new ID $newId');
                     setState(() {
-                      servings.add({
-                        'id': newId,
-                        'serving': newServingType,
-                        'price': prices.first,
-                      });
-                      debugPrint('Serving added; $servings');
+                      existingServings.add(
+                        //   {
+                        //   'id': newId,
+                        //   'serving': newServingType,
+                        //   'price': prices.first,
+                        // }
+                        ServingModel(
+                          id: newId,
+                          servingQuantity: newServingType,
+                          servingPrice: prices.first,
+                        ),
+                      );
+                      debugPrint('Serving added; $existingServings');
                     });
                   },
                 ),
@@ -328,15 +354,32 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
                 isLoading: isLoading,
                 onPressed: () async {
                   if (!formKey.currentState!.validate()) return;
+                  //check if image is added
                   if (_imageUrl.isEmpty) {
                     context.flushBarErrorMessage(message: 'Image is required');
                     return;
                   }
 
+                  //check if same name already exists
+                  if (!widget.isEdit) {
+                    if (vendor!.menu != null) {
+                      if (vendor.menu!.any(
+                        (item) =>
+                            item.itemName.toLowerCase() ==
+                            _productNameController.text,
+                      )) {
+                        context.flushBarErrorMessage(
+                          message:
+                              'Duplicate product found. Please try a different name.',
+                        );
+                        return;
+                      }
+                    }
+                  }
+
                   if (mounted) {
                     setState(() => isLoading = true);
                   }
-
                   // request here...
                   await _vendorProfileService.editOrUploadProduct(
                     context,
@@ -346,13 +389,20 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
                     category: selectedCategory,
                     productName: _productNameController.text,
                     description: _productDescriptionController.text,
-                    servings: servings,
+                    servings: existingServings,
                     onSuccess: () {
-                      context.flushBarSuccessMessage(
-                        message: widget.isEdit
-                            ? 'Product uploaded successfully!'
-                            : 'Product added successfully!',
-                      );
+                      // context.flushBarSuccessMessage(
+                      //   message: widget.isEdit
+                      //       ? 'Product updated successfully!'
+                      //       : 'Product added successfully!',
+                      // );
+                      if (widget.isEdit) {
+                        context.flushBarSuccessMessage(
+                          message: 'Product updated successfully!',
+                        );
+                      } else {
+                        Navigator.pop(context);
+                      }
                     },
                   );
 

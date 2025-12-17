@@ -17,7 +17,10 @@ class ProfileMenuTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      onTap: onTap,
+      onTap: () async {
+        await Future.delayed(Duration(milliseconds: 150));
+        onTap();
+      },
       child: Container(
         margin: EdgeInsets.symmetric(vertical: 12.h, horizontal: 16.w),
         color: Colors.transparent,

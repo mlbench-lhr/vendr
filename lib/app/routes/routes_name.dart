@@ -8,7 +8,8 @@ class RoutesName {
   static const String vendorSignup = 'vendor_signup_screen';
   static const String forgotPassword = 'forgot_password_screen';
   static const String newPassword = 'new_password_screen';
-  static const String changePassword = 'changeUserPassword';
+  static const String changePassword = 'change_password_screen';
+  static const String noConnection = 'no_connection_screen';
 
   //Home
   static const String vendorHome = 'vendor_home_screen';

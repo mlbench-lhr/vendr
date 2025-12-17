@@ -162,7 +162,10 @@ class _LoginScreenState extends State<LoginScreen> {
                 children: [
                   GestureDetector(
                     onTap: () {
-                      AuthService.gotoForgotPassword(context);
+                      AuthService.gotoForgotPassword(
+                        context,
+                        isVendor: widget.isVendor,
+                      );
                     },
                     child: Text(
                       'Forgot password?',

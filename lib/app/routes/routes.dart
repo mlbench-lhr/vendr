@@ -6,6 +6,7 @@ import 'package:vendr/model/vendor/vendor_model.dart';
 import 'package:vendr/view/auth/forgot_password/forgot_password.dart';
 import 'package:vendr/view/auth/forgot_password/new_password.dart';
 import 'package:vendr/view/auth/login.dart';
+import 'package:vendr/view/auth/no_connection.dart';
 import 'package:vendr/view/auth/profile_type.dart';
 import 'package:vendr/view/auth/user/user_signup.dart';
 import 'package:vendr/view/auth/vendor/vendor_signup.dart';
@@ -34,14 +35,15 @@ import 'package:vendr/view/splash/splash_view.dart';
 
 class Routes {
   static String initialRoute() => RoutesName.splash;
-  // static String initialRoute() => RoutesName.userHome;
+  // static String initialRoute() => RoutesName.noConnection;
   static final Map<String, WidgetBuilder> _routes = {
     RoutesName.splash: (_) => const SplashView(),
     RoutesName.welcome: (_) => const WelcomeScreen(),
     RoutesName.profileTypeSelection: (_) => const ProfileTypeSelectionScreen(),
+    RoutesName.noConnection: (_) => const NoConnectionScreen(),
     RoutesName.userSignup: (_) => const UserSignupScreen(),
     RoutesName.vendorSignup: (_) => const VendorSignupScreen(),
-    RoutesName.forgotPassword: (_) => const ForgotPasswordScreen(),
+
     RoutesName.vendorHome: (_) => const VendorHomeScreen(),
     RoutesName.userHome: (_) => const UserHomeScreen(),
     RoutesName.vendorProfile: (_) => const VendorProfileScreen(),
@@ -78,6 +80,13 @@ class Routes {
         final args = _getArgs(settings, requiredKeys: ['isVendor']);
         return MaterialPageRoute(
           builder: (_) => LoginScreen(isVendor: args['isVendor'] as bool),
+        );
+
+      case RoutesName.forgotPassword:
+        final args = _getArgs(settings, requiredKeys: ['isVendor']);
+        return MaterialPageRoute(
+          builder: (_) =>
+              ForgotPasswordScreen(isVendor: args['isVendor'] as bool),
         );
 
       case RoutesName.newPassword:

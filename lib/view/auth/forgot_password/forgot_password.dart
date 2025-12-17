@@ -11,8 +11,8 @@ import 'package:vendr/app/utils/extensions/validations_exception.dart';
 import 'package:vendr/services/common/auth_service.dart';
 
 class ForgotPasswordScreen extends StatefulWidget {
-  const ForgotPasswordScreen({super.key});
-
+  const ForgotPasswordScreen({super.key, required this.isVendor});
+  final bool isVendor;
   @override
   State<ForgotPasswordScreen> createState() => _ForgotPasswordScreenState();
 }
@@ -57,6 +57,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
       context: context,
       // isDoctor: widget.isDoctor,
       email: emailController.text.trim(),
+      isUser: !widget.isVendor,
     );
     if (isSent) {
       _startTimer();

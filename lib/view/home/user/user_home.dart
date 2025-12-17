@@ -88,7 +88,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
         .getNearbyVendors(
           context: context,
           location: _userLocation,
-          maxDistance: 5,
+          maxDistance: 5, //km TODO: set to 5
         );
     setState(() {
       nearbyVendors = vendorsResponse;
@@ -117,29 +117,30 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
 
   Future<void> _showLocationPermissionSheet() async {
     //show bottom sheet here
-    if (mounted) {
-      await MyBottomSheet.show(
-        context,
-        isDismissible: true,
-        isScrollControlled: true,
-        enableDrag: true,
-        useSafeArea: false,
-        backgroundColor: context.colors.primary.withOpacity(0.0),
-        child: const LocationPermissionRequired(),
-      );
-      checkLocationPermission();
-    }
+    if (!mounted) return;
+    await MyBottomSheet.show(
+      context,
+      isDismissible: true,
+      isScrollControlled: true,
+      enableDrag: true,
+      useSafeArea: false,
+      backgroundColor: context.colors.primary.withOpacity(0.0),
+      child: const LocationPermissionRequired(),
+    );
+    checkLocationPermission();
   }
 
   void _onSessionChanged() {
-    if (mounted) setState(() {});
+    if (!mounted) return;
+    setState(() {});
   }
 
   /// Load map style and custom marker assets
   Future<void> _loadAssets() async {
     await _loadMapStyle();
     await _loadCustomMarker();
-    if (mounted) setState(() => _assetsLoaded = true);
+    if (!mounted) return;
+    setState(() => _assetsLoaded = true);
   }
 
   /// Load Google Map night theme style
@@ -339,7 +340,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
     });
   }
 
-  void unselectVendor() {
+  Future<void> unselectVendor() async {
     if (_selectedVendorIndex == null && _polylines.isEmpty) return;
     setState(() {
       _selectedVendorIndex = null;
@@ -435,7 +436,9 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
   /// User avatar in AppBar
   Widget _buildUserAvatar() {
     return GestureDetector(
-      onTap: () {
+      onTap: () async {
+        await unselectVendor();
+        if (!mounted) return;
         UserProfileService.gotoUserProfile(context);
       },
       child: CircleAvatar(
@@ -540,7 +543,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
       padding: EdgeInsets.symmetric(vertical: 20.w, horizontal: 16.w),
       initialCameraPosition: CameraPosition(
         target: _userLocation ?? const LatLng(31.4645193, 74.2540502),
-        zoom: 14.4,
+        zoom: 15,
       ),
       markers: buildMarkers(customMarker: _customMarker),
       polylines: polylines,
@@ -637,6 +640,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
       vendorId: selectedVendor!.id!,
       isExpanded: _isCardExpanded,
       onTap: () async {
+        if (!mounted) return;
         setState(() => _isCardExpanded = !_isCardExpanded);
       },
       distance: selected.distanceInKm ?? 0.0,

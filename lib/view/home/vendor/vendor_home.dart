@@ -354,6 +354,20 @@ Widget _buildReviewsList(List<SingleReviewModel> reviews) {
 }
 
 class VendorHoursCard extends StatelessWidget {
+  ///
+  ///format time to 12 hours format
+  ///
+  String formatTo12Hour(String time) {
+    final parts = time.split(':');
+    int hour = int.parse(parts[0]);
+    final minute = parts[1];
+
+    final period = hour >= 12 ? 'PM' : 'AM';
+    hour = hour % 12 == 0 ? 12 : hour % 12;
+
+    return '${hour.toString().padLeft(2, '0')}:$minute $period';
+  }
+
   const VendorHoursCard({
     super.key,
     required this.day,
@@ -411,14 +425,14 @@ class VendorHoursCard extends StatelessWidget {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(
-                          startTime ?? '',
+                          formatTo12Hour(startTime ?? ''),
                           style: context.typography.bodySmall.copyWith(
                             fontSize: 12.sp,
                           ),
                         ),
                         SizedBox(height: 4.h),
                         Text(
-                          endTime ?? '',
+                          formatTo12Hour(endTime ?? ''),
                           style: context.typography.bodySmall.copyWith(
                             fontSize: 12.sp,
                           ),

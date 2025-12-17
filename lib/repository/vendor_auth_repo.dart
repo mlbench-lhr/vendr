@@ -54,10 +54,7 @@ class VendorAuthRepository {
     String productId,
     Map<String, dynamic> data,
   ) async {
-    return _apiServices.post(
-      url: '${AppUrl.editProduct}$productId',
-      data: data,
-    );
+    return _apiServices.put(url: '${AppUrl.editProduct}$productId', data: data);
   }
 
   //fetch profile

@@ -45,7 +45,9 @@ class _UserFavouritsScreenState extends State<UserFavouritsScreen> {
                       venderType: vendor.vendorType ?? '',
                       imageUrl: vendor.imageUrl,
                       onRemove: () {
-                        setState(() {});
+                        if (mounted) {
+                          setState(() {});
+                        }
                       },
                     ),
                   );

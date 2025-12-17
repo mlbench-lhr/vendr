@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:vendr/app/components/my_bottom_sheet.dart';
@@ -41,8 +42,15 @@ class AuthService {
     );
   }
 
-  static void gotoForgotPassword(BuildContext context) {
-    Navigator.pushNamed(context, RoutesName.forgotPassword);
+  static void gotoForgotPassword(
+    BuildContext context, {
+    required bool isVendor,
+  }) {
+    Navigator.pushNamed(
+      context,
+      arguments: {'isVendor': isVendor},
+      RoutesName.forgotPassword,
+    );
   }
 
   static void gotoNewPassword(BuildContext context, String email, String otp) {
@@ -69,6 +77,14 @@ class AuthService {
     );
   }
 
+  static void goToNoConnectionScreen(BuildContext context) {
+    Navigator.pushNamedAndRemoveUntil(
+      context,
+      RoutesName.noConnection,
+      (route) => false,
+    );
+  }
+
   static void goToWelcome(BuildContext context) {
     Navigator.pushNamedAndRemoveUntil(
       context,
@@ -79,13 +95,12 @@ class AuthService {
 
   static void logout(BuildContext context) async {
     await SessionController().clearSession();
-    if (context.mounted) {
-      Navigator.pushNamedAndRemoveUntil(
-        context,
-        RoutesName.profileTypeSelection,
-        (route) => false,
-      );
-    }
+    if (!context.mounted) return;
+    Navigator.pushNamedAndRemoveUntil(
+      context,
+      RoutesName.profileTypeSelection,
+      (route) => false,
+    );
   }
 
   static void gotoChangePassword(BuildContext context) {
@@ -134,21 +149,18 @@ class AuthService {
       // final response =
       await _vendorAuthRepo.vendorSignup(data);
 
-      if (context.mounted) {
-        // context.flushBarSuccessMessage(message: 'Signup successful!');
-        showVerificationSheet(context, email: email, isVendor: true);
-      }
+      if (!context.mounted) return;
+      // context.flushBarSuccessMessage(message: 'Signup successful!');
+      showVerificationSheet(context, email: email, isVendor: true);
     } catch (e) {
       if (e is AppException) {
         debugPrint('[$tag] ❌ ${e.debugMessage}');
-        if (context.mounted) {
-          context.flushBarErrorMessage(message: e.userMessage);
-        }
+        if (!context.mounted) return;
+        context.flushBarErrorMessage(message: e.userMessage);
       } else {
         debugPrint('[$tag] ❌ Unexpected: $e');
-        if (context.mounted) {
-          context.flushBarErrorMessage(message: 'Something went wrong');
-        }
+        if (!context.mounted) return;
+        context.flushBarErrorMessage(message: 'Something went wrong');
       }
     }
   }
@@ -172,21 +184,18 @@ class AuthService {
       // final response =
       await _userAuthRepo.userSignup(data);
 
-      if (context.mounted) {
-        // context.flushBarSuccessMessage(message: 'Signup successful!');
-        showVerificationSheet(context, email: email, isVendor: false);
-      }
+      if (!context.mounted) return;
+      // context.flushBarSuccessMessage(message: 'Signup successful!');
+      showVerificationSheet(context, email: email, isVendor: false);
     } catch (e) {
       if (e is AppException) {
         debugPrint('[$tag] ❌ ${e.debugMessage}');
-        if (context.mounted) {
-          context.flushBarErrorMessage(message: e.userMessage);
-        }
+        if (!context.mounted) return;
+        context.flushBarErrorMessage(message: e.userMessage);
       } else {
         debugPrint('[$tag] ❌ Unexpected: $e');
-        if (context.mounted) {
-          context.flushBarErrorMessage(message: 'Something went wrong');
-        }
+        if (!context.mounted) return;
+        context.flushBarErrorMessage(message: 'Something went wrong');
       }
     }
   }
@@ -260,20 +269,17 @@ class AuthService {
       // }
 
       //Vendor Login
-      if (context.mounted) {
-        isVendor ? goToVendorHome(context) : goToUserHome(context);
-      }
+      if (!context.mounted) return;
+      isVendor ? goToVendorHome(context) : goToUserHome(context);
     } catch (e) {
       if (e is AppException) {
         debugPrint('[$tag] ❌ ${e.debugMessage}');
-        if (context.mounted) {
-          context.flushBarErrorMessage(message: e.userMessage);
-        }
+        if (!context.mounted) return;
+        context.flushBarErrorMessage(message: e.userMessage);
       } else {
         debugPrint('[$tag] ❌ Unexpected: $e');
-        if (context.mounted) {
-          context.flushBarErrorMessage(message: 'Something went wrong');
-        }
+        if (!context.mounted) return;
+        context.flushBarErrorMessage(message: 'Something went wrong');
       }
     }
   }
@@ -301,15 +307,16 @@ class AuthService {
       await _sessionController.saveUser(UserModel.fromJson(userData));
       _sessionController.userType = UserType.user;
       await _sessionController.saveUserType();
-      if (context.mounted) {
-        await fetchProfile(context);
-      }
-      if (context.mounted) {
-        goToUserHome(context);
-      }
+      if (!context.mounted) return;
+      await fetchProfile(context);
+
+      if (!context.mounted) return;
+      goToUserHome(context);
+
       debugPrint('[$tag] ✅ User login success');
     } catch (e) {
-      if (context.mounted) ErrorHandler.handle(context, e, serviceName: tag);
+      if (!context.mounted) return;
+      ErrorHandler.handle(context, e, serviceName: tag);
     }
   }
 
@@ -322,13 +329,11 @@ class AuthService {
     required String password,
   }) async {
     final data = {'email': email, 'password': password};
-
     try {
       final response = await _vendorAuthRepo.vendorLogin(data);
       final String accessToken = response['tokens']['accessToken'] as String;
       final String refreshToken = response['tokens']['refreshToken'] as String;
       final vendorData = response['vendor'] as Map<String, dynamic>;
-
       await _sessionController.saveToken(
         accessToken: accessToken,
         refreshToken: refreshToken,
@@ -336,15 +341,14 @@ class AuthService {
       await _sessionController.saveVendor(VendorModel.fromJson(vendorData));
       _sessionController.userType = UserType.vendor;
       await _sessionController.saveUserType();
-      if (context.mounted) {
-        await fetchProfile(context);
-      }
-      if (context.mounted) {
-        goToVendorHome(context);
-      }
+      if (!context.mounted) return;
+      await fetchProfile(context);
+      if (!context.mounted) return;
+      goToVendorHome(context);
       debugPrint('[$tag] ✅ Vendor login success');
     } catch (e) {
-      if (context.mounted) ErrorHandler.handle(context, e, serviceName: tag);
+      if (!context.mounted) return;
+      ErrorHandler.handle(context, e, serviceName: tag);
     }
   }
 
@@ -363,9 +367,8 @@ class AuthService {
       }
       debugPrint('[$tag] ✅ Profile fetched');
     } catch (e) {
-      if (context.mounted) {
-        ErrorHandler.handle(context, e, serviceName: tag);
-      }
+      if (!context.mounted) return;
+      ErrorHandler.handle(context, e, serviceName: tag);
       rethrow;
     }
   }
@@ -373,20 +376,26 @@ class AuthService {
   ///
   ///Check Authentication
   ///
-
   Future<void> checkAuthentication(BuildContext context) async {
     if (_sessionController.isLoggedIn && _sessionController.userType != null) {
       debugPrint('[$tag] Active session found, fetching profile');
       try {
         await fetchProfile(context);
-        if (context.mounted) {
-          _sessionController.userType == UserType.user
-              ? goToUserHome(context)
-              : goToVendorHome(context);
-        }
-      } catch (_) {
+        if (!context.mounted) return;
+        _sessionController.userType == UserType.user
+            ? goToUserHome(context)
+            : goToVendorHome(context);
+      } on SocketException catch (e) {
+        // No internet / connection issue
+        debugPrint('Socket error: ${e.message}');
+        if (!context.mounted) return;
+        goToNoConnectionScreen(context);
+      } catch (e) {
+        debugPrint('Failed to fetch profile: $e');
         debugPrint('[$tag] Error fetching profile, clearing session');
         await _sessionController.clearSession();
+        if (!context.mounted) return;
+        goToWelcome(context);
         // if (context.mounted) goToWelcome(context);
       }
     } else {
@@ -394,7 +403,8 @@ class AuthService {
         '[$tag] No active session found, redirecting to welcome screen',
       );
       Timer(const Duration(seconds: 1), () {
-        if (context.mounted) goToWelcome(context);
+        if (!context.mounted) return;
+        goToWelcome(context);
       });
     }
   }
@@ -405,10 +415,11 @@ class AuthService {
   Future<bool> sendForgotOtp({
     required BuildContext context,
     required String email,
+    required bool isUser,
     // bool isDoctor = false,
   }) async {
     try {
-      final Map<String, dynamic> data = {'email': email};
+      final Map<String, dynamic> data = {'email': email, 'is_user': isUser};
 
       //same for both user and vendor
       await _userAuthRepo.forgotPassword(data);
@@ -442,13 +453,11 @@ class AuthService {
       //   // isDoctor: isDoctor,
       // );
 
-      if (context.mounted) {
-        gotoNewPassword(context, email, otp);
-      }
+      if (!context.mounted) return;
+      gotoNewPassword(context, email, otp);
     } catch (e) {
-      if (context.mounted) {
-        ErrorHandler.handle(context, e, serviceName: tag);
-      }
+      if (!context.mounted) return;
+      ErrorHandler.handle(context, e, serviceName: tag);
     }
   }
 
@@ -476,7 +485,8 @@ class AuthService {
         Navigator.of(context).pop();
       }
     } catch (e) {
-      if (context.mounted) ErrorHandler.handle(context, e, serviceName: tag);
+      if (!context.mounted) return;
+      ErrorHandler.handle(context, e, serviceName: tag);
     }
   }
 
@@ -491,15 +501,11 @@ class AuthService {
     final data = {'old_password': oldPassword, 'new_password': newPassword};
     try {
       await _userAuthRepo.changePassword(data);
-      if (context.mounted) {
-        context.flushBarSuccessMessage(
-          message: 'Password updated successfully.',
-        );
-      }
+      if (!context.mounted) return;
+      context.flushBarSuccessMessage(message: 'Password updated successfully.');
     } catch (e) {
-      if (context.mounted) {
-        ErrorHandler.handle(context, e, serviceName: tag);
-      }
+      if (!context.mounted) return;
+      ErrorHandler.handle(context, e, serviceName: tag);
     }
   }
 
@@ -528,14 +534,12 @@ class AuthService {
     } catch (e) {
       if (e is AppException) {
         debugPrint('[$tag] ❌ ${e.debugMessage}');
-        if (context.mounted) {
-          context.flushBarErrorMessage(message: e.userMessage);
-        }
+        if (!context.mounted) return;
+        context.flushBarErrorMessage(message: e.userMessage);
       } else {
         debugPrint('[$tag] ❌ Unexpected: $e');
-        if (context.mounted) {
-          context.flushBarErrorMessage(message: 'Something went wrong');
-        }
+        if (!context.mounted) return;
+        context.flushBarErrorMessage(message: 'Something went wrong');
       }
     }
   }
@@ -600,13 +604,11 @@ class AuthService {
     final data = {'email': email};
     try {
       await _vendorAuthRepo.resendSignupOtp(data);
-      if (context.mounted) {
-        context.flushBarSuccessMessage(message: 'OTP resent to your email.');
-      }
+      if (!context.mounted) return;
+      context.flushBarSuccessMessage(message: 'OTP resent to your email.');
     } catch (e) {
-      if (context.mounted) {
-        ErrorHandler.handle(context, e, serviceName: tag);
-      }
+      if (!context.mounted) return;
+      ErrorHandler.handle(context, e, serviceName: tag);
     }
   }
   //END: Resend signup otp

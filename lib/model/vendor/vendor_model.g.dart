@@ -80,12 +80,14 @@ Map<String, dynamic> _$MenuItemModelToJson(MenuItemModel instance) =>
     };
 
 ServingModel _$ServingModelFromJson(Map<String, dynamic> json) => ServingModel(
+  id: (json['id'] as num?)?.toInt(),
   servingQuantity: json['serving'] as String,
   servingPrice: json['price'] as String,
 );
 
 Map<String, dynamic> _$ServingModelToJson(ServingModel instance) =>
     <String, dynamic>{
+      'id': instance.id,
       'serving': instance.servingQuantity,
       'price': instance.servingPrice,
     };

@@ -15,9 +15,9 @@ class MenuBottomSheet extends StatefulWidget {
 }
 
 class _MenuBottomSheetState extends State<MenuBottomSheet> {
+  int selectedServing = 0;
   @override
   Widget build(BuildContext context) {
-    int selectedServing = 0;
     return Container(
       padding: EdgeInsets.symmetric(vertical: 16.w),
       height: 500.h,
@@ -85,6 +85,9 @@ class _MenuBottomSheetState extends State<MenuBottomSheet> {
                       onServingChanged: (int value) {
                         setState(() {
                           selectedServing = value;
+                          debugPrint(
+                            'selectedServing UPDATED : $selectedServing',
+                          );
                         });
                       },
                       servingsLength: widget.menuItem.servings.length,
