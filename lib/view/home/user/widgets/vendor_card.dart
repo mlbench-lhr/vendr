@@ -17,11 +17,13 @@ import 'package:vendr/model/vendor/vendor_model.dart';
 import 'package:vendr/services/common/session_manager/session_controller.dart';
 import 'package:vendr/services/user/user_home_service.dart';
 import 'package:vendr/services/user/user_profile_service.dart';
+import 'package:vendr/services/vendor/vendor_home_service.dart';
 import 'package:vendr/view/home/user/widgets/menu_bottom_sheet.dart';
 import 'package:vendr/view/home/vendor/vendor_home.dart';
 
 class VendorCard extends StatefulWidget {
   final bool isExpanded;
+  final bool isRouteSet;
   final VoidCallback onTap;
   final double distance;
   final String vendorId;
@@ -38,6 +40,7 @@ class VendorCard extends StatefulWidget {
   const VendorCard({
     super.key,
     required this.isExpanded,
+    required this.isRouteSet,
     required this.onTap,
     required this.distance,
     required this.vendorName,
@@ -277,13 +280,25 @@ class _VendorCardState extends State<VendorCard> {
           ),
         ),
         Padding(
+          padding: const EdgeInsets.only(right: 16.0),
+          child: Text(
+            '${widget.distance.toString()}km',
+            style: context.typography.label.copyWith(),
+          ),
+        ),
+        Padding(
           padding: EdgeInsets.only(top: 4.h, right: 10.w),
           child: GestureDetector(
             onTap: widget.onGetDirection,
             child: CircleAvatar(
               radius: 20.r,
               backgroundColor: const Color(0xFF2E323D),
-              child: const Icon(Icons.navigation_outlined, color: Colors.white),
+              child: Icon(
+                widget.isRouteSet
+                    ? Icons.navigation
+                    : Icons.navigation_outlined,
+                color: Colors.white,
+              ),
             ),
           ),
         ),
@@ -291,6 +306,7 @@ class _VendorCardState extends State<VendorCard> {
     );
   }
 
+  bool isFavoriteLoading = false;
   Widget _buildExpandedCardHeader(BuildContext context) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -310,6 +326,7 @@ class _VendorCardState extends State<VendorCard> {
           child: GestureDetector(
             onTap: () async {
               setState(() {
+                isFavoriteLoading = true;
                 isFavorite = !isFavorite;
               });
               if (isFavorite) {
@@ -323,14 +340,21 @@ class _VendorCardState extends State<VendorCard> {
                   vendorId: widget.vendorId,
                 );
               }
+              setState(() {
+                isFavoriteLoading = false;
+              });
             },
             child: CircleAvatar(
               radius: 20.r,
               backgroundColor: const Color(0xFF2E323D),
-              child: Icon(
-                isFavorite ? Icons.star_rounded : Icons.star_outline_rounded,
-                color: Colors.white,
-              ),
+              child: isFavoriteLoading
+                  ? LoadingWidget(color: Colors.white54)
+                  : Icon(
+                      isFavorite
+                          ? Icons.star_rounded
+                          : Icons.star_outline_rounded,
+                      color: Colors.white,
+                    ),
             ),
           ),
         ),
@@ -360,7 +384,9 @@ class _VendorCardState extends State<VendorCard> {
             context,
             Icons.menu_outlined,
             'Menu',
-            '${widget.menuLength} Product(s)',
+            widget.menuLength < 2
+                ? '${widget.menuLength} Product'
+                : '${widget.menuLength} Products',
           ),
         ),
         SizedBox(width: 8.w),
@@ -380,7 +406,8 @@ class _VendorCardState extends State<VendorCard> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        CardVendorHoursHeading(hoursADay: widget.hoursADay ?? '0'),
+        // CardVendorHoursHeading(hoursADay: widget.hoursADay ?? '0'),
+        CardVendorHoursHeading(vendorHours: selectedVendorDetails!.hours),
         SizedBox(height: 16.h),
         if (selectedVendorDetails?.hours != null) ...[
           Wrap(
@@ -764,8 +791,8 @@ class CardMenuHeading extends StatelessWidget {
 }
 
 class CardVendorHoursHeading extends StatelessWidget {
-  const CardVendorHoursHeading({super.key, required this.hoursADay});
-  final String hoursADay;
+  const CardVendorHoursHeading({super.key, required this.vendorHours});
+  final HoursModel? vendorHours;
   @override
   Widget build(BuildContext context) {
     return Row(
@@ -785,7 +812,9 @@ class CardVendorHoursHeading extends StatelessWidget {
         ),
         const Spacer(),
         Text(
-          hoursADay,
+          VendorHomeService.getVendorWorkingHoursToday(
+            vendorHours: vendorHours,
+          ),
           style: context.typography.body.copyWith(fontSize: 14.sp),
         ),
       ],

@@ -6,7 +6,6 @@ import 'package:vendr/app/components/my_button.dart';
 import 'package:vendr/app/components/my_pinput.dart';
 import 'package:vendr/app/components/my_text_button.dart';
 import 'package:vendr/app/utils/extensions/context_extensions.dart';
-import 'package:vendr/app/utils/extensions/flush_bar_extension.dart';
 import 'package:vendr/services/common/auth_service.dart';
 
 class AccountVerificationSheet extends StatefulWidget {
@@ -24,8 +23,6 @@ class AccountVerificationSheet extends StatefulWidget {
 }
 
 class _AccountVerificationSheetState extends State<AccountVerificationSheet> {
-  final _authService = AuthService();
-
   final pinController = TextEditingController();
   final authService = AuthService();
   bool isResendAvailable = false;

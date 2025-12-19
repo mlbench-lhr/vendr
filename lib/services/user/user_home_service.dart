@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:vendr/app/network/base_api_services.dart';
+import 'package:vendr/app/network/network_api_services.dart';
 import 'package:vendr/app/routes/routes_name.dart';
-import 'package:vendr/app/utils/extensions/flush_bar_extension.dart';
 import 'package:vendr/app/utils/service_error_handler.dart';
 import 'package:vendr/model/vendor/vendor_model.dart';
 import 'package:vendr/repository/user_home_repo.dart';
 import 'package:vendr/services/common/auth_service.dart';
-import 'package:vendr/app/utils/service_error_handler.dart';
-import 'package:vendr/model/vendor/vendor_model.dart';
 import 'package:vendr/repository/user_auth_repo.dart';
 
 class UserHomeService {
   final String tag = '[UserHomeService]';
+  final BaseApiServices api = NetworkApiService();
   final UserHomeRepository _userHomeRepo = UserHomeRepository();
 
   ///
@@ -42,50 +42,6 @@ class UserHomeService {
   }
 
   ///
-  ///_buildQueryString
-  ///
-  String _buildQueryString(Map<String, dynamic> params) {
-    final queryParts = <String>[];
-
-    params.forEach((key, value) {
-      if (value != null && value.toString().isNotEmpty) {
-        queryParts.add('$key=${Uri.encodeQueryComponent(value.toString())}');
-      }
-    });
-
-    return queryParts.isEmpty ? '' : queryParts.join('&');
-  }
-
-  // Future<List<VendorModel>> getNearbyVendors({
-  //   required BuildContext context,
-  //   required LatLng? location,
-  //   maxDistance = 5, //kilometers
-  // }) async {
-  //   if (location == null) {
-  //     debugPrint('❌ User location is null');
-  //     return [];
-  //   }
-  //   try {
-  //     final queryParams = {
-  //       if (location != LatLng(0, 0)) 'lat': location.latitude,
-  //       'lng': location.longitude,
-  //       'maxDistance': maxDistance,
-  //       if (maxDistance != null) 'maxDistance': maxDistance,
-  //     };
-  //     // Build query string
-  //     final queryString = _buildQueryString(queryParams);
-  //     final response = await _userHomeRepo.getNearbyVendors(query: queryString);
-  //     debugPrint('✅ Nearby vendors fetch successfully!');
-  //     return response['vendors'];
-  //   } catch (e) {
-  //     if (context.mounted) {
-  //       ErrorHandler.handle(context, e, serviceName: tag);
-  //     }
-  //     return [];
-  //   }
-  // }
-
-  ///
   ///getNearbyVendors
   ///
   Future<List<VendorModel>> getNearbyVendors({
@@ -105,7 +61,7 @@ class UserHomeService {
         'maxDistance': maxDistance,
       };
 
-      final queryString = _buildQueryString(queryParams);
+      final queryString = api.buildQueryString(queryParams);
 
       final response = await _userHomeRepo.getNearbyVendors(query: queryString);
 
@@ -195,9 +151,6 @@ class UserHomeService {
       if (context.mounted) {
         await AuthService().fetchProfile(context);
       }
-      // if (context.mounted) {
-      //   context.flushBarSuccessMessage(message: 'Vendor added to favorites');
-      // }
     } catch (e) {
       if (context.mounted) {
         ErrorHandler.handle(context, e, serviceName: tag);
@@ -226,16 +179,49 @@ class UserHomeService {
     }
   }
 
+  // final queryParams = {
+  //       'lat': location.latitude,
+  //       'lng': location.longitude,
+  //       'maxDistance': maxDistance,
+  //     };
+
+  //     final queryString = api.buildQueryString(queryParams);
+
+  //     final response = await _userHomeRepo.getNearbyVendors(query: queryString);
+
+  //     debugPrint('✅ Nearby vendors fetched successfully!');
+
+  //     // --- IMPORTANT PART ---
+  //     // Convert list<dynamic> → List<VendorModel>
+  //     if (response['vendors'] is List) {
+  //       return (response['vendors'] as List)
+  //           .map((json) => VendorModel.fromJson(json))
+  //           .toList();
+  // }
+
+  //go to vendor search
+
   // Search Vendors Service
-  Future<List<VendorModel>> searchVendor({
+  Future<List<VendorModel>> searchVendors({
     required BuildContext context,
     required String query,
+    required LatLng userLocation,
+    double searchRadius = 5,
   }) async {
     try {
-      // Skip API call if query is empty
-      if (query.trim().isEmpty) return [];
+      final queryParams = {
+        'query': query,
+        'lat': userLocation.latitude,
+        'lng': userLocation.longitude,
+        'distance': searchRadius,
+      };
 
-      final response = await _userAuthRepo.searchVendors(query: query);
+      final queryString = api.buildQueryString(queryParams);
+
+      // final response = await _userAuthRepo.searchVendors(query: query);
+      final response = await _userAuthRepo.searchVendors(
+        queryString: queryString,
+      );
 
       if (response['success'] == true) {
         final vendors = response['vendors'] as List<dynamic>? ?? [];
@@ -246,6 +232,7 @@ class UserHomeService {
 
       return [];
     } catch (e) {
+      // ignore: use_build_context_synchronously
       ErrorHandler.handle(context, e, serviceName: 'SearchVendorService');
       return [];
     }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:vendr/app/components/my_scaffold.dart';
 import 'package:vendr/generated/assets/assets.gen.dart';
 import 'package:vendr/services/common/auth_service.dart';
@@ -31,7 +32,44 @@ class _SplashViewState extends State<SplashView> {
     if (mounted) {
       AuthService().checkAuthentication(context);
     }
-    //});
+
+    ///
+    ///Ask for locaition permission
+    ///
+    _requestLocationPermission();
+  }
+
+  ///
+  ///Location permission and Live Tracking
+  ///
+  Future<bool> _requestLocationPermission() async {
+    try {
+      LocationPermission permission = await Geolocator.checkPermission();
+
+      // Already granted
+      if (permission == LocationPermission.whileInUse ||
+          permission == LocationPermission.always) {
+        // connect to firebase();  //TODO: uncomment after firebase setup
+        return true;
+      }
+
+      // Not granted yet. Request
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+
+        if (permission == LocationPermission.whileInUse ||
+            permission == LocationPermission.always) {
+          // connect to firebase(); //TODO: uncomment after firebase setup
+          return true; // granted after request
+        }
+      }
+
+      // Denied forever or still denied
+      return false;
+    } catch (e) {
+      debugPrint('Location permission error: $e');
+      return false;
+    }
   }
 
   @override

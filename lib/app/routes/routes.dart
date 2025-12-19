@@ -1,4 +1,5 @@
 import 'dart:developer';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:vendr/app/routes/routes_name.dart';
 import 'package:vendr/app/routes/unknown_page.dart';
 import 'package:flutter/material.dart';
@@ -122,11 +123,15 @@ class Routes {
           ),
         );
       case RoutesName.userSearch:
-        final args = _getArgs(settings, requiredKeys: ['onVendorSelected']);
+        final args = _getArgs(
+          settings,
+          requiredKeys: ['onVendorSelected', 'userLocation'],
+        );
         return MaterialPageRoute(
           builder: (_) => UserSearchScreen(
             onVendorSelected:
                 args['onVendorSelected'] as ValueChanged<VendorModel>,
+            userLocation: args['userLocation'] as LatLng,
           ),
         );
 

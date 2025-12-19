@@ -248,4 +248,17 @@ class NetworkApiService implements BaseApiServices {
       rethrow;
     }
   }
+
+  @override
+  String buildQueryString(Map<String, dynamic> params) {
+    final queryParts = <String>[];
+
+    params.forEach((key, value) {
+      if (value != null && value.toString().isNotEmpty) {
+        queryParts.add('$key=${Uri.encodeQueryComponent(value.toString())}');
+      }
+    });
+
+    return queryParts.isEmpty ? '' : queryParts.join('&');
+  }
 }

@@ -25,4 +25,6 @@ abstract class BaseApiServices {
     String requestType = 'POST',
     String felid = 'image',
   });
+
+  String buildQueryString(Map<String, dynamic> params);
 }

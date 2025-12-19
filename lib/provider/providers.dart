@@ -1,9 +1,6 @@
-import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:provider/single_child_widget.dart';
-import 'package:vendr/model/vendor/vendor_model.dart';
 import 'package:vendr/provider/auth/locale_provider.dart';
-import 'package:vendr/provider/user_home_provider.dart';
 
 // final List<VendorModel> initialVendors = [
 //   VendorModel(

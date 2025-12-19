@@ -21,7 +21,6 @@ import 'package:vendr/model/vendor/vendor_model.dart';
 import 'package:vendr/services/common/session_manager/session_controller.dart';
 import 'package:vendr/services/user/user_home_service.dart';
 import 'package:vendr/services/user/user_profile_service.dart';
-import 'package:vendr/view/home/user/user_search.dart';
 import 'package:vendr/view/home/user/widgets/location_permission_required.dart';
 import 'package:vendr/view/home/user/widgets/vendor_card.dart';
 import 'package:vendr/view/home/vendor/vendor_home.dart';
@@ -52,8 +51,10 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
   bool _assetsLoaded = false;
 
   // UI states
-  double? _distanceInKm;
+  // double? _distanceInKm;
   bool _isCardExpanded = false;
+  bool _isRouteSet = false;
+  bool _isUserLocationSet = false;
 
   // final List<VendorModel> vendors = List<VendorModel>.from(initialVendors);
   List<VendorModel> nearbyVendors = [];
@@ -88,7 +89,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
         .getNearbyVendors(
           context: context,
           location: _userLocation,
-          maxDistance: 5, //km TODO: set to 5
+          maxDistance: 5, //km
         );
     setState(() {
       nearbyVendors = vendorsResponse;
@@ -124,7 +125,6 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
       isScrollControlled: true,
       enableDrag: true,
       useSafeArea: false,
-      backgroundColor: context.colors.primary.withOpacity(0.0),
       child: const LocationPermissionRequired(),
     );
     checkLocationPermission();
@@ -243,8 +243,17 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
 
   /// Draw route from user to vendor
   Future<void> _drawRouteToVendor(LatLng vendor, int index) async {
-    final user = _userLocation;
+    debugPrint('_isDirectionSet $_isRouteSet');
+    if (_isRouteSet) {
+      clearPolylines();
+      return;
+    }
 
+    setState(() {
+      _isRouteSet = true;
+    });
+
+    final user = _userLocation;
     if (user == null) {
       // If user location is not available, just move camera to vendor
       final controller = await _controller.future;
@@ -256,13 +265,13 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
     clearPolylines();
 
     // Calculate distance
-    final meters = Geolocator.distanceBetween(
-      user.latitude,
-      user.longitude,
-      vendor.latitude,
-      vendor.longitude,
-    );
-    setState(() => _distanceInKm = meters / 1000);
+    // final meters = Geolocator.distanceBetween(
+    //   user.latitude,
+    //   user.longitude,
+    //   vendor.latitude,
+    //   vendor.longitude,
+    // );
+    // setState(() => _distanceInKm = meters / 1000);
 
     try {
       final result = await _polylinePoints.getRouteBetweenCoordinates(
@@ -296,7 +305,6 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
           ),
         );
       }
-
       // Move camera to vendor after drawing route
       final controller = await _controller.future;
       controller.animateCamera(CameraUpdate.newLatLngZoom(vendor, 15));
@@ -329,6 +337,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
     if (_userLocation == newLocation) return;
     setState(() {
       _userLocation = newLocation;
+      _isUserLocationSet = true;
     });
   }
 
@@ -345,7 +354,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
     setState(() {
       _selectedVendorIndex = null;
       _polylines.clear();
-      _distanceInKm = null;
+      // _distanceInKm = null;
       _isCardExpanded = false;
     });
   }
@@ -369,13 +378,13 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
     if (_polylines.isEmpty) return;
     setState(() {
       _polylines.clear();
+      _isRouteSet = false;
     });
   }
 
+  final Set<Marker> markers = {};
   //add markers
   Set<Marker> buildMarkers({BitmapDescriptor? customMarker}) {
-    final Set<Marker> markers = {};
-
     for (var i = 0; i < nearbyVendors.length; i++) {
       final vendor = nearbyVendors[i];
       if (vendor.lat != null && vendor.lng != null) {
@@ -385,7 +394,10 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
             position: LatLng(vendor.lat!, vendor.lng!),
             icon: customMarker ?? BitmapDescriptor.defaultMarker,
             onTap: () => toggleVendorSelection(i),
-            infoWindow: InfoWindow(title: vendor.name),
+            infoWindow: InfoWindow(
+              title: vendor.name,
+              snippet: vendor.vendorType,
+            ),
           ),
         );
       }
@@ -497,8 +509,8 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
             child: GradientOverlay(height: 250.h),
           ),
           _buildHeader(),
-          if (_distanceInKm != null && selectedVendor != null)
-            _buildVendorProfileBox(),
+          // if (_distanceInKm != null && selectedVendor != null)
+          //   _buildVendorProfileBox(),
           if (selectedVendor != null) _buildUserVendorCard(),
         ],
       ),
@@ -567,7 +579,13 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
   Widget _buildSearchField() {
     return GestureDetector(
       onTap: () {
-        openVendorSearch(); // NEW: open search screen
+        if (!_isUserLocationSet) {
+          debugPrint('❌ USER LOCATION NOT SET');
+          return;
+        }
+        openVendorSearch(
+          userLocation: _userLocation!,
+        ); // NEW: open search screen
       },
       child: AbsorbPointer(
         child: MyTextField(
@@ -579,58 +597,102 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
     );
   }
 
-  /// Open User Search Screen and handle selected vendor
-  Future<void> openVendorSearch() async {
+  ///
+  ///Updated
+  ///
+  Future<void> openVendorSearch({required LatLng userLocation}) async {
+    //TODO: Add to service
     Navigator.pushNamed(
       context,
       RoutesName.userSearch,
       arguments: {
-        'onVendorSelected': (VendorModel vendor) {
-          final index = nearbyVendors.indexWhere((v) => v.id == vendor.id);
+        'onVendorSelected': (VendorModel searchedVendor) async {
+          //check if already in the list, update
+          final bool vendorAlreadyLoaded = nearbyVendors.any(
+            (v) => v.id == searchedVendor.id,
+          );
+          if (!vendorAlreadyLoaded) {
+            debugPrint('Not loaded');
+            //if not in list, add in the list
+            nearbyVendors.add(searchedVendor);
+            debugPrint('Added to list');
+
+            // if location is null
+            if (searchedVendor.lat == null || searchedVendor.lng == null) {
+              debugPrint('Location does not found for this vendor.');
+              final index = nearbyVendors.length - 1;
+              selectVendor(index);
+              return;
+            }
+            //create new marker
+            markers.add(
+              Marker(
+                markerId: MarkerId('vendor_${searchedVendor.id}'),
+                position: LatLng(searchedVendor.lat!, searchedVendor.lng!),
+                icon: _customMarker ?? BitmapDescriptor.defaultMarker,
+                // onTap: () => toggleVendorSelection(nearbyVendors.length - 1),
+                onTap: () => toggleVendorSelection(
+                  nearbyVendors.indexWhere((v) => v.id == searchedVendor.id),
+                ),
+                infoWindow: InfoWindow(
+                  title: searchedVendor.name,
+                  snippet: searchedVendor.vendorType,
+                ),
+              ),
+            );
+            debugPrint('Marker Added');
+          }
+
+          final index = nearbyVendors.indexWhere(
+            (v) => v.id == searchedVendor.id,
+          );
           if (index != -1) {
             selectVendor(index);
-
+            debugPrint('VENDOR IS NOW SELECTED');
             // Move camera to selected vendor
             if (_userLocation != null &&
                 nearbyVendors[index].lat != null &&
                 nearbyVendors[index].lng != null) {
+              debugPrint('DRAWING ROUTE');
               _drawRouteToVendor(
                 LatLng(nearbyVendors[index].lat!, nearbyVendors[index].lng!),
                 index,
               );
+              debugPrint('ROUTE DRAWN NOW!');
             }
           }
         },
+        'userLocation': userLocation,
       },
     );
   }
 
   /// Distance box displayed above vendor card
-  Widget _buildVendorProfileBox() {
-    return Positioned(
-      top: 480.h,
-      left: 15.w,
-      child: Material(
-        elevation: 4,
-        borderRadius: BorderRadius.circular(8.r),
-        child: Container(
-          padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(8.r),
-          ),
-          child: Text(
-            'Distance: ${_distanceInKm!.toStringAsFixed(2)} km',
-            style: TextStyle(
-              color: Colors.black,
-              fontSize: 14.sp,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
+  // Widget _buildVendorProfileBox() {
+  //   return Positioned(
+  //     top: 480.h,
+  //     left: 15.w,
+  //     child: Material(
+  //       elevation: 4,
+  //       borderRadius: BorderRadius.circular(8.r),
+  //       child: Container(
+  //         padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
+  //         decoration: BoxDecoration(
+  //           color: Colors.white,
+  //           borderRadius: BorderRadius.circular(8.r),
+  //         ),
+  //         child: Text(
+  //           'Distance: ${_distanceInKm!.toStringAsFixed(2)} km',
+  //           style: TextStyle(
+  //             color: Colors.black,
+  //             fontSize: 14.sp,
+  //             fontWeight: FontWeight.w500,
+  //           ),
+  //         ),
+  //       ),
+  //     ),
+  //   );
+  // }
 
   /// Vendor card displayed at bottom
   Widget _buildUserVendorCard() {
@@ -639,6 +701,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
     return VendorCard(
       vendorId: selectedVendor!.id!,
       isExpanded: _isCardExpanded,
+      isRouteSet: _isRouteSet,
       onTap: () async {
         if (!mounted) return;
         setState(() => _isCardExpanded = !_isCardExpanded);

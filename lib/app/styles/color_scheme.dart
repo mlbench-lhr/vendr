@@ -68,7 +68,7 @@ class AppColorScheme extends ThemeExtension<AppColorScheme> {
   factory AppColorScheme.light() => const AppColorScheme(
     // Core colors
     primary: Color(0xff00195a),
-    background: Color(0xFF161B25), //update
+    background: Color(0xFF20232A), //update
     surface: Color(0xFFF1F5F9),
     onSurface: Color(0xFF0F172A),
     onSurfaceVariant: Color(0xFF64748B),

@@ -54,51 +54,53 @@ class VendorHomeService {
   ///getVendorWorkingHoursToday
   ///Returns a String of working hours of vendor "Today"
   ///
-  static String getVendorWorkingHoursToday() {
-    final VendorModel vendor = SessionController().vendor!;
+  static String getVendorWorkingHoursToday({HoursModel? vendorHours}) {
     final weekday = DateTime.now().weekday;
-    if (vendor.hours == null) return '0 hours';
-    // Pick today's schedule automatically
+    late final HoursModel? hours;
+
+    if (vendorHours != null) {
+      hours = vendorHours;
+    } else {
+      final VendorModel vendor = SessionController().vendor!;
+      hours = vendor.hours;
+    }
+
+    if (hours == null) return '0 hours';
+
     final day = switch (weekday) {
-      DateTime.monday => vendor.hours!.days.monday,
-      DateTime.tuesday => vendor.hours!.days.tuesday,
-      DateTime.wednesday => vendor.hours!.days.wednesday,
-      DateTime.thursday => vendor.hours!.days.thursday,
-      DateTime.friday => vendor.hours!.days.friday,
-      DateTime.saturday => vendor.hours!.days.saturday,
-      DateTime.sunday => vendor.hours!.days.sunday,
+      DateTime.monday => hours.days.monday,
+      DateTime.tuesday => hours.days.tuesday,
+      DateTime.wednesday => hours.days.wednesday,
+      DateTime.thursday => hours.days.thursday,
+      DateTime.friday => hours.days.friday,
+      DateTime.saturday => hours.days.saturday,
+      DateTime.sunday => hours.days.sunday,
       _ => null,
     };
 
-    // Safety checks
-    if (day == null || !day.enabled) {
-      return "Off";
-    }
-
-    final startTime = day.start;
-    final endTime = day.end;
-
-    if (!day.enabled) return "Off";
+    if (day == null || !day.enabled) return "Off";
 
     try {
-      // Parse HH:mm
-      final s = startTime.split(":");
-      final e = endTime.split(":");
+      final s = day.start.split(":");
+      final e = day.end.split(":");
 
       final startMinutes = int.parse(s[0]) * 60 + int.parse(s[1]);
       final endMinutes = int.parse(e[0]) * 60 + int.parse(e[1]);
 
       if (endMinutes <= startMinutes) return "Off";
 
-      final diff = endMinutes - startMinutes;
-      final hours = diff / 60;
+      final diffMinutes = endMinutes - startMinutes;
 
-      //  Remove .0 for clean printing
-      final result = hours % 1 == 0
-          ? hours.toInt().toString()
-          : hours.toStringAsFixed(1);
+      final hoursPart = diffMinutes ~/ 60; // integer hours
+      final minutesPart = diffMinutes % 60; // remaining minutes
 
-      return "$result hours";
+      if (hoursPart > 0 && minutesPart > 0) {
+        return "$hoursPart hours $minutesPart mins";
+      } else if (hoursPart > 0) {
+        return "$hoursPart hours";
+      } else {
+        return "$minutesPart mins";
+      }
     } catch (_) {
       return "Off";
     }

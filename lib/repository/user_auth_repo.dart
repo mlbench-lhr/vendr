@@ -71,28 +71,35 @@ class UserAuthRepository {
   }
 
   //Search Vendors
-  Future<Map<String, dynamic>> searchVendors({required String query}) async {
-    // Trim and ensure query is string
-    final safeQuery = (query.trim().isEmpty) ? '' : query.trim();
+  // Future<Map<String, dynamic>> searchVendors({required String query}) async {
+  //   // Trim and ensure query is string
+  //   final safeQuery = (query.trim().isEmpty) ? '' : query.trim();
 
-    // If empty, skip backend call and return empty results
-    if (safeQuery.isEmpty) {
-      return {'success': true, 'vendors': []};
-    }
+  //   // If empty, skip backend call and return empty results
+  //   if (safeQuery.isEmpty) {
+  //     return {'success': true, 'vendors': []};
+  //   }
 
-    final uri = Uri.parse(
-      AppUrl.searchVendors,
-    ).replace(queryParameters: {'query': safeQuery});
+  //   final uri = Uri.parse(
+  //     AppUrl.searchVendors,
+  //   ).replace(queryParameters: {'query': safeQuery});
 
-    debugPrint('Search Vendor API URL: ${uri.toString()}'); // debug
+  //   debugPrint('Search Vendor API URL: ${uri.toString()}'); // debug
 
-    final response = await _apiServices.get(url: uri.toString());
+  //   final response = await _apiServices.get(url: uri.toString());
 
-    // Ensure success key exists
-    if (response['success'] is! bool) {
-      return {'success': false, 'vendors': []};
-    }
+  //   // Ensure success key exists
+  //   if (response['success'] is! bool) {
+  //     return {'success': false, 'vendors': []};
+  //   }
 
-    return response;
+  //   return response;
+  // }
+
+  //Search Vendors
+  Future<Map<String, dynamic>> searchVendors({
+    required String queryString,
+  }) async {
+    return _apiServices.get(url: '${AppUrl.searchVendors}?$queryString');
   }
 }

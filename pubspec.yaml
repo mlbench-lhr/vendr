@@ -61,11 +61,11 @@ dependencies:
   url_launcher: 6.3.2
   google_maps_flutter: ^2.13.1
   geolocator: ^14.0.2
-  web_socket_channel: ^3.0.3
   flutter_polyline_points: ^3.0.1
   google_sign_in: ^7.2.0
   sign_in_with_apple: ^7.0.1
   share_plus: ^12.0.1
+  flutter_native_splash: ^2.4.7
 
 
 dev_dependencies:
@@ -82,6 +82,13 @@ flutter_launcher_icons:
   android: true
   ios: true
   image_path: "assets/icons/logo/vendr_logo.jpg"
+
+flutter_native_splash:
+  ios: true
+  android: false
+  color: "#20232A"
+  image: assets/icons/logo/vendr_logo.jpg
+
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
