@@ -56,7 +56,7 @@ class MyButton extends StatelessWidget {
             ? LoadingWidget(
                 size: 24.sp,
                 // color: context.colors.primary,
-                color: Colors.white54,
+                color: const Color.fromARGB(96, 168, 168, 168),
               )
             : Text(
                 label,

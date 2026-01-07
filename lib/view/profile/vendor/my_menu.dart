@@ -86,7 +86,7 @@ class _VendorMyMenuScreenState extends State<VendorMyMenuScreen> {
                   spacing: 14.w,
                   runSpacing: 14.w,
                   children: [
-                    ...menuItems.map((item) {
+                    ...menuItems.reversed.map((item) {
                       return MenuItemTile(
                         onTap: () {
                           //edit product

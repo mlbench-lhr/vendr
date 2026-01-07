@@ -31,17 +31,21 @@ class MenuItemTile extends StatelessWidget {
               top: -40,
               child: CircleAvatar(
                 radius: 45.r,
-                backgroundColor: Colors.white,
-                backgroundImage: imageUrl != null
-                    ? NetworkImage(imageUrl!)
-                    : null,
-                child: imageUrl == null
-                    ? Icon(
-                        Icons.restaurant_menu,
-                        size: 32,
-                        color: context.colors.primary.withValues(alpha: 0.5),
-                      )
-                    : null,
+                backgroundColor: Colors.white70,
+                child: CircleAvatar(
+                  radius: 44.r,
+                  backgroundColor: Colors.white,
+                  backgroundImage: imageUrl != null
+                      ? NetworkImage(imageUrl!)
+                      : null,
+                  child: imageUrl == null
+                      ? Icon(
+                          Icons.restaurant_menu,
+                          size: 32,
+                          color: context.colors.primary.withValues(alpha: 0.5),
+                        )
+                      : null,
+                ),
               ),
             ),
             Container(

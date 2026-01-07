@@ -24,6 +24,9 @@ class _ServingCounterState extends State<ServingCounter> {
     _controller = FixedExtentScrollController(initialItem: selectedIndex);
   }
 
+  Color incrementSymbolColor = Colors.white70;
+  Color decrementSymbolColor = Colors.white24;
+
   void increment() {
     if (selectedIndex < widget.servingsLength - 1) {
       selectedIndex++;
@@ -34,6 +37,12 @@ class _ServingCounterState extends State<ServingCounter> {
       );
       setState(() {
         widget.onServingChanged(selectedIndex);
+
+        //change color to disabled
+        if (selectedIndex == widget.servingsLength - 1) {
+          incrementSymbolColor = Colors.white24;
+        }
+        decrementSymbolColor = Colors.white70; //restore increment symbol
       });
     }
   }
@@ -48,6 +57,11 @@ class _ServingCounterState extends State<ServingCounter> {
       );
       setState(() {
         widget.onServingChanged(selectedIndex);
+        //change color to disabled
+        if (selectedIndex == 0) {
+          decrementSymbolColor = Colors.white24;
+        }
+        incrementSymbolColor = Colors.white70; //restore increment symbol
       });
     }
   }
@@ -61,11 +75,11 @@ class _ServingCounterState extends State<ServingCounter> {
         children: [
           GestureDetector(
             onTap: decrement,
-            child: const Padding(
+            child: Padding(
               padding: EdgeInsets.symmetric(vertical: 8),
               child: Text(
                 "-",
-                style: TextStyle(fontSize: 34, color: Colors.white70),
+                style: TextStyle(fontSize: 34, color: decrementSymbolColor),
               ),
             ),
           ),
@@ -108,11 +122,11 @@ class _ServingCounterState extends State<ServingCounter> {
 
           GestureDetector(
             onTap: increment,
-            child: const Padding(
+            child: Padding(
               padding: EdgeInsets.symmetric(vertical: 8),
               child: Text(
                 "+",
-                style: TextStyle(fontSize: 34, color: Colors.white70),
+                style: TextStyle(fontSize: 34, color: incrementSymbolColor),
               ),
             ),
           ),

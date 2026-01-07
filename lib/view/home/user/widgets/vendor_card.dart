@@ -639,14 +639,15 @@ class _VendorCardState extends State<VendorCard> {
   }
 
   Widget _buildMenuItems(List<MenuItemModel> menuItems) {
-    return menuItems.isNotEmpty
+    final reversedmenuItems = menuItems.reversed.toList();
+    return reversedmenuItems.isNotEmpty
         ? SizedBox(
             width: double.infinity,
             height: 200.h,
             child: ListView.separated(
               scrollDirection: Axis.horizontal,
               shrinkWrap: true,
-              itemCount: menuItems.length,
+              itemCount: reversedmenuItems.length,
               itemBuilder: (context, index) {
                 return MenuItemTile(
                   onTap: () {
@@ -656,16 +657,18 @@ class _VendorCardState extends State<VendorCard> {
                       enableDrag: true,
                       isScrollControlled: true,
                       backgroundColor: context.colors.primary,
-                      child: MenuBottomSheet(menuItem: menuItems[index]),
+                      child: MenuBottomSheet(
+                        menuItem: reversedmenuItems[index],
+                      ),
                       // child: AddReviewBottomSheet(),
                     );
                   },
-                  name: menuItems[index].itemName,
-                  price: menuItems[index].servings.first.servingPrice,
-                  imageUrl: menuItems[index].imageUrl,
+                  name: reversedmenuItems[index].itemName,
+                  price: reversedmenuItems[index].servings.first.servingPrice,
+                  imageUrl: reversedmenuItems[index].imageUrl,
                 );
               },
-              separatorBuilder: (_, __) => SizedBox(width: 16.w),
+              separatorBuilder: (_, _) => SizedBox(width: 16.w),
             ),
           )
         : SizedBox.shrink();

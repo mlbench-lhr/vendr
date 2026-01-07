@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_google_places_sdk/flutter_google_places_sdk.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:vendr/app/utils/extensions/context_extensions.dart';
-import 'package:vendr/l10n/l10n.dart';
 
 class AddressResult {
   AddressResult({
@@ -40,6 +39,7 @@ class AddressAutocompleteTextField extends StatefulWidget {
     this.readOnly = false,
     this.borderRadius = 16.0,
     this.onAddressSelected,
+    this.onChanged,
   });
 
   final TextEditingController? controller;
@@ -60,6 +60,7 @@ class AddressAutocompleteTextField extends StatefulWidget {
   final double borderRadius;
   final void Function(AddressResult)? onAddressSelected;
   final String apiKey;
+  final ValueChanged<String>? onChanged;
 
   @override
   State<AddressAutocompleteTextField> createState() =>
@@ -296,6 +297,7 @@ class _AddressAutocompleteTextFieldState
     return CompositedTransformTarget(
       link: _layerLink,
       child: TextFormField(
+        onChanged: widget.onChanged,
         controller: _controller,
         focusNode: _focusNode,
         enabled: !widget.readOnly,

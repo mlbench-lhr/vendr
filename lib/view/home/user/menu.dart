@@ -31,30 +31,32 @@ class _UserMenuScreenState extends State<UserMenuScreen> {
       body: Padding(
         padding: EdgeInsets.all(16.w),
         child: widget.menuList.isNotEmpty
-            ? Wrap(
-                spacing: 14.w,
-                runSpacing: 14.w,
-                children: [
-                  ...widget.menuList.map((item) {
-                    return MenuItemTile(
-                      onTap: () {
-                        //show bottom sheet
-                        MyBottomSheet.show(
-                          context,
-                          isDismissible: true,
-                          enableDrag: true,
-                          isScrollControlled: true,
-                          backgroundColor: context.colors.primary,
-                          child: MenuBottomSheet(menuItem: item),
-                          // child: AddReviewBottomSheet(),
-                        );
-                      },
-                      name: item.itemName,
-                      price: item.servings.first.servingPrice,
-                      imageUrl: item.imageUrl,
-                    );
-                  }),
-                ],
+            ? SingleChildScrollView(
+                child: Wrap(
+                  spacing: 14.w,
+                  runSpacing: 14.w,
+                  children: [
+                    ...widget.menuList.reversed.map((item) {
+                      return MenuItemTile(
+                        onTap: () {
+                          //show bottom sheet
+                          MyBottomSheet.show(
+                            context,
+                            isDismissible: true,
+                            enableDrag: true,
+                            isScrollControlled: true,
+                            backgroundColor: context.colors.primary,
+                            child: MenuBottomSheet(menuItem: item),
+                            // child: AddReviewBottomSheet(),
+                          );
+                        },
+                        name: item.itemName,
+                        price: item.servings.first.servingPrice,
+                        imageUrl: item.imageUrl,
+                      );
+                    }),
+                  ],
+                ),
               )
             : Center(
                 child: Text(

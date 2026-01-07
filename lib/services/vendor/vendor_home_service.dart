@@ -78,7 +78,8 @@ class VendorHomeService {
       _ => null,
     };
 
-    if (day == null || !day.enabled) return "Off";
+    // if (day == null || !day.enabled) return "Off";
+    if (day == null || !day.enabled) return "0 hours";
 
     try {
       final s = day.start.split(":");
@@ -87,7 +88,8 @@ class VendorHomeService {
       final startMinutes = int.parse(s[0]) * 60 + int.parse(s[1]);
       final endMinutes = int.parse(e[0]) * 60 + int.parse(e[1]);
 
-      if (endMinutes <= startMinutes) return "Off";
+      // if (endMinutes <= startMinutes) return "Off";
+      if (endMinutes <= startMinutes) return "0 hours";
 
       final diffMinutes = endMinutes - startMinutes;
 
@@ -102,7 +104,8 @@ class VendorHomeService {
         return "$minutesPart mins";
       }
     } catch (_) {
-      return "Off";
+      // return "Off";
+      return "0 hours";
     }
   }
 }

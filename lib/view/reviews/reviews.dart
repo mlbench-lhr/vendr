@@ -175,16 +175,18 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
                       padding: EdgeInsets.symmetric(vertical: 20),
                       child: Center(child: CircularProgressIndicator()),
                     ),
-                  if (!_hasMore)
-                    Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 20),
-                      child: Center(
-                        child: Text(
-                          'No more reviews',
-                          style: context.typography.subtitle,
-                        ),
-                      ),
-                    ),
+                  // if (!_hasMore)
+                  //   Padding(
+                  //     padding: const EdgeInsets.symmetric(vertical: 20),
+                  //     child: Center(
+                  //       child: Text(
+                  //         'No more reviews',
+                  //         style: context.typography.subtitle.copyWith(
+                  //           color: context.colors.textOnDark,
+                  //         ),
+                  //       ),
+                  //     ),
+                  //   ),
                   if (!widget.isVendor) 100.height,
                 ],
               ),
@@ -239,7 +241,8 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
       itemBuilder: (context, index) {
         final r = _reviews[index];
         return ReviewTile(
-          name: r.user.name.isNotEmpty ? r.user.name : 'User',
+          isExpandable: true,
+          name: r.user.name,
           rating: r.rating.toDouble(),
           timeStamp: ReviewsService.formatTimeAgo(r.createdAt),
           content: r.message,

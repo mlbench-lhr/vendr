@@ -210,7 +210,13 @@ class AuthService {
     required bool isVendor,
   }) async {
     try {
-      final Map<String, dynamic> data = {'email': email, 'otp': otp};
+      final Map<String, dynamic> data = {
+        'email': email,
+        'otp': otp,
+        'is_user': !isVendor,
+      };
+
+      //TODO:
 
       if (isVendor) {
         //Vendor Side
@@ -221,13 +227,14 @@ class AuthService {
         final Map<String, dynamic> vendorData =
             response['vendor'] as Map<String, dynamic>;
 
-        await _sessionController.saveVendor(VendorModel.fromJson(vendorData));
-
         //save token in session controller
         await _sessionController.saveToken(
           accessToken: accessToken,
           refreshToken: refreshToken,
         );
+        await _sessionController.saveVendor(VendorModel.fromJson(vendorData));
+        _sessionController.userType = UserType.vendor;
+        await _sessionController.saveUserType();
       } else {
         //User Side
         final response = await _userAuthRepo.verifySignupOtp(data);
@@ -236,14 +243,18 @@ class AuthService {
             response['tokens']['refreshToken'] as String;
         final Map<String, dynamic> userData =
             response['user'] as Map<String, dynamic>;
-        await _sessionController.saveUser(UserModel.fromJson(userData));
         //save token in session controller
         await _sessionController.saveToken(
           accessToken: accessToken,
           refreshToken: refreshToken,
         );
+        await _sessionController.saveUser(UserModel.fromJson(userData));
+        _sessionController.userType = UserType.user;
+        await _sessionController.saveUserType();
       }
 
+      if (!context.mounted) return;
+      await fetchProfile(context); //Fetch profile after verification
       // final Map<String, dynamic> userData =
       //     response['user'] as Map<String, dynamic>;
 
@@ -377,7 +388,9 @@ class AuthService {
   ///Check Authentication
   ///
   Future<void> checkAuthentication(BuildContext context) async {
-    if (_sessionController.isLoggedIn && _sessionController.userType != null) {
+    if (
+    // _sessionController.isLoggedIn &&
+    _sessionController.userType != null) {
       debugPrint('[$tag] Active session found, fetching profile');
       try {
         await fetchProfile(context);

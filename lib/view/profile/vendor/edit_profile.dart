@@ -146,6 +146,16 @@ class _VendorEditProfileScreenState extends State<VendorEditProfileScreen> {
                       });
                     }
                   },
+                  onChanged: (value) {
+                    //reset lat lng if address is changed manually
+                    _lat = 0;
+                    _lng = 0;
+                    if (mounted) {
+                      setState(() {
+                        selectedLatLng = null;
+                      });
+                    }
+                  },
                   validator: (value) {
                     if (value == null &&
                         value!.isNotEmpty &&
@@ -191,6 +201,15 @@ class _VendorEditProfileScreenState extends State<VendorEditProfileScreen> {
                   label: 'Save',
                   onPressed: () async {
                     if (!formKey.currentState!.validate()) return;
+                    if (_addressController.text.isNotEmpty &&
+                        (_lat == 0 || _lng == 0)) {
+                      context.flushBarErrorMessage(
+                        message:
+                            'Please enter a valid address or leave the field empty.',
+                      );
+                      return;
+                    }
+
                     if (mounted) {
                       setState(() => isLoading = true);
                     }

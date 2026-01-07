@@ -13,6 +13,7 @@ import 'package:vendr/services/common/reviews_service.dart';
 import 'package:vendr/services/common/session_manager/session_controller.dart';
 import 'package:vendr/services/user/user_home_service.dart';
 import 'package:vendr/services/vendor/vendor_home_service.dart';
+import 'package:vendr/services/vendor/vendor_profile_service.dart';
 
 class VendorHomeScreen extends StatefulWidget {
   const VendorHomeScreen({super.key});
@@ -204,11 +205,12 @@ class _VendorHomeScreenState extends State<VendorHomeScreen> {
   }
 
   Widget _buildMenuItems(List<MenuItemModel> menuItems) {
+    final reversedmenuItems = menuItems.reversed.toList();
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
         SizedBox(height: 8.h),
-        menuItems.isNotEmpty
+        reversedmenuItems.isNotEmpty
             ? SizedBox(
                 width: double.infinity,
                 height: 200,
@@ -216,12 +218,21 @@ class _VendorHomeScreenState extends State<VendorHomeScreen> {
                   padding: EdgeInsets.only(left: 16.w),
                   scrollDirection: Axis.horizontal,
                   shrinkWrap: true,
-                  itemCount: menuItems.length,
+                  itemCount: reversedmenuItems.length,
                   itemBuilder: (BuildContext context, int index) {
                     return MenuItemTile(
-                      name: menuItems[index].itemName,
-                      price: menuItems[index].servings.first.servingPrice,
-                      imageUrl: menuItems[index].imageUrl,
+                      onTap: () {
+                        //edit product
+                        VendorProfileService.gotoAddEditProduct(
+                          context,
+                          true,
+                          reversedmenuItems[index],
+                        ); //isEdit = true
+                      },
+                      name: reversedmenuItems[index].itemName,
+                      price:
+                          reversedmenuItems[index].servings.first.servingPrice,
+                      imageUrl: reversedmenuItems[index].imageUrl,
                     );
                   },
                   separatorBuilder: (BuildContext context, int index) {
@@ -310,7 +321,7 @@ class VendorHoursCard extends StatelessWidget {
         color: isEnabled ? Colors.white12 : Colors.red,
         borderRadius: BorderRadius.circular(AppRadiuses.mediumRadius),
       ),
-      height: 90.h,
+      height: 92.h,
       width: 104.w,
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -323,7 +334,7 @@ class VendorHoursCard extends StatelessWidget {
               fontSize: 12.sp,
             ),
           ),
-          SizedBox(height: 4.h),
+          SizedBox(height: 6.h),
           isEnabled
               ? Row(
                   mainAxisSize: MainAxisSize.min,
@@ -338,7 +349,7 @@ class VendorHoursCard extends StatelessWidget {
                         Container(
                           color: Colors.white60,
                           width: 2.5.w,
-                          height: 16.h,
+                          height: 24.h,
                         ),
                         CircleAvatar(radius: 4.r, backgroundColor: Colors.red),
                       ],
@@ -353,7 +364,7 @@ class VendorHoursCard extends StatelessWidget {
                             fontSize: 12.sp,
                           ),
                         ),
-                        SizedBox(height: 4.h),
+                        SizedBox(height: 8.h),
                         Text(
                           formatTo12Hour(endTime ?? ''),
                           style: context.typography.bodySmall.copyWith(

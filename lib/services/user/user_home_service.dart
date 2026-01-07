@@ -179,26 +179,6 @@ class UserHomeService {
     }
   }
 
-  // final queryParams = {
-  //       'lat': location.latitude,
-  //       'lng': location.longitude,
-  //       'maxDistance': maxDistance,
-  //     };
-
-  //     final queryString = api.buildQueryString(queryParams);
-
-  //     final response = await _userHomeRepo.getNearbyVendors(query: queryString);
-
-  //     debugPrint('✅ Nearby vendors fetched successfully!');
-
-  //     // --- IMPORTANT PART ---
-  //     // Convert list<dynamic> → List<VendorModel>
-  //     if (response['vendors'] is List) {
-  //       return (response['vendors'] as List)
-  //           .map((json) => VendorModel.fromJson(json))
-  //           .toList();
-  // }
-
   //go to vendor search
 
   // Search Vendors Service

@@ -81,6 +81,7 @@ class _MenuBottomSheetState extends State<MenuBottomSheet> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
+                    //Serving counter
                     ServingCounter(
                       onServingChanged: (int value) {
                         setState(() {

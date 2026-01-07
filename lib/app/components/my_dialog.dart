@@ -84,7 +84,7 @@ class _MyDialogState extends State<MyDialog> {
               SizedBox(height: 16.h),
               Row(
                 children: [
-                  if (widget.showCancelButton) ...[
+                  if (widget.showCancelButton && !_isLoading) ...[
                     Expanded(
                       child: MyOutlinedButton(
                         label: context.l10n.dialog_cancel,

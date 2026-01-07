@@ -120,7 +120,7 @@ class _UserSearchScreenState extends State<UserSearchScreen> {
             ),
             26.verticalSpace,
             _buildDistanceSlider(),
-            20.verticalSpace,
+            // 20.verticalSpace,
             Expanded(
               child: _isLoading
                   ? Center(child: const LoadingWidget(color: Colors.white54))
@@ -133,7 +133,7 @@ class _UserSearchScreenState extends State<UserSearchScreen> {
                     )
                   : ListView.separated(
                       itemCount: _searchResults.length,
-                      separatorBuilder: (_, __) => Divider(height: 16.h),
+                      separatorBuilder: (_, _) => Divider(height: 16.h),
                       itemBuilder: (_, index) {
                         final vendor = _searchResults[index];
                         return ListTile(
