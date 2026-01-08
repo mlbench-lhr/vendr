@@ -342,9 +342,71 @@ class _VendorHoursScreenState extends State<VendorHoursScreen> {
                       },
                     };
                     debugPrint('Data: $data');
-                    if (mounted) {
-                      setState(() => isLoading = true);
+
+                    //Validation
+                    // Validate all enabled days
+                    final checks = [
+                      (
+                        "Monday",
+                        _isMondayEnabled,
+                        _mondayStartTime,
+                        _mondayEndTime,
+                      ),
+                      (
+                        "Tuesday",
+                        _isTuesdayEnabled,
+                        _tuesdayStartTime,
+                        _tuesdayEndTime,
+                      ),
+                      (
+                        "Wednesday",
+                        _isWednesdayEnabled,
+                        _wednesdayStartTime,
+                        _wednesdayEndTime,
+                      ),
+                      (
+                        "Thursday",
+                        _isThursdayEnabled,
+                        _thursdayStartTime,
+                        _thursdayEndTime,
+                      ),
+                      (
+                        "Friday",
+                        _isFridayEnabled,
+                        _fridayStartTime,
+                        _fridayEndTime,
+                      ),
+                      (
+                        "Saturday",
+                        _isSaturdayEnabled,
+                        _saturdayStartTime,
+                        _saturdayEndTime,
+                      ),
+                      (
+                        "Sunday",
+                        _isSundayEnabled,
+                        _sundayStartTime,
+                        _sundayEndTime,
+                      ),
+                    ];
+                    for (final day in checks) {
+                      final dayName = day.$1;
+                      final enabled = day.$2;
+                      final start = day.$3;
+                      final end = day.$4;
+
+                      if (enabled && _isEndBeforeStart(start, end)) {
+                        context.flushBarErrorMessage(
+                          message:
+                              'Invalid hours for $dayName: End time cannot be before start time.',
+                        );
+                        return;
+                      }
                     }
+                    //END: Validation
+                    setState(() {
+                      isLoading = true;
+                    });
                     await _vendorProfileService.updateVendorHours(
                       context,
                       data,
@@ -365,6 +427,16 @@ class _VendorHoursScreenState extends State<VendorHoursScreen> {
         ),
       ),
     );
+  }
+
+  bool _isEndBeforeStart(String start, String end) {
+    final s = start.split(':');
+    final e = end.split(':');
+
+    final startMinutes = int.parse(s[0]) * 60 + int.parse(s[1]);
+    final endMinutes = int.parse(e[0]) * 60 + int.parse(e[1]);
+
+    return endMinutes < startMinutes;
   }
 }
 

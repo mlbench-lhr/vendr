@@ -77,9 +77,14 @@ dev_dependencies:
   very_good_analysis: 9.0.0
 
 flutter_launcher_icons:
-  android: true
+  android: "launcher_icon"
   ios: true
+  remove_alpha_ios: true
   image_path: "assets/icons/logo/vendr_logo.jpg"
+  adaptive_icon_background: "#161B25"
+  adaptive_icon_foreground: "assets/icons/logo/vendr_logo.jpg"
+  background_color_ios: "#161B25"
+  min_sdk_android: 21 # android min sdk min:16, default 21
 
 flutter_native_splash:
   ios: true

@@ -5,6 +5,7 @@ import 'package:vendr/app/components/my_dialog.dart';
 import 'package:vendr/app/components/my_dropdown.dart';
 import 'package:vendr/app/components/my_form_text_field.dart';
 import 'package:vendr/app/components/my_scaffold.dart';
+import 'package:vendr/app/components/my_text_field.dart';
 import 'package:vendr/app/styles/app_radiuses.dart';
 import 'package:vendr/app/utils/app_constants.dart';
 import 'package:vendr/app/utils/extensions/context_extensions.dart';
@@ -40,20 +41,10 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
     '5 Units',
     '10 Units',
   ];
-  // final List<String> prices = ['\$100', '\$200', '\$300'];
-  final List<String> prices = List.generate(
-    200, // (100 / 0.5) = 200 items
-    (index) {
-      final value = (index + 1) * 0.5;
-      return value % 1 == 0
-          ? '\$${value.toInt()}'
-          : '\$${value.toStringAsFixed(1)}';
-    },
-  );
 
   // Use consistent keys: 'id', 'serving', 'price'
   List<ServingModel> existingServings = [
-    ServingModel(id: 1, servingQuantity: '1 Unit', servingPrice: '\$1'),
+    ServingModel(id: 1, servingQuantity: '1 Unit', servingPrice: '1'),
   ];
 
   Set<String> categories = {};
@@ -125,6 +116,7 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
     return existingServings.indexWhere((s) => s.id == id);
   }
 
+  String defaultPricing = '1';
   @override
   Widget build(BuildContext context) {
     final vendor = _session.vendor;
@@ -265,7 +257,6 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
                 return ServingSection(
                   id: id,
                   servingTypes: availableServingTypes,
-                  prices: prices,
                   servingValue: currentServingValue,
                   priceValue: currentPriceValue,
                   onRemove: () {
@@ -341,7 +332,7 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
                         ServingModel(
                           id: newId,
                           servingQuantity: newServingType,
-                          servingPrice: prices.first,
+                          servingPrice: defaultPricing,
                         ),
                       );
                       debugPrint('Serving added; $existingServings');
@@ -454,7 +445,6 @@ class ServingSection extends StatefulWidget {
   const ServingSection({
     super.key,
     required this.servingTypes,
-    required this.prices,
     required this.onRemove,
     required this.id,
     required this.onServingUpdate,
@@ -465,7 +455,6 @@ class ServingSection extends StatefulWidget {
 
   final int id;
   final List<String> servingTypes;
-  final List<String> prices;
   final VoidCallback onRemove;
   final ValueChanged<String> onServingUpdate;
   final ValueChanged<String> onPriceUpdate;
@@ -502,8 +491,10 @@ class _ServingSectionState extends State<ServingSection> {
     }
   }
 
+  final TextEditingController priceController = TextEditingController();
   @override
   Widget build(BuildContext context) {
+    priceController.text = selectedPrice;
     // Use the list passed from parent (already filtered). Don't re-add duplicates here.
     // But make sure the currently selected value is present as an option (in case parent omitted it incorrectly).
     final List<String> items = widget.servingTypes.contains(selectedServing)
@@ -531,7 +522,7 @@ class _ServingSectionState extends State<ServingSection> {
                 ),
                 10.height,
                 SizedBox(
-                  width: 160.w,
+                  width: 150.w,
                   child: MyDropdown(
                     value: selectedServing,
                     items: items,
@@ -552,7 +543,7 @@ class _ServingSectionState extends State<ServingSection> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 SizedBox(
-                  width: 140.w,
+                  width: 150.w,
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -577,16 +568,29 @@ class _ServingSectionState extends State<ServingSection> {
                 10.height,
                 SizedBox(
                   width: 140.w,
-                  child: MyDropdown(
-                    value: selectedPrice,
-                    items: widget.prices,
+
+                  // child: MyDropdown(
+                  //   value: selectedPrice,
+                  //   items: widget.prices,
+                  //   onChanged: (value) {
+                  //     if (value == null) return;
+                  //     setState(() {
+                  //       selectedPrice = value;
+                  //     });
+                  //     widget.onPriceUpdate(value);
+                  //   },
+                  // ),
+                  child: MyTextField(
+                    prefixIcon: Icon(Icons.attach_money, size: 20.w),
+                    controller: priceController,
                     onChanged: (value) {
-                      if (value == null) return;
-                      setState(() {
-                        selectedPrice = value;
-                      });
+                      // setState(() {
+                      //   selectedPrice = value;
+                      // });
+                      debugPrint('Price changed: $value');
                       widget.onPriceUpdate(value);
                     },
+                    // onChanged: widget.onPriceUpdate,
                   ),
                 ),
               ],

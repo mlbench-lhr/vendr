@@ -111,7 +111,6 @@ class _VendorHomeScreenState extends State<VendorHomeScreen> {
                       ),
                     ],
                   ),
-                  SizedBox(height: 24.h),
                   LocationSection(location: vendor.address),
                   SizedBox(height: 24.h),
                   //Menu heading
@@ -491,43 +490,48 @@ class LocationSection extends StatelessWidget {
   final String? location;
   @override
   Widget build(BuildContext context) {
-    return location != null
-        ? Row(
-            children: [
-              CircleAvatar(
-                radius: 18.r,
-                backgroundColor: Colors.white24,
-                child: Icon(
-                  // Icons.my_location_outlined,
-                  Icons.location_on_outlined,
-                  color: Colors.white,
-                  size: 20.w,
+    return location != null && location!.isNotEmpty
+        ? Padding(
+            padding: EdgeInsets.only(top: 24.h),
+            child: Row(
+              children: [
+                CircleAvatar(
+                  radius: 18.r,
+                  backgroundColor: Colors.white24,
+                  child: Icon(
+                    // Icons.my_location_outlined,
+                    Icons.location_on_outlined,
+                    color: Colors.white,
+                    size: 20.w,
+                  ),
                 ),
-              ),
-              SizedBox(width: 12.w),
-              SizedBox(
-                width: MediaQuery.sizeOf(context).width * 0.7,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      'Location',
-                      style: context.typography.title.copyWith(
-                        fontWeight: FontWeight.w700,
-                        fontSize: 18.sp,
+                SizedBox(width: 12.w),
+                SizedBox(
+                  width: MediaQuery.sizeOf(context).width * 0.7,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        'Location',
+                        style: context.typography.title.copyWith(
+                          fontWeight: FontWeight.w700,
+                          fontSize: 18.sp,
+                        ),
                       ),
-                    ),
-                    Text(
-                      overflow: TextOverflow.clip,
-                      // '15 Maiden Ln Suite 908, New York, NY 10038, United States',
-                      location!,
-                      style: context.typography.body.copyWith(fontSize: 14.sp),
-                    ),
-                  ],
+                      Text(
+                        overflow: TextOverflow.clip,
+                        // '15 Maiden Ln Suite 908, New York, NY 10038, United States',
+                        location!,
+                        style: context.typography.body.copyWith(
+                          fontSize: 14.sp,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           )
         : const SizedBox.shrink();
   }

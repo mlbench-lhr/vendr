@@ -69,7 +69,7 @@ class _MenuBottomSheetState extends State<MenuBottomSheet> {
                       ),
                       Text(
                         textAlign: TextAlign.left,
-                        widget.menuItem.servings[selectedServing].servingPrice,
+                        '\$${widget.menuItem.servings.isNotEmpty ? widget.menuItem.servings[selectedServing].servingPrice : '0.00'}',
                         style: context.typography.body.copyWith(
                           fontSize: 20.sp,
                           fontWeight: FontWeight.w600,
