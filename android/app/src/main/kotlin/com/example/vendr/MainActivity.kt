@@ -1,4 +1,4 @@
-package com.example.vendr
+package com.streetvendr.app
 
 import io.flutter.embedding.android.FlutterActivity
 

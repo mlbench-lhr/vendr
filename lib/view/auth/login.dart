@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:http/http.dart' as http;
 import 'package:vendr/app/components/my_button.dart';
 import 'package:vendr/app/components/my_form_text_field.dart';
 import 'package:vendr/app/components/my_scaffold.dart';
@@ -9,6 +10,7 @@ import 'package:vendr/app/utils/extensions/validations_exception.dart';
 import 'package:vendr/services/common/auth_service.dart';
 import 'package:vendr/view/auth/widgets/language_menu.dart';
 import 'package:vendr/view/auth/widgets/social_login_btn.dart';
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key, required this.isVendor});
@@ -231,7 +233,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     type: 'apple',
                     onTap: () async {
                       debugPrint('apple btn pressed');
-                      // await AuthService().signInWithApple();
+                      signInWithApple();
                     },
                   ),
                   SocialLoginBtn(
@@ -274,5 +276,38 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
       ),
     );
+  }
+
+  Future<void> signInWithApple() async {
+    try {
+      final credential = await SignInWithApple.getAppleIDCredential(
+        scopes: [
+          AppleIDAuthorizationScopes.email,
+          AppleIDAuthorizationScopes.fullName,
+        ],
+      );
+
+      // This is the data you send to your backend
+      print('User Identifier: ${credential.userIdentifier}');
+      print('Identity Token: ${credential.identityToken}');
+      print('Auth Code: ${credential.authorizationCode}');
+
+      // 4. Send to your OAuth API
+      // final response = await http.post(
+      //   Uri.parse('https://your-api.com/oauth/apple'),
+      //   body: {
+      //     'token': credential.identityToken,
+      //     'authCode': credential.authorizationCode,
+      //     'givenName': credential.givenName,
+      //     'familyName': credential.familyName,
+      //   },
+      // );
+
+      // if (response.statusCode == 200) {
+      //   // Handle successful backend login
+      // }
+    } catch (e) {
+      print('Sign in failed: $e');
+    }
   }
 }

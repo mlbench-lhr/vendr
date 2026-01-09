@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "980752797154",
+    "project_id": "street-vendr",
+    "storage_bucket": "street-vendr.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:980752797154:android:36ec38118760204f4f3dbb",
+        "android_client_info": {
+          "package_name": "com.example.vendr"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDom1RZxEY5_jpEbWgOhE2S1E-3dRZDlvI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:980752797154:android:a366ffc54698d4394f3dbb",
+        "android_client_info": {
+          "package_name": "com.streetvendr.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDom1RZxEY5_jpEbWgOhE2S1E-3dRZDlvI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

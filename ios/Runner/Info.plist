@@ -34,6 +34,16 @@
 		<string>Background location needed.</string>
 		<key>NSLocationWhenInUseUsageDescription</key>
 		<string>Your location is used to track nearby vendors.</string>
+		<!-- Apple Sign in Config -->
+		<!-- <key>CFBundleURLTypes</key>
+		<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLName</key>
+			<string>apple-signin</string>
+		</dict>
+		</array> -->
 		<!-- Photo & Camera permissions -->
 		<key>NSPhotoLibraryUsageDescription</key>
 		<string>We need access to your photo library to allow you to select images or upload photos.</string>
