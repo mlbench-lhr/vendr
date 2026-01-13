@@ -12,6 +12,10 @@ class AppUrl {
       '$baseUrl/auth/vendor/signup-otp'; //add info and send otp
   static const String userSignup =
       '$baseUrl/auth/user/signup-otp'; //add info and send otp
+  static const String userOAuth =
+      '$baseUrl/auth/user/oauth'; //user google or apple auth
+  static const String vendorOAuth =
+      '$baseUrl/auth/vendor/oauth'; //vendor google or apple auth
   static const String verifyVendorOtp =
       '$baseUrl/auth/vendor/signup'; //verify otp to complete signup
   static const String verifyUserOtp =
@@ -65,4 +69,16 @@ class AppUrl {
   // Upload Endpoints
   // ========================
   static const String uploadImage = '$baseUrl/auth/image';
+
+  // ====================
+  // Notifications Endpoints //TODO: Update endpoints
+  // ====================
+  static const String saveTokenVendor =
+      '$baseUrl/api/doctor/medical-opinion/save-token';
+  static const String saveTokenUser =
+      '$baseUrl/api/user/medical-opinion/save-token';
+  static const String pushNotificationUser =
+      '$baseUrl/api/user/medical-opinion/push-notification';
+  static const String pushNotificationVendor =
+      '$baseUrl/api/doctor/medical-opinion/push-notification';
 }

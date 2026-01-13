@@ -12,6 +12,10 @@ class UserAuthRepository {
     return _apiServices.post(url: AppUrl.userSignup, data: data);
   }
 
+  Future<Map<String, dynamic>> userOAuth(Map<String, dynamic> data) async {
+    return _apiServices.post(url: AppUrl.userOAuth, data: data);
+  }
+
   Future<Map<String, dynamic>> updateuserProfile(
     Map<String, dynamic> data,
   ) async {

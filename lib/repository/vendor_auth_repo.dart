@@ -17,6 +17,10 @@ class VendorAuthRepository {
     return _apiServices.post(url: AppUrl.vendorSignup, data: data);
   }
 
+  Future<Map<String, dynamic>> vendorOAuth(Map<String, dynamic> data) async {
+    return _apiServices.post(url: AppUrl.vendorOAuth, data: data);
+  }
+
   Future<Map<String, dynamic>> verifySignupOtp(
     Map<String, dynamic> data,
   ) async {

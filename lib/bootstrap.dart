@@ -1,20 +1,13 @@
 import 'dart:async';
 import 'dart:developer';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:vendr/firebase_options.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:vendr/provider/providers.dart';
 import 'package:vendr/services/common/session_manager/session_controller.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:provider/provider.dart';
-
-import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
-import 'package:provider/provider.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 Future<void> bootstrap(FutureOr<Widget> Function() builder) async {
@@ -33,6 +26,11 @@ Future<void> bootstrap(FutureOr<Widget> Function() builder) async {
 
   /// Initialize Firebase with platform-specific options
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
+  // CRITICAL: Initialize Google Sign-In
+  await GoogleSignIn.instance.initialize(
+    // clientId: 'YOUR_WEB_CLIENT_ID.apps.googleusercontent.com', // Required for Web
+  );
 
   // Add cross-flavor configuration here
   await SessionController().init();

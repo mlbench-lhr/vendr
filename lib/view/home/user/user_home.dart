@@ -18,6 +18,7 @@ import 'package:vendr/app/utils/extensions/general_extensions.dart';
 import 'package:vendr/generated/assets/assets.gen.dart';
 import 'package:vendr/model/user/user_model.dart';
 import 'package:vendr/model/vendor/vendor_model.dart';
+import 'package:vendr/services/common/push_notifications_service.dart';
 import 'package:vendr/services/common/session_manager/session_controller.dart';
 import 'package:vendr/services/user/user_home_service.dart';
 import 'package:vendr/services/user/user_profile_service.dart';
@@ -72,7 +73,11 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
     super.initState();
     sessionController.addListener(_onSessionChanged);
     WidgetsBinding.instance.addPostFrameCallback((_) => _initializeMap());
-    ();
+
+    ///
+    ///Initialize Push Notifications
+    ///
+    PushNotificationsService().initFCM(context: context);
   }
 
   Future<void> _initializeMap() async {

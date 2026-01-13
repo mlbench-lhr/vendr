@@ -8,6 +8,7 @@ import 'package:vendr/app/components/my_scaffold.dart';
 import 'package:vendr/app/utils/extensions/context_extensions.dart';
 import 'package:vendr/app/utils/extensions/validations_exception.dart';
 import 'package:vendr/services/common/auth_service.dart';
+import 'package:vendr/services/common/o_auth_service.dart';
 import 'package:vendr/view/auth/widgets/language_menu.dart';
 import 'package:vendr/view/auth/widgets/social_login_btn.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
@@ -21,6 +22,7 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   final AuthService _authService = AuthService();
+  final OAuthService _oAuthService = OAuthService();
   final _formKey = GlobalKey<FormState>();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
@@ -233,16 +235,24 @@ class _LoginScreenState extends State<LoginScreen> {
                     type: 'apple',
                     onTap: () async {
                       debugPrint('apple btn pressed');
-                      signInWithApple();
+                      _oAuthService.appleAuth(
+                        context,
+                        isVendor: widget.isVendor,
+                      );
                     },
                   ),
                   SocialLoginBtn(
                     type: 'google',
                     onTap: () async {
                       debugPrint('google btn pressed');
-                      final signInResponse = await AuthService().signIn();
-                      debugPrint(
-                        '🚨 G O O G L E Sign in response: $signInResponse',
+                      // final signInResponse = await _authService.signIn();
+                      // debugPrint(
+                      //   '🚨 G O O G L E Sign in response: $signInResponse',
+                      // );
+
+                      _oAuthService.googleAuth(
+                        context,
+                        isVendor: widget.isVendor,
                       );
                     },
                   ),
@@ -276,38 +286,5 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
       ),
     );
-  }
-
-  Future<void> signInWithApple() async {
-    try {
-      final credential = await SignInWithApple.getAppleIDCredential(
-        scopes: [
-          AppleIDAuthorizationScopes.email,
-          AppleIDAuthorizationScopes.fullName,
-        ],
-      );
-
-      // This is the data you send to your backend
-      print('User Identifier: ${credential.userIdentifier}');
-      print('Identity Token: ${credential.identityToken}');
-      print('Auth Code: ${credential.authorizationCode}');
-
-      // 4. Send to your OAuth API
-      // final response = await http.post(
-      //   Uri.parse('https://your-api.com/oauth/apple'),
-      //   body: {
-      //     'token': credential.identityToken,
-      //     'authCode': credential.authorizationCode,
-      //     'givenName': credential.givenName,
-      //     'familyName': credential.familyName,
-      //   },
-      // );
-
-      // if (response.statusCode == 200) {
-      //   // Handle successful backend login
-      // }
-    } catch (e) {
-      print('Sign in failed: $e');
-    }
   }
 }

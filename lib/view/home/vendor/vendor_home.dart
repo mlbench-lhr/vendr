@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:vendr/app/components/menu_item_tile.dart';
 import 'package:vendr/app/components/my_scaffold.dart';
 import 'package:vendr/app/components/my_text_button.dart';
@@ -9,6 +8,7 @@ import 'package:vendr/app/styles/app_radiuses.dart';
 import 'package:vendr/app/utils/extensions/context_extensions.dart';
 import 'package:vendr/app/utils/extensions/general_extensions.dart';
 import 'package:vendr/model/vendor/vendor_model.dart';
+import 'package:vendr/services/common/push_notifications_service.dart';
 import 'package:vendr/services/common/reviews_service.dart';
 import 'package:vendr/services/common/session_manager/session_controller.dart';
 import 'package:vendr/services/user/user_home_service.dart';
@@ -32,6 +32,11 @@ class _VendorHomeScreenState extends State<VendorHomeScreen> {
     super.initState();
     //request permissoin
     sessionController.addListener(_onSessionChanged);
+
+    ///
+    ///Initialize Push Notifications
+    ///
+    PushNotificationsService().initFCM(context: context);
   }
 
   ///
