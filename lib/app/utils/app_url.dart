@@ -73,12 +73,10 @@ class AppUrl {
   // ====================
   // Notifications Endpoints //TODO: Update endpoints
   // ====================
-  static const String saveTokenVendor =
-      '$baseUrl/api/doctor/medical-opinion/save-token';
-  static const String saveTokenUser =
-      '$baseUrl/api/user/medical-opinion/save-token';
+  static const String saveTokenVendor = '$baseUrl/auth/vendor/save-token';
+  static const String saveTokenUser = '$baseUrl/auth/user/save-token';
   static const String pushNotificationUser =
-      '$baseUrl/api/user/medical-opinion/push-notification';
+      '$baseUrl/auth/user/push-notification'; //Not implemented on backend
   static const String pushNotificationVendor =
-      '$baseUrl/api/doctor/medical-opinion/push-notification';
+      '$baseUrl/auth/vendor/push-notification'; //Not implemented on backend
 }

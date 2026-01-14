@@ -10,7 +10,10 @@ class UserNotificationsRepository {
     required String userId,
     required String token,
   }) async {
-    return api.post(url: AppUrl.saveTokenUser, data: {'token': token});
+    return api.post(
+      url: AppUrl.saveTokenUser,
+      data: {'userId': userId, 'token': token},
+    );
   }
 
   //sendNotification

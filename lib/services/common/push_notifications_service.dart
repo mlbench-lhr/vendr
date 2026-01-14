@@ -1,8 +1,6 @@
 import 'dart:io';
-
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:vendr/app/utils/enums.dart';
 import 'package:vendr/app/utils/service_error_handler.dart';
@@ -46,7 +44,7 @@ class PushNotificationsService {
     if (token != null) {
       // Send token to your server
       // ignore: use_build_context_synchronously
-      // await sendTokenToServer(context, userId, token); //TODO: Uncomment when api routes are updated
+      await sendTokenToServer(context, userId, token);
     }
 
     // Foreground messages
@@ -88,7 +86,7 @@ class PushNotificationsService {
       if (_session.userType == UserType.user) {
         await _userRepo.sendToken(userId: userId, token: token);
       } else {
-        await _doctorRepo.sendToken(userId: userId, token: token);
+        await _doctorRepo.sendToken(vendorId: userId, token: token);
       }
     } catch (e) {
       if (context.mounted) ErrorHandler.handle(context, e, serviceName: tag);

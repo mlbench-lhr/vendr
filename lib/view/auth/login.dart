@@ -1,7 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:http/http.dart' as http;
 import 'package:vendr/app/components/my_button.dart';
 import 'package:vendr/app/components/my_form_text_field.dart';
 import 'package:vendr/app/components/my_scaffold.dart';
@@ -11,7 +10,6 @@ import 'package:vendr/services/common/auth_service.dart';
 import 'package:vendr/services/common/o_auth_service.dart';
 import 'package:vendr/view/auth/widgets/language_menu.dart';
 import 'package:vendr/view/auth/widgets/social_login_btn.dart';
-import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key, required this.isVendor});
@@ -235,25 +233,32 @@ class _LoginScreenState extends State<LoginScreen> {
                     type: 'apple',
                     onTap: () async {
                       debugPrint('apple btn pressed');
-                      _oAuthService.appleAuth(
+                      setState(() {
+                        isLoading = true;
+                      });
+                      await _oAuthService.appleAuth(
                         context,
                         isVendor: widget.isVendor,
                       );
+                      setState(() {
+                        isLoading = false;
+                      });
                     },
                   ),
                   SocialLoginBtn(
                     type: 'google',
                     onTap: () async {
-                      debugPrint('google btn pressed');
-                      // final signInResponse = await _authService.signIn();
-                      // debugPrint(
-                      //   '🚨 G O O G L E Sign in response: $signInResponse',
-                      // );
-
-                      _oAuthService.googleAuth(
+                      debugPrint('google btn pressed from login screen');
+                      setState(() {
+                        isLoading = true;
+                      });
+                      await _oAuthService.googleAuth(
                         context,
                         isVendor: widget.isVendor,
                       );
+                      setState(() {
+                        isLoading = false;
+                      });
                     },
                   ),
                 ],

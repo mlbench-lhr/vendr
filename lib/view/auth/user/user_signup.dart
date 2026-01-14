@@ -7,6 +7,7 @@ import 'package:vendr/app/components/my_scaffold.dart';
 import 'package:vendr/app/utils/extensions/context_extensions.dart';
 import 'package:vendr/app/utils/extensions/validations_exception.dart';
 import 'package:vendr/services/common/auth_service.dart';
+import 'package:vendr/services/common/o_auth_service.dart';
 import 'package:vendr/view/auth/widgets/language_menu.dart';
 import 'package:vendr/view/auth/widgets/social_login_btn.dart';
 
@@ -84,6 +85,8 @@ class _UserSignupScreenState extends State<UserSignupScreen> {
       isFormFilled.value = true;
     }
   }
+
+  final OAuthService _oAuthService = OAuthService();
 
   @override
   Widget build(BuildContext context) {
@@ -301,12 +304,14 @@ class _UserSignupScreenState extends State<UserSignupScreen> {
                     type: 'apple',
                     onTap: () {
                       debugPrint('apple btn pressed');
+                      _oAuthService.appleAuth(context, isVendor: false);
                     },
                   ),
                   SocialLoginBtn(
                     type: 'google',
                     onTap: () {
                       debugPrint('google btn pressed');
+                      _oAuthService.googleAuth(context, isVendor: false);
                     },
                   ),
                 ],

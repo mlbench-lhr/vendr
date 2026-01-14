@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -42,7 +44,11 @@ class OAuthService {
     );
 
     if (googleUser == null) {
-      throw Exception('Google sign-in aborted');
+      // throw Exception('Google sign-in aborted');
+      debugPrint('❌ Google sign-in aborted');
+      if (!context.mounted) return;
+      context.flushBarErrorMessage(message: 'Google sign-in aborted');
+      return;
     }
 
     // 3. Get ID Token (Authentication)
@@ -51,7 +57,11 @@ class OAuthService {
     final String? idToken = googleAuth.idToken;
 
     if (idToken == null) {
-      throw Exception('Missing Google ID Token');
+      context.flushBarErrorMessage(
+        message: 'Unable to sign in with google. Please try again.',
+      );
+      return;
+      // throw Exception('Missing Google ID Token');
     }
 
     // 4. Get Access Token (Authorization)
@@ -91,6 +101,38 @@ class OAuthService {
   ///Apple Auth
   ///
   ///
+  //Old
+  // Future<void> appleAuth(BuildContext context, {required bool isVendor}) async {
+  //   try {
+  //     final credential = await SignInWithApple.getAppleIDCredential(
+  //       scopes: [
+  //         AppleIDAuthorizationScopes.email,
+  //         AppleIDAuthorizationScopes.fullName,
+  //       ],
+  //     );
+
+  //     // This is the data you send to your backend
+  //     // debugPrint('User Identifier: ${credential.userIdentifier}');
+  //     debugPrint('Identity Token: ${credential.identityToken}');
+  //     // debugPrint('Auth Code: ${credential.authorizationCode}');
+
+  //     final String? idToken = credential.identityToken;
+  //     //Api call
+  //     if (!context.mounted) return;
+  //     if (isVendor) {
+  //       //vendor oauth
+  //       vendorOAuth(context, providerName: 'apple', token: idToken ?? '');
+  //     } else {
+  //       //user oauth
+  //       userOAuth(context, providerName: 'apple', token: idToken ?? '');
+  //     }
+  //     // 4. Send to your OAuth API
+  //   } catch (e) {
+  //     debugPrint('❌ Sign in failed: $e');
+  //   }
+  // }
+
+  //updated
   Future<void> appleAuth(BuildContext context, {required bool isVendor}) async {
     try {
       final credential = await SignInWithApple.getAppleIDCredential(
@@ -98,24 +140,27 @@ class OAuthService {
           AppleIDAuthorizationScopes.email,
           AppleIDAuthorizationScopes.fullName,
         ],
+        webAuthenticationOptions: Platform.isAndroid
+            ? WebAuthenticationOptions(
+                clientId:
+                    'com.streetvendr.service', // Your Service ID from step 1
+                redirectUri: Uri.parse(
+                  'https://street-vendr.firebaseapp.com/__/auth/handler', // From step 2
+                ),
+              )
+            : null,
       );
 
-      // This is the data you send to your backend
-      // debugPrint('User Identifier: ${credential.userIdentifier}');
       debugPrint('Identity Token: ${credential.identityToken}');
-      // debugPrint('Auth Code: ${credential.authorizationCode}');
 
       final String? idToken = credential.identityToken;
-      //Api call
+
       if (!context.mounted) return;
       if (isVendor) {
-        //vendor oauth
         vendorOAuth(context, providerName: 'apple', token: idToken ?? '');
       } else {
-        //user oauth
         userOAuth(context, providerName: 'apple', token: idToken ?? '');
       }
-      // 4. Send to your OAuth API
     } catch (e) {
       debugPrint('❌ Sign in failed: $e');
     }

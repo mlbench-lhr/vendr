@@ -7,10 +7,13 @@ class VendorNotificationsRepository {
 
   //sendToken
   Future<Map<String, dynamic>> sendToken({
-    required String userId,
+    required String vendorId,
     required String token,
   }) async {
-    return api.post(url: AppUrl.saveTokenVendor, data: {'token': token});
+    return api.post(
+      url: AppUrl.saveTokenVendor,
+      data: {'vendorId': vendorId, 'token': token},
+    );
   }
 
   //sendNotification

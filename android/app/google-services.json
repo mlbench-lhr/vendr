@@ -7,12 +7,20 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:980752797154:android:36ec38118760204f4f3dbb",
+        "mobilesdk_app_id": "1:980752797154:android:a366ffc54698d4394f3dbb",
         "android_client_info": {
-          "package_name": "com.example.vendr"
+          "package_name": "com.streetvendr.app"
         }
       },
       "oauth_client": [
+        {
+          "client_id": "980752797154-temk3tj7cj56emtk13vd69h19to3u2cf.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.streetvendr.app",
+            "certificate_hash": "77f0516d6885fbeecd1f0e8bd31eda4d82b7bb2b"
+          }
+        },
         {
           "client_id": "980752797154-ju8n2b1p8v3oe1p4681a2e1s5cro0nm0.apps.googleusercontent.com",
           "client_type": 3
@@ -43,12 +51,64 @@
     },
     {
       "client_info": {
-        "mobilesdk_app_id": "1:980752797154:android:a366ffc54698d4394f3dbb",
+        "mobilesdk_app_id": "1:980752797154:android:8e9dbbce9ea69a9b4f3dbb",
         "android_client_info": {
-          "package_name": "com.streetvendr.app"
+          "package_name": "com.streetvendr.app.dev"
         }
       },
       "oauth_client": [
+        {
+          "client_id": "980752797154-vijsf3uhjh75kessjshk4njocsc7c95l.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.streetvendr.app.dev",
+            "certificate_hash": "affeefc7e1f68f2934906652b3075becdcbd3ad8"
+          }
+        },
+        {
+          "client_id": "980752797154-ju8n2b1p8v3oe1p4681a2e1s5cro0nm0.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDom1RZxEY5_jpEbWgOhE2S1E-3dRZDlvI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "980752797154-ju8n2b1p8v3oe1p4681a2e1s5cro0nm0.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "980752797154-4t9o6akj3tbie4gukedok9m4lhoq64pq.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.streetvendr.app"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:980752797154:android:a585153c0ae5c1f24f3dbb",
+        "android_client_info": {
+          "package_name": "com.streetvendr.app.stg"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "980752797154-2pdu8sshgdpcu48origtk0adl0l4fphl.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.streetvendr.app.stg",
+            "certificate_hash": "affeefc7e1f68f2934906652b3075becdcbd3ad8"
+          }
+        },
         {
           "client_id": "980752797154-ju8n2b1p8v3oe1p4681a2e1s5cro0nm0.apps.googleusercontent.com",
           "client_type": 3

@@ -5,7 +5,7 @@
 
 	<!-- Push Notifications -->
 	<key>aps-environment</key>
-	<string>production</string>
+	<string>development</string>
 
 	<!-- Location Push (if you are using it) -->
 	<key>com.apple.developer.location.push</key>
