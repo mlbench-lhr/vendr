@@ -816,6 +816,7 @@ class CardVendorHoursHeading extends StatelessWidget {
         const Spacer(),
         Text(
           VendorHomeService.getVendorWorkingHoursToday(
+            isUserSide: true,
             vendorHours: vendorHours,
           ),
           style: context.typography.body.copyWith(fontSize: 14.sp),

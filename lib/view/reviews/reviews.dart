@@ -60,7 +60,7 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
   // ============================
   Future<void> _fetchData() async {
     if (_isLoading || !_hasMore) return;
-
+    debugPrint("F E T C H  D A T A  C A L L E D");
     setState(() => _isLoading = true);
 
     ReviewsModel? response;
@@ -197,14 +197,18 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
               padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 24.h),
               child: MyButton(
                 label: 'Write Review',
-                onPressed: () {
-                  MyBottomSheet.show(
+                onPressed: () async {
+                  await MyBottomSheet.show(
                     context,
                     isDismissible: true,
                     isScrollControlled: true,
                     enableDrag: true,
                     backgroundColor: context.colors.primary,
-                    child: AddReviewBottomSheet(vendorId: widget.vendorId!),
+                    child: AddReviewBottomSheet(
+                      vendorId: widget.vendorId!,
+                      parentContext: context,
+                      onSuccess: _fetchData,
+                    ),
                   );
                 },
               ),

@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -227,24 +229,26 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               SizedBox(height: 16.h),
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  SocialLoginBtn(
-                    type: 'apple',
-                    onTap: () async {
-                      debugPrint('apple btn pressed');
-                      setState(() {
-                        isLoading = true;
-                      });
-                      await _oAuthService.appleAuth(
-                        context,
-                        isVendor: widget.isVendor,
-                      );
-                      setState(() {
-                        isLoading = false;
-                      });
-                    },
-                  ),
+                  //show Apple login only on iOS
+                  if (Platform.isIOS)
+                    SocialLoginBtn(
+                      type: 'apple',
+                      onTap: () async {
+                        debugPrint('apple btn pressed');
+                        setState(() {
+                          isLoading = true;
+                        });
+                        await _oAuthService.appleAuth(
+                          context,
+                          isVendor: widget.isVendor,
+                        );
+                        setState(() {
+                          isLoading = false;
+                        });
+                      },
+                    ),
                   SocialLoginBtn(
                     type: 'google',
                     onTap: () async {

@@ -54,12 +54,17 @@ class VendorHomeService {
   ///getVendorWorkingHoursToday
   ///Returns a String of working hours of vendor "Today"
   ///
-  static String getVendorWorkingHoursToday({HoursModel? vendorHours}) {
+  static String getVendorWorkingHoursToday({
+    HoursModel? vendorHours,
+    bool? isUserSide,
+  }) {
     final weekday = DateTime.now().weekday;
     late final HoursModel? hours;
 
     if (vendorHours != null) {
       hours = vendorHours;
+    } else if (isUserSide != null && isUserSide == true) {
+      return '0 hours';
     } else {
       final VendorModel vendor = SessionController().vendor!;
       hours = vendor.hours;

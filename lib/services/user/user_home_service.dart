@@ -159,7 +159,7 @@ class UserHomeService {
   }
 
   // Add User Review
-  Future<void> submitReview({
+  Future<bool> submitReview({
     required BuildContext context,
     required String message,
     required String vendorId,
@@ -172,10 +172,12 @@ class UserHomeService {
         'vendor_id': vendorId,
       };
       await _userAuthRepo.addUserReview(data);
+      return true; //sucess
     } catch (e) {
       if (context.mounted) {
         ErrorHandler.handle(context, e, serviceName: tag);
       }
+      return false;
     }
   }
 

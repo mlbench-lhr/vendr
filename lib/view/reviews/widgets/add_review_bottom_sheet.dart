@@ -10,8 +10,16 @@ import 'package:vendr/app/utils/extensions/flush_bar_extension.dart';
 import 'package:vendr/services/user/user_home_service.dart';
 
 class AddReviewBottomSheet extends StatefulWidget {
+  final BuildContext parentContext;
+  final VoidCallback onSuccess;
   final String vendorId; // pass vendorId to the sheet
-  const AddReviewBottomSheet({super.key, required this.vendorId});
+
+  const AddReviewBottomSheet({
+    super.key,
+    required this.vendorId,
+    required this.parentContext,
+    required this.onSuccess,
+  });
 
   @override
   State<AddReviewBottomSheet> createState() => _AddReviewBottomSheetState();
@@ -23,7 +31,7 @@ class _AddReviewBottomSheetState extends State<AddReviewBottomSheet> {
   bool isLoading = false;
 
   Future<void> _submitReview() async {
-    if (isLoading) return;
+    // if (isLoading) return;
 
     final msg = feedbackController.text.trim();
     if (rating == 0 || msg.isEmpty) {
@@ -36,31 +44,33 @@ class _AddReviewBottomSheetState extends State<AddReviewBottomSheet> {
     setState(() => isLoading = true);
 
     try {
-      await UserHomeService().submitReview(
+      final bool success = await UserHomeService().submitReview(
         message: msg,
         vendorId: widget.vendorId,
         rating: rating.toInt(),
         context: context,
       );
 
-      if (!mounted) return;
-
-      context.flushBarSuccessMessage(message: 'Review added successfully');
-
       // ✅ close only on success (safe)
       Future.delayed(const Duration(milliseconds: 300), () {
-        if (mounted) {
-          Navigator.of(context).pop(true);
+        if (!success) {
+          return;
         }
+        widget.onSuccess.call();
+        if (!mounted) return;
+        Navigator.of(context, rootNavigator: true).pop(true);
+        if (!widget.parentContext.mounted) return;
+        widget.parentContext.flushBarSuccessMessage(
+          message: 'Review added successfully',
+        );
       });
     } on AppException catch (e) {
       if (!mounted) return;
-
-      context.flushBarErrorMessage(message: e.userMessage);
+      // context.flushBarErrorMessage(message: e.userMessage);
     } catch (_) {
       if (!mounted) return;
 
-      context.flushBarErrorMessage(message: 'Something went wrong');
+      // context.flushBarErrorMessage(message: 'Something went wrong');
     } finally {
       if (mounted) {
         setState(() => isLoading = false);
@@ -127,12 +137,15 @@ class _AddReviewBottomSheetState extends State<AddReviewBottomSheet> {
             controller: feedbackController,
             hint: 'Enter your feedback...',
           ),
-          SizedBox(height: 40.w),
+          SizedBox(height: 32.w),
           MyButton(
             isLoading: isLoading,
             label: 'Add',
-            onPressed: _submitReview,
+            onPressed: () async {
+              await _submitReview();
+            },
           ),
+          const SizedBox(height: 24),
         ],
       ),
     );

@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -34,7 +35,7 @@ class _VendorSignupScreenState extends State<VendorSignupScreen> {
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
 
-  String _selectedVendorType = '';
+  String _selectedVendorType = 'Other'; //Default Vendor type
 
   final FocusNode _passwordFocusNode = FocusNode();
   final FocusNode _confirmPasswordFocusNode = FocusNode();
@@ -356,20 +357,33 @@ class _VendorSignupScreenState extends State<VendorSignupScreen> {
               ),
               SizedBox(height: 16.h),
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  SocialLoginBtn(
-                    type: 'apple',
-                    onTap: () {
-                      debugPrint('apple btn pressed');
-                      _oAuthService.appleAuth(context, isVendor: true);
-                    },
-                  ),
+                  if (Platform.isIOS)
+                    SocialLoginBtn(
+                      type: 'apple',
+                      onTap: () async {
+                        debugPrint('apple btn pressed');
+                        setState(() {
+                          isLoading = true;
+                        });
+                        await _oAuthService.appleAuth(context, isVendor: true);
+                        setState(() {
+                          isLoading = false;
+                        });
+                      },
+                    ),
                   SocialLoginBtn(
                     type: 'google',
-                    onTap: () {
+                    onTap: () async {
                       debugPrint('google btn pressed');
-                      _oAuthService.googleAuth(context, isVendor: true);
+                      setState(() {
+                        isLoading = true;
+                      });
+                      await _oAuthService.googleAuth(context, isVendor: true);
+                      setState(() {
+                        isLoading = false;
+                      });
                     },
                   ),
                 ],

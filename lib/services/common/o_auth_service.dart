@@ -35,64 +35,70 @@ class OAuthService {
     BuildContext context, {
     required bool isVendor,
   }) async {
-    final List<String> scopes = ['email', 'profile'];
+    try {
+      final List<String> scopes = ['email', 'profile'];
 
-    // 2. Trigger Google Authentication (formerly .signIn())
-    // Note: authenticate() now throws exceptions instead of returning null on error.
-    final GoogleSignInAccount googleUser = await _googleSignIn.authenticate(
-      scopeHint: scopes,
-    );
-
-    if (googleUser == null) {
-      // throw Exception('Google sign-in aborted');
-      debugPrint('❌ Google sign-in aborted');
-      if (!context.mounted) return;
-      context.flushBarErrorMessage(message: 'Google sign-in aborted');
-      return;
-    }
-
-    // 3. Get ID Token (Authentication)
-    // In v7+, .authentication is a synchronous getter.
-    final GoogleSignInAuthentication googleAuth = googleUser.authentication;
-    final String? idToken = googleAuth.idToken;
-
-    if (idToken == null) {
-      context.flushBarErrorMessage(
-        message: 'Unable to sign in with google. Please try again.',
+      // 2. Trigger Google Authentication (formerly .signIn())
+      // Note: authenticate() now throws exceptions instead of returning null on error.
+      final GoogleSignInAccount googleUser = await _googleSignIn.authenticate(
+        scopeHint: scopes,
       );
-      return;
-      // throw Exception('Missing Google ID Token');
-    }
 
-    // 4. Get Access Token (Authorization)
-    // Authorization is now separate from Identity. You must request it explicitly.
-    final authorization = await googleUser.authorizationClient.authorizeScopes(
-      scopes,
-    );
-    final String? accessToken = authorization.accessToken;
+      if (googleUser == null) {
+        // throw Exception('Google sign-in aborted');
+        debugPrint('❌ Google sign-in aborted');
+        if (!context.mounted) return;
+        context.flushBarErrorMessage(message: 'Google sign-in aborted');
+        return;
+      }
 
-    // 5. Firebase Auth sign-in
-    final credential = GoogleAuthProvider.credential(
-      idToken: idToken,
-      accessToken: accessToken,
-    );
+      // 3. Get ID Token (Authentication)
+      // In v7+, .authentication is a synchronous getter.
+      final GoogleSignInAuthentication googleAuth = googleUser.authentication;
+      final String? idToken = googleAuth.idToken;
 
-    await FirebaseAuth.instance.signInWithCredential(credential);
-    debugPrint('✅ Authentication successful!');
-    LogManager.logResponse('✅ Complete Token:', idToken);
+      if (idToken == null) {
+        if (!context.mounted) return;
+        context.flushBarErrorMessage(
+          message: 'Unable to sign in with google. Please try again.',
+        );
+        return;
+        // throw Exception('Missing Google ID Token');
+      }
 
-    // debugPrint('Email: ${googleUser.email}'); //user email
-    // debugPrint('Name: ${googleUser.displayName}'); //user name
-    // debugPrint('Photo URL: ${googleUser.photoUrl}'); //user photo url
+      // 4. Get Access Token (Authorization)
+      // Authorization is now separate from Identity. You must request it explicitly.
+      final authorization = await googleUser.authorizationClient
+          .authorizeScopes(scopes);
+      final String? accessToken = authorization.accessToken;
 
-    //Api call
-    if (!context.mounted) return;
-    if (isVendor) {
-      //vendor oauth
-      vendorOAuth(context, providerName: 'google', token: idToken);
-    } else {
-      //user oauth
-      userOAuth(context, providerName: 'google', token: idToken);
+      // 5. Firebase Auth sign-in
+      final credential = GoogleAuthProvider.credential(
+        idToken: idToken,
+        accessToken: accessToken,
+      );
+
+      await FirebaseAuth.instance.signInWithCredential(credential);
+      debugPrint('✅ Authentication successful!');
+      LogManager.logResponse('✅ Complete Token:', idToken);
+
+      // debugPrint('Email: ${googleUser.email}'); //user email
+      // debugPrint('Name: ${googleUser.displayName}'); //user name
+      // debugPrint('Photo URL: ${googleUser.photoUrl}'); //user photo url
+
+      //Api call
+      if (!context.mounted) return;
+      if (isVendor) {
+        //vendor oauth
+        vendorOAuth(context, providerName: 'google', token: idToken);
+      } else {
+        //user oauth
+        userOAuth(context, providerName: 'google', token: idToken);
+      }
+    } catch (e) {
+      debugPrint('❌ Sign in failed. Error: $e');
+      if (!context.mounted) return;
+      context.flushBarErrorMessage(message: 'Sign in failed.');
     }
   }
 
@@ -101,38 +107,7 @@ class OAuthService {
   ///Apple Auth
   ///
   ///
-  //Old
-  // Future<void> appleAuth(BuildContext context, {required bool isVendor}) async {
-  //   try {
-  //     final credential = await SignInWithApple.getAppleIDCredential(
-  //       scopes: [
-  //         AppleIDAuthorizationScopes.email,
-  //         AppleIDAuthorizationScopes.fullName,
-  //       ],
-  //     );
 
-  //     // This is the data you send to your backend
-  //     // debugPrint('User Identifier: ${credential.userIdentifier}');
-  //     debugPrint('Identity Token: ${credential.identityToken}');
-  //     // debugPrint('Auth Code: ${credential.authorizationCode}');
-
-  //     final String? idToken = credential.identityToken;
-  //     //Api call
-  //     if (!context.mounted) return;
-  //     if (isVendor) {
-  //       //vendor oauth
-  //       vendorOAuth(context, providerName: 'apple', token: idToken ?? '');
-  //     } else {
-  //       //user oauth
-  //       userOAuth(context, providerName: 'apple', token: idToken ?? '');
-  //     }
-  //     // 4. Send to your OAuth API
-  //   } catch (e) {
-  //     debugPrint('❌ Sign in failed: $e');
-  //   }
-  // }
-
-  //updated
   Future<void> appleAuth(BuildContext context, {required bool isVendor}) async {
     try {
       final credential = await SignInWithApple.getAppleIDCredential(
@@ -163,6 +138,7 @@ class OAuthService {
       }
     } catch (e) {
       debugPrint('❌ Sign in failed: $e');
+      debugPrint('Sign in failed.');
     }
   }
 
