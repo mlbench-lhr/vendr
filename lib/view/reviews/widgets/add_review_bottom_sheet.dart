@@ -66,11 +66,11 @@ class _AddReviewBottomSheetState extends State<AddReviewBottomSheet> {
       });
     } on AppException catch (e) {
       if (!mounted) return;
-      // context.flushBarErrorMessage(message: e.userMessage);
+      context.flushBarErrorMessage(message: e.userMessage);
     } catch (_) {
       if (!mounted) return;
 
-      // context.flushBarErrorMessage(message: 'Something went wrong');
+      context.flushBarErrorMessage(message: 'Something went wrong');
     } finally {
       if (mounted) {
         setState(() => isLoading = false);
