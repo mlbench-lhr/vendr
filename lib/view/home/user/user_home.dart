@@ -94,7 +94,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
         .getNearbyVendors(
           context: context,
           location: _userLocation,
-          maxDistance: 50000000000, //km
+          maxDistance: 5, //km
         );
     setState(() {
       nearbyVendors = vendorsResponse;
