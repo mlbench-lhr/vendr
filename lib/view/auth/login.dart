@@ -232,7 +232,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
                   //show Apple login only on iOS
-                  if (Platform.isIOS)
+                  if (Platform.isIOS) ...[
                     SocialLoginBtn(
                       type: 'apple',
                       onTap: () async {
@@ -249,6 +249,8 @@ class _LoginScreenState extends State<LoginScreen> {
                         });
                       },
                     ),
+                    SizedBox(width: 16.w),
+                  ],
                   SocialLoginBtn(
                     type: 'google',
                     onTap: () async {
