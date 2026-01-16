@@ -59,6 +59,9 @@ class $AssetsIconsGen {
 class $AssetsImagesGen {
   const $AssetsImagesGen();
 
+  /// File path: assets/images/bike.png
+  AssetGenImage get bike => const AssetGenImage('assets/images/bike.png');
+
   /// File path: assets/images/blocks_pattern.png
   AssetGenImage get blocksPattern =>
       const AssetGenImage('assets/images/blocks_pattern.png');
@@ -75,12 +78,17 @@ class $AssetsImagesGen {
   AssetGenImage get shopMarker =>
       const AssetGenImage('assets/images/shop_marker.png');
 
+  /// File path: assets/images/truck.png
+  AssetGenImage get truck => const AssetGenImage('assets/images/truck.png');
+
   /// List of all assets
   List<AssetGenImage> get values => [
+    bike,
     blocksPattern,
     disconnected,
     locationPermissionRequired,
     shopMarker,
+    truck,
   ];
 }
 

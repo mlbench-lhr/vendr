@@ -18,6 +18,7 @@ import 'package:vendr/app/utils/extensions/general_extensions.dart';
 import 'package:vendr/generated/assets/assets.gen.dart';
 import 'package:vendr/model/user/user_model.dart';
 import 'package:vendr/model/vendor/vendor_model.dart';
+import 'package:vendr/services/common/location_service.dart';
 import 'package:vendr/services/common/push_notifications_service.dart';
 import 'package:vendr/services/common/session_manager/session_controller.dart';
 import 'package:vendr/services/user/user_home_service.dart';
@@ -33,35 +34,33 @@ class UserHomeScreen extends StatefulWidget {
   State<UserHomeScreen> createState() => _UserHomeScreenState();
 }
 
-// List<VendorModel> initialVendors = [];
 class _UserHomeScreenState extends State<UserHomeScreen> {
   final _userHomeService = UserHomeService();
-  // Google Map controller and Polyline
+  final _locationService = VendorLocationService();
+  StreamSubscription? _liveSub;
+
   final Completer<GoogleMapController> _controller = Completer();
   late final PolylinePoints _polylinePoints;
 
-  //Access Users Data
   final sessionController = SessionController();
   UserModel? get user => SessionController().user;
 
-  // Custom marker for vendors
   BitmapDescriptor? _customMarker;
+  BitmapDescriptor? _movingMarker;
 
-  // Map styling
   String _mapStyle = '';
   bool _assetsLoaded = false;
 
-  // UI states
-  // double? _distanceInKm;
   bool _isCardExpanded = false;
   bool _isRouteSet = false;
   bool _isUserLocationSet = false;
   bool _isNearbyVendorsLoaded = false;
+  bool _isInitializingLocation = false;
 
-  // final List<VendorModel> vendors = List<VendorModel>.from(initialVendors);
   List<VendorModel> nearbyVendors = [];
   LatLng? _userLocation;
   int? _selectedVendorIndex;
+  Map<String, dynamic>? _selectedLiveVendor;
   final Set<Polyline> _polylines = {};
 
   VendorModel? get selectedVendor => (_selectedVendorIndex != null)
@@ -74,32 +73,52 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
     super.initState();
     sessionController.addListener(_onSessionChanged);
     WidgetsBinding.instance.addPostFrameCallback((_) => _initializeMap());
+
+    _liveSub = _locationService.onUpdate.listen((_) {
+      if (mounted) setState(() {});
+    });
+  }
+
+  @override
+  void dispose() {
+    sessionController.removeListener(_onSessionChanged);
+    _liveSub?.cancel();
+    _locationService.stopListening();
+    super.dispose();
   }
 
   Future<void> _initializeMap() async {
     _polylinePoints = PolylinePoints(apiKey: KeyConstants.googleApiKey);
-    // Get user location after the first frame
     await _initializeUserLocation();
   }
 
   Future<void> _initializeUserLocation() async {
-    if (!_isUserLocationSet && !_isNearbyVendorsLoaded) {
+    if (_isInitializingLocation || _isNearbyVendorsLoaded) return;
+    _isInitializingLocation = true;
+    try {
       await checkLocationPermission();
       await _getUserLocation();
+      if (!mounted) return;
       setState(() {
         _isNearbyVendorsLoaded = true;
       });
+      _locationService.startListening();
       await getNearbyVendors();
-      _loadAssets();
+      await _loadAssets();
+    } finally {
+      _isInitializingLocation = false;
     }
   }
 
   Future<void> getNearbyVendors() async {
+    setState(() {
+      _isNearbyVendorsLoaded = true;
+    });
     final List<VendorModel> vendorsResponse = await _userHomeService
         .getNearbyVendors(
           context: context,
           location: _userLocation,
-          maxDistance: 5, //km
+          maxDistance: 5,
         );
     if (!mounted) return;
     setState(() {
@@ -123,16 +142,12 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
 
     debugPrint('Location Status: $permissionGranted');
     if (!permissionGranted) {
-      //show bottom sheet here
       await _showLocationPermissionSheet();
-    } else {
-      //
-      _initializeUserLocation();
     }
+    // Removed: else { _initializeUserLocation(); }
   }
 
   Future<void> _showLocationPermissionSheet() async {
-    //show bottom sheet here
     if (!mounted) return;
     await MyBottomSheet.show(
       context,
@@ -150,20 +165,18 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
     setState(() {});
   }
 
-  /// Load map style and custom marker assets
   Future<void> _loadAssets() async {
     await _loadMapStyle();
     await _loadCustomMarker();
+    await _loadMovingMarker();
     if (!mounted) return;
     setState(() => _assetsLoaded = true);
   }
 
-  /// Load Google Map night theme style
   Future<void> _loadMapStyle() async {
     try {
       final stylePath = Assets.json.mapStyles.nightTheme;
       debugPrint("Loading map style from: $stylePath");
-
       _mapStyle = await rootBundle.loadString(stylePath);
       debugPrint("Map style loaded successfully!");
     } catch (e) {
@@ -171,7 +184,6 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
     }
   }
 
-  /// Load custom circular marker for vendors
   Future<void> _loadCustomMarker({
     double circleSize = 100,
     double imageSize = 60,
@@ -187,14 +199,12 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
       final canvas = Canvas(recorder);
       final paint = Paint();
 
-      // Draw outer circle
       canvas.drawCircle(
         Offset(circleSize / 2, circleSize / 2),
         circleSize / 2,
         paint..color = const Color(0xFF21242B),
       );
 
-      // Draw image at center
       final src = Rect.fromLTWH(
         0,
         0,
@@ -217,7 +227,49 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
     }
   }
 
-  /// Fetch user's current location
+  Future<void> _loadMovingMarker({
+    double circleSize = 100,
+    double imageSize = 60,
+  }) async {
+    try {
+      final data = await rootBundle.load(Assets.images.truck.path);
+      final bytes = data.buffer.asUint8List();
+
+      final ui.Codec codec = await ui.instantiateImageCodec(bytes);
+      final ui.FrameInfo fi = await codec.getNextFrame();
+
+      final recorder = ui.PictureRecorder();
+      final canvas = Canvas(recorder);
+      final paint = Paint();
+
+      canvas.drawCircle(
+        Offset(circleSize / 2, circleSize / 2),
+        circleSize / 2,
+        paint..color = const Color(0xFF4CAF50),
+      );
+
+      final src = Rect.fromLTWH(
+        0,
+        0,
+        fi.image.width.toDouble(),
+        fi.image.height.toDouble(),
+      );
+      final double offset = (circleSize - imageSize) / 2;
+      final dst = Rect.fromLTWH(offset, offset, imageSize, imageSize);
+      canvas.drawImageRect(fi.image, src, dst, Paint());
+
+      final picture = recorder.endRecording();
+      final img = await picture.toImage(circleSize.toInt(), circleSize.toInt());
+      final byteData = await img.toByteData(format: ui.ImageByteFormat.png);
+
+      _movingMarker = BitmapDescriptor.fromBytes(
+        byteData!.buffer.asUint8List(),
+      );
+    } catch (e) {
+      debugPrint('Could not load moving marker: $e');
+    }
+  }
+
   Future<void> _getUserLocation() async {
     try {
       LocationPermission permission = await Geolocator.checkPermission();
@@ -236,9 +288,6 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
       updateUserLocation(LatLng(position.latitude, position.longitude));
       _moveCameraToUser();
 
-      ///
-      ///Initialize Push Notifications
-      ///
       if (context.mounted) {
         PushNotificationsService().initFCM(
           context: context,
@@ -251,7 +300,6 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
     }
   }
 
-  /// Move camera to user's current location
   Future<void> _moveCameraToUser() async {
     if (_userLocation == null) return;
     debugPrint('📍USER LAT LNG ARE :$_userLocation');
@@ -266,7 +314,6 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
     );
   }
 
-  /// Draw route from user to vendor
   Future<void> _drawRouteToVendor(LatLng vendor, int index) async {
     debugPrint('_isDirectionSet $_isRouteSet');
     if (_isRouteSet) {
@@ -280,7 +327,6 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
 
     final user = _userLocation;
     if (user == null) {
-      // If user location is not available, just move camera to vendor
       final controller = await _controller.future;
       controller.animateCamera(CameraUpdate.newLatLngZoom(vendor, 15));
       selectVendor(index);
@@ -288,15 +334,6 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
     }
 
     clearPolylines();
-
-    // Calculate distance
-    // final meters = Geolocator.distanceBetween(
-    //   user.latitude,
-    //   user.longitude,
-    //   vendor.latitude,
-    //   vendor.longitude,
-    // );
-    // setState(() => _distanceInKm = meters / 1000);
 
     try {
       final result = await _polylinePoints.getRouteBetweenCoordinates(
@@ -330,7 +367,6 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
           ),
         );
       }
-      // Move camera to vendor after drawing route
       final controller = await _controller.future;
       controller.animateCamera(CameraUpdate.newLatLngZoom(vendor, 15));
     } catch (e) {
@@ -338,7 +374,6 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
     }
   }
 
-  /// Zoom map to show both user and vendor
   Future<void> _zoomMapToBounds(LatLng user, LatLng vendor) async {
     final controller = await _controller.future;
 
@@ -356,8 +391,6 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
     controller.animateCamera(CameraUpdate.newLatLngBounds(bounds, 100));
   }
 
-  // ----------------- Provider methods moved here -----------------
-
   void updateUserLocation(LatLng newLocation) {
     if (_userLocation == newLocation) return;
     if (!mounted) return;
@@ -373,16 +406,20 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
     if (!mounted) return;
     setState(() {
       _selectedVendorIndex = index;
+      _selectedLiveVendor = null;
     });
   }
 
   Future<void> unselectVendor() async {
-    if (_selectedVendorIndex == null && _polylines.isEmpty) return;
+    if (_selectedVendorIndex == null &&
+        _selectedLiveVendor == null &&
+        _polylines.isEmpty)
+      return;
     if (!mounted) return;
     setState(() {
       _selectedVendorIndex = null;
+      _selectedLiveVendor = null;
       _polylines.clear();
-      // _distanceInKm = null;
       _isCardExpanded = false;
     });
   }
@@ -412,27 +449,106 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
     });
   }
 
-  final Set<Marker> markers = {};
-  //add markers
+  /// Build markers with priority: Live > Fixed
+  /// Builds all markers for the map.
+  /// Priority: Live vendor location > Fixed vendor location.
+  /// Small card and info window display only vendor name and type.
   Set<Marker> buildMarkers({BitmapDescriptor? customMarker}) {
+    final Set<Marker> markers = {};
+    final Set<String> liveVendorIds = {};
+
+    // Collect all live vendor IDs near the user
+    if (_userLocation != null) {
+      final liveVendors = _locationService.getLiveVendorsNear(
+        _userLocation!,
+        5,
+      );
+      for (final lv in liveVendors) {
+        final id = lv['vendorId'] as String? ?? '';
+        if (id.isNotEmpty) liveVendorIds.add(id);
+      }
+    }
+
+    // Add backend vendors (fixed)
     for (var i = 0; i < nearbyVendors.length; i++) {
       final vendor = nearbyVendors[i];
-      if (vendor.lat != null && vendor.lng != null) {
+      if (vendor.id == null) continue;
+
+      double? lat;
+      double? lng;
+      BitmapDescriptor icon;
+
+      // Use live location if available, otherwise fixed backend location
+      if (liveVendorIds.contains(vendor.id)) {
+        lat = _locationService.getLat(vendor.id!);
+        lng = _locationService.getLng(vendor.id!);
+        icon =
+            _movingMarker ??
+            BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen);
+      } else {
+        lat = vendor.lat;
+        lng = vendor.lng;
+        icon = customMarker ?? BitmapDescriptor.defaultMarker;
+      }
+
+      if (lat == null || lng == null) continue;
+
+      markers.add(
+        Marker(
+          markerId: MarkerId(vendor.id!),
+          position: LatLng(lat, lng),
+          icon: icon,
+          onTap: () => toggleVendorSelection(i),
+          infoWindow: InfoWindow(
+            title: vendor.name,
+            snippet: vendor.vendorType, // Only show name + type
+          ),
+        ),
+      );
+    }
+
+    // Add live-only vendors (not in backend list)
+    if (_userLocation != null) {
+      final liveVendors = _locationService.getLiveVendorsNear(
+        _userLocation!,
+        5,
+      );
+      for (final lv in liveVendors) {
+        final id = lv['vendorId'] as String? ?? '';
+        if (id.isEmpty) continue;
+
+        // Skip if already added from backend
+        if (nearbyVendors.any((v) => v.id == id)) continue;
+
+        final lat = (lv['latitude'] as num?)?.toDouble();
+        final lng = (lv['longitude'] as num?)?.toDouble();
+        if (lat == null || lng == null) continue;
+
         markers.add(
           Marker(
-            markerId: MarkerId('vendor_$i'),
-            position: LatLng(vendor.lat!, vendor.lng!),
-            icon: customMarker ?? BitmapDescriptor.defaultMarker,
-            onTap: () => toggleVendorSelection(i),
+            markerId: MarkerId(id),
+            position: LatLng(lat, lng),
+            icon:
+                _movingMarker ??
+                BitmapDescriptor.defaultMarkerWithHue(
+                  BitmapDescriptor.hueGreen,
+                ),
+            onTap: () {
+              setState(() {
+                _selectedLiveVendor = lv;
+                _selectedVendorIndex = null;
+              });
+            },
             infoWindow: InfoWindow(
-              title: vendor.name,
-              snippet: vendor.vendorType,
+              title: lv['name'] ?? 'Unknown',
+              snippet: lv['vendorType'] ?? '',
             ),
           ),
         );
       }
     }
 
+    // Add user marker
     if (_userLocation != null) {
       markers.add(
         Marker(
@@ -449,17 +565,16 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
     return markers;
   }
 
-  // ----------------------------------------------------------------
-
-  /// Main build method
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       floatingActionButton: AnimatedOpacity(
-        opacity: _selectedVendorIndex == null ? 1.0 : 0.0,
+        opacity: (_selectedVendorIndex == null && _selectedLiveVendor == null)
+            ? 1.0
+            : 0.0,
         duration: const Duration(milliseconds: 300),
         child: Visibility(
-          visible: _selectedVendorIndex == null,
+          visible: _selectedVendorIndex == null && _selectedLiveVendor == null,
           child: FloatingActionButton(
             backgroundColor: context.colors.buttonPrimary,
             onPressed: () {
@@ -475,7 +590,6 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
     );
   }
 
-  /// User avatar in AppBar
   Widget _buildUserAvatar() {
     return GestureDetector(
       onTap: () async {
@@ -500,7 +614,6 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
     );
   }
 
-  /// User greeting in AppBar
   Widget _buildUserGreeting() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -527,21 +640,20 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
     );
   }
 
-  /// Main stack containing map, search, distance, and vendor card
   Widget _buildMapStack() {
     return SizedBox(
       height: MediaQuery.sizeOf(context).height,
       child: Stack(
         children: [
+          Center(child: LoadingWidget(color: Colors.white70)),
           _buildGoogleMap(),
           Align(
             alignment: Alignment.topCenter,
             child: GradientOverlay(height: 250.h),
           ),
           _buildHeader(),
-          // if (_distanceInKm != null && selectedVendor != null)
-          //   _buildVendorProfileBox(),
-          if (selectedVendor != null) _buildUserVendorCard(),
+          if (selectedVendor != null || _selectedLiveVendor != null)
+            _buildUserVendorCard(),
         ],
       ),
     );
@@ -579,7 +691,6 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
     );
   }
 
-  /// Google Map widget
   Widget _buildGoogleMap() {
     return GoogleMap(
       padding: EdgeInsets.symmetric(vertical: 20.w, horizontal: 16.w),
@@ -605,7 +716,6 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
     );
   }
 
-  /// Search field at top
   Widget _buildSearchField() {
     return GestureDetector(
       onTap: () {
@@ -613,9 +723,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
           debugPrint('❌ USER LOCATION NOT SET');
           return;
         }
-        openVendorSearch(
-          userLocation: _userLocation!,
-        ); // NEW: open search screen
+        openVendorSearch(userLocation: _userLocation!);
       },
       child: AbsorbPointer(
         child: MyTextField(
@@ -627,50 +735,19 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
     );
   }
 
-  ///
-  ///Updated
-  ///
   Future<void> openVendorSearch({required LatLng userLocation}) async {
-    //TODO: Add to service
     Navigator.pushNamed(
       context,
       RoutesName.userSearch,
       arguments: {
         'onVendorSelected': (VendorModel searchedVendor) async {
-          //check if already in the list, update
           final bool vendorAlreadyLoaded = nearbyVendors.any(
             (v) => v.id == searchedVendor.id,
           );
           if (!vendorAlreadyLoaded) {
             debugPrint('Not loaded');
-            //if not in list, add in the list
             nearbyVendors.add(searchedVendor);
             debugPrint('Added to list');
-
-            // if location is null
-            if (searchedVendor.lat == null || searchedVendor.lng == null) {
-              debugPrint('Location does not found for this vendor.');
-              final index = nearbyVendors.length - 1;
-              selectVendor(index);
-              return;
-            }
-            //create new marker
-            markers.add(
-              Marker(
-                markerId: MarkerId('vendor_${searchedVendor.id}'),
-                position: LatLng(searchedVendor.lat!, searchedVendor.lng!),
-                icon: _customMarker ?? BitmapDescriptor.defaultMarker,
-                // onTap: () => toggleVendorSelection(nearbyVendors.length - 1),
-                onTap: () => toggleVendorSelection(
-                  nearbyVendors.indexWhere((v) => v.id == searchedVendor.id),
-                ),
-                infoWindow: InfoWindow(
-                  title: searchedVendor.name,
-                  snippet: searchedVendor.vendorType,
-                ),
-              ),
-            );
-            debugPrint('Marker Added');
           }
 
           final index = nearbyVendors.indexWhere(
@@ -679,15 +756,20 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
           if (index != -1) {
             selectVendor(index);
             debugPrint('VENDOR IS NOW SELECTED');
-            // Move camera to selected vendor
-            if (_userLocation != null &&
-                nearbyVendors[index].lat != null &&
-                nearbyVendors[index].lng != null) {
+
+            double? lat;
+            double? lng;
+            if (_locationService.isLive(searchedVendor.id!)) {
+              lat = _locationService.getLat(searchedVendor.id!);
+              lng = _locationService.getLng(searchedVendor.id!);
+            } else {
+              lat = searchedVendor.lat;
+              lng = searchedVendor.lng;
+            }
+
+            if (_userLocation != null && lat != null && lng != null) {
               debugPrint('DRAWING ROUTE');
-              _drawRouteToVendor(
-                LatLng(nearbyVendors[index].lat!, nearbyVendors[index].lng!),
-                index,
-              );
+              _drawRouteToVendor(LatLng(lat, lng), index);
               debugPrint('ROUTE DRAWN NOW!');
             }
           }
@@ -697,39 +779,48 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
     );
   }
 
-  /// Distance box displayed above vendor card
-  // Widget _buildVendorProfileBox() {
-  //   return Positioned(
-  //     top: 480.h,
-  //     left: 15.w,
-  //     child: Material(
-  //       elevation: 4,
-  //       borderRadius: BorderRadius.circular(8.r),
-  //       child: Container(
-  //         padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
-  //         decoration: BoxDecoration(
-  //           color: Colors.white,
-  //           borderRadius: BorderRadius.circular(8.r),
-  //         ),
-  //         child: Text(
-  //           'Distance: ${_distanceInKm!.toStringAsFixed(2)} km',
-  //           style: TextStyle(
-  //             color: Colors.black,
-  //             fontSize: 14.sp,
-  //             fontWeight: FontWeight.w500,
-  //           ),
-  //         ),
-  //       ),
-  //     ),
-  //   );
-  // }
-
-  /// Vendor card displayed at bottom
   Widget _buildUserVendorCard() {
+    // Live-only vendor
+    if (_selectedLiveVendor != null) {
+      final lv = _selectedLiveVendor!;
+      return VendorCard(
+        vendorId: lv['vendorId'] ?? '',
+        isExpanded: _isCardExpanded,
+        isRouteSet: _isRouteSet,
+        onTap: () async {
+          if (!mounted) return;
+          setState(() => _isCardExpanded = !_isCardExpanded);
+        },
+        distance: 0,
+        vendorName: lv['name'] ?? '',
+        imageUrl: lv['profileImage'] ?? '',
+        vendorAddress: '',
+        vendorType: lv['vendorType'] ?? '',
+        menuLength: lv['menuCount'] ?? 0,
+        hoursADay: (lv['hoursADay'] ?? 0).toString(),
+        onGetDirection: () async {
+          final lat = (lv['latitude'] as num).toDouble();
+          final lng = (lv['longitude'] as num).toDouble();
+          await _drawRouteToVendor(LatLng(lat, lng), 0);
+          if (!mounted) return;
+          setState(() => _isCardExpanded = false);
+        },
+      );
+    }
+
+    // Backend vendor
     final selected = selectedVendor;
     if (selected == null) return const SizedBox.shrink();
+
+    double? lat = selected.lat;
+    double? lng = selected.lng;
+    if (_locationService.isLive(selected.id!)) {
+      lat = _locationService.getLat(selected.id!);
+      lng = _locationService.getLng(selected.id!);
+    }
+
     return VendorCard(
-      vendorId: selectedVendor!.id!,
+      vendorId: selected.id!,
       isExpanded: _isCardExpanded,
       isRouteSet: _isRouteSet,
       onTap: () async {
@@ -746,11 +837,8 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
           ? selected.hoursADay.toString()
           : '0',
       onGetDirection: () async {
-        if (selected.lat != null && selected.lng != null) {
-          await _drawRouteToVendor(
-            LatLng(selected.lat!, selected.lng!),
-            _selectedVendorIndex ?? 0,
-          );
+        if (lat != null && lng != null) {
+          await _drawRouteToVendor(LatLng(lat, lng), _selectedVendorIndex ?? 0);
           if (!mounted) return;
           setState(() => _isCardExpanded = false);
         } else {
@@ -775,10 +863,7 @@ class GradientOverlay extends StatelessWidget {
         gradient: LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
-          colors: [
-            Colors.white30, // top
-            Colors.transparent, // bottom
-          ],
+          colors: [Colors.white30, Colors.transparent],
         ),
       ),
     );

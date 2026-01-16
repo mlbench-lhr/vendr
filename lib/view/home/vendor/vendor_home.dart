@@ -8,6 +8,7 @@ import 'package:vendr/app/styles/app_radiuses.dart';
 import 'package:vendr/app/utils/extensions/context_extensions.dart';
 import 'package:vendr/app/utils/extensions/general_extensions.dart';
 import 'package:vendr/model/vendor/vendor_model.dart';
+import 'package:vendr/services/common/location_service.dart';
 import 'package:vendr/services/common/push_notifications_service.dart';
 import 'package:vendr/services/common/reviews_service.dart';
 import 'package:vendr/services/common/session_manager/session_controller.dart';
@@ -27,38 +28,60 @@ class _VendorHomeScreenState extends State<VendorHomeScreen> {
   List<SingleReviewModel> reviews = [];
 
   final sessionController = SessionController();
+  final _locationService = VendorLocationService();
+
   @override
   void initState() {
     super.initState();
-    //request permissoin
     sessionController.addListener(_onSessionChanged);
-
-    ///
-    ///Initialize Push Notifications
-    ///
     PushNotificationsService().initFCM(context: context);
+    _autoStartLocationSharing();
   }
-
-  ///
-  ///END: Location permission and Websockets
-  ///
 
   void _onSessionChanged() {
     if (mounted) setState(() {});
   }
 
-  /// Fetch user's current location
-
   @override
   void dispose() {
     sessionController.removeListener(_onSessionChanged);
+    VendorLocationService().stopSharing();
+
     super.dispose();
+  }
+
+  Future<void> _autoStartLocationSharing() async {
+    // Small delay to ensure everything is initialized
+    await Future.delayed(const Duration(milliseconds: 500));
+
+    if (!mounted) return;
+
+    // Only auto-start if not already sharing
+    if (!_locationService.isSharing) {
+      try {
+        await _locationService.startSharing();
+        debugPrint('✅ Auto-started location sharing');
+        if (mounted) setState(() {});
+      } catch (e) {
+        debugPrint('⚠️ Auto-start failed: $e');
+        // Don't show error - user can manually toggle if needed
+      }
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    //set vendor profile data from session
-    final vendor = sessionController.vendor!;
+    final vendor = sessionController.vendor;
+
+    // Safety check
+    if (vendor == null) {
+      return MyScaffold(
+        body: Center(
+          child: Text('Loading...', style: TextStyle(color: Colors.white)),
+        ),
+      );
+    }
+
     if (vendor.menu != null) {
       menuItems = vendor.menu!;
     }
@@ -108,25 +131,20 @@ class _VendorHomeScreenState extends State<VendorHomeScreen> {
                       const Spacer(),
                       GestureDetector(
                         onTap: () {
-                          UserHomeService.gotoNotifications(
-                            context,
-                          ); //TODO: Change with VendorHomeService
+                          UserHomeService.gotoNotifications(context);
                         },
                         child: NotificationsBtn(),
                       ),
                     ],
                   ),
+
                   LocationSection(location: vendor.address),
                   SizedBox(height: 24.h),
-                  //Menu heading
                   MenuHeading(productsCount: vendor.menu?.length ?? 0),
                 ],
               ),
             ),
-            //End: Menu heading
-            //Menu Items
             _buildMenuItems(menuItems),
-            //Vendor hours heading
             Padding(
               padding: EdgeInsets.symmetric(horizontal: 16.w),
               child: Column(
@@ -147,8 +165,6 @@ class _VendorHomeScreenState extends State<VendorHomeScreen> {
                         ),
                         VendorHoursCard(
                           day: 'Tuesday',
-                          // startTime: '09:00 AM',
-                          // endTime: '06:00 PM',
                           startTime: vendor.hours!.days.tuesday.start,
                           endTime: vendor.hours!.days.tuesday.end,
                           isEnabled: vendor.hours!.days.tuesday.enabled,
@@ -196,7 +212,6 @@ class _VendorHomeScreenState extends State<VendorHomeScreen> {
                   SizedBox(height: 24.h),
                   ReviewsSectionHeading(),
                   SizedBox(height: 16.h),
-                  //Reviews
                   _buildReviewsList(reviews),
                   if (reviews.isNotEmpty) SizedBox(height: 16.h),
                 ],
@@ -226,12 +241,11 @@ class _VendorHomeScreenState extends State<VendorHomeScreen> {
                   itemBuilder: (BuildContext context, int index) {
                     return MenuItemTile(
                       onTap: () {
-                        //edit product
                         VendorProfileService.gotoAddEditProduct(
                           context,
                           true,
                           reversedmenuItems[index],
-                        ); //isEdit = true
+                        );
                       },
                       name: reversedmenuItems[index].itemName,
                       price:
@@ -249,7 +263,6 @@ class _VendorHomeScreenState extends State<VendorHomeScreen> {
                 child: Text(
                   textAlign: TextAlign.center,
                   'No menu items found.',
-                  // style: context.typography.body.copyWith(fontSize: 14.sp),
                 ),
               ),
         SizedBox(height: 24.h),
@@ -267,10 +280,6 @@ Widget _buildReviewsList(List<SingleReviewModel> reviews) {
             itemCount: reviews.length,
             itemBuilder: (BuildContext context, int index) {
               return ReviewTile(
-                // name: reviews[index]['name'],
-                // rating: reviews[index]['rating'],
-                // timeStamp: reviews[index]['time_stamp'],
-                // content: reviews[index]['content'],
                 name: reviews[index].user.name,
                 rating: reviews[index].rating.toDouble(),
                 imageUrl: reviews[index].user.profileImage,
@@ -292,9 +301,6 @@ Widget _buildReviewsList(List<SingleReviewModel> reviews) {
 }
 
 class VendorHoursCard extends StatelessWidget {
-  ///
-  ///format time to 12 hours format
-  ///
   String formatTo12Hour(String time) {
     final parts = time.split(':');
     int hour = int.parse(parts[0]);
@@ -313,10 +319,12 @@ class VendorHoursCard extends StatelessWidget {
     this.endTime,
     this.isEnabled = false,
   });
+
   final String day;
   final String? startTime;
   final String? endTime;
   final bool isEnabled;
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -395,12 +403,10 @@ class VendorHoursCard extends StatelessWidget {
 class MenuHeading extends StatelessWidget {
   const MenuHeading({super.key, required this.productsCount});
   final int productsCount;
+
   @override
   Widget build(BuildContext context) {
-    return
-    //  productsCount > 0
-    //     ?
-    Row(
+    return Row(
       children: [
         CircleAvatar(
           radius: 18.r,
@@ -422,12 +428,12 @@ class MenuHeading extends StatelessWidget {
         ),
       ],
     );
-    // : SizedBox.shrink();
   }
 }
 
 class VendorHoursHeading extends StatelessWidget {
   const VendorHoursHeading({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Row(
@@ -447,7 +453,6 @@ class VendorHoursHeading extends StatelessWidget {
         ),
         const Spacer(),
         Text(
-          // '8 Hours',
           VendorHomeService.getVendorWorkingHoursToday(),
           style: context.typography.body.copyWith(fontSize: 14.sp),
         ),
@@ -493,6 +498,7 @@ class ReviewsSectionHeading extends StatelessWidget {
 class LocationSection extends StatelessWidget {
   const LocationSection({super.key, required this.location});
   final String? location;
+
   @override
   Widget build(BuildContext context) {
     return location != null && location!.isNotEmpty
@@ -504,7 +510,6 @@ class LocationSection extends StatelessWidget {
                   radius: 18.r,
                   backgroundColor: Colors.white24,
                   child: Icon(
-                    // Icons.my_location_outlined,
                     Icons.location_on_outlined,
                     color: Colors.white,
                     size: 20.w,
@@ -526,7 +531,6 @@ class LocationSection extends StatelessWidget {
                       ),
                       Text(
                         overflow: TextOverflow.clip,
-                        // '15 Maiden Ln Suite 908, New York, NY 10038, United States',
                         location!,
                         style: context.typography.body.copyWith(
                           fontSize: 14.sp,
@@ -545,6 +549,7 @@ class LocationSection extends StatelessWidget {
 class VendorAvatar extends StatelessWidget {
   const VendorAvatar({super.key, this.vendorProfileImage});
   final String? vendorProfileImage;
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
