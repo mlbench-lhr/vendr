@@ -359,7 +359,7 @@ class _VendorSignupScreenState extends State<VendorSignupScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  if (Platform.isIOS)
+                  if (Platform.isIOS) ...[
                     SocialLoginBtn(
                       type: 'apple',
                       onTap: () async {
@@ -373,6 +373,9 @@ class _VendorSignupScreenState extends State<VendorSignupScreen> {
                         });
                       },
                     ),
+                    SizedBox(width: 16.w),
+                  ],
+
                   SocialLoginBtn(
                     type: 'google',
                     onTap: () async {

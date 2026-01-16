@@ -15,9 +15,7 @@ VendorModel _$VendorModelFromJson(Map<String, dynamic> json) => VendorModel(
   verified: json['verified'] as bool?,
   profileImage: json['profile_image'] as String?,
   address: json['shop_address'] as String?,
-  routes: (json['routes'] as List<dynamic>?)
-      ?.map((e) => e as Map<String, dynamic>)
-      .toList(),
+  isMoving: json['isMoving'] as bool?,
   menu: (json['menus'] as List<dynamic>?)
       ?.map((e) => MenuItemModel.fromJson(e as Map<String, dynamic>))
       .toList(),
@@ -46,7 +44,7 @@ Map<String, dynamic> _$VendorModelToJson(VendorModel instance) =>
       'verified': instance.verified,
       'profile_image': instance.profileImage,
       'shop_address': instance.address,
-      'routes': instance.routes,
+      'isMoving': instance.isMoving,
       'lat': instance.lat,
       'lng': instance.lng,
       'hours': instance.hours,
