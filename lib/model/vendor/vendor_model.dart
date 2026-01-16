@@ -13,7 +13,7 @@ class VendorModel {
     this.verified,
     this.profileImage,
     this.address,
-    this.routes,
+    this.isMoving,
     this.menu,
     this.hours,
     this.hoursADay,
@@ -49,7 +49,7 @@ class VendorModel {
   @JsonKey(name: 'shop_address')
   final String? address;
 
-  final List<Map<String, dynamic>>? routes;
+  final bool? isMoving;
 
   // NEW FIELDS (replace LatLng)
   final double? lat;

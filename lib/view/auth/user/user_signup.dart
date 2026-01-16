@@ -302,7 +302,7 @@ class _UserSignupScreenState extends State<UserSignupScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  if (Platform.isIOS)
+                  if (Platform.isIOS) ...[
                     SocialLoginBtn(
                       type: 'apple',
                       onTap: () async {
@@ -316,6 +316,8 @@ class _UserSignupScreenState extends State<UserSignupScreen> {
                         });
                       },
                     ),
+                    SizedBox(width: 16.w),
+                  ],
                   SocialLoginBtn(
                     type: 'google',
                     onTap: () async {

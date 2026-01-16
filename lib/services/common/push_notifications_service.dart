@@ -19,56 +19,100 @@ class PushNotificationsService {
       VendorNotificationsRepository();
 
   /// Initialize Firebase Messaging
-  Future<void> initialize(BuildContext context, String userId) async {
-    ///
-    ///Check if device is Simulator (Push notifications only work on Physical Device)
-    ///(Push notifications only work on Physical Device)
-    ///
-    if (await isIOSSimulator()) {
-      debugPrint('⚠️ iOS Simulator detected — skipping FCM init');
+  // 1. Add this static variable at the top of your class (outside the function)
+  static bool _isInitializing = false;
+
+  /// Initialize Firebase Messaging
+  Future<void> initialize(
+    BuildContext context, {
+    required String userId,
+    double? userLat,
+    double? userLng,
+  }) async {
+    // 2. Lock check: If already running, exit to prevent the "already running" Exception
+    if (_isInitializing) {
+      debugPrint(
+        'ℹ️ FCM initialization already in progress. Skipping duplicate call.',
+      );
       return;
     }
 
-    debugPrint('🔔 Initializing Notifications for user: $userId');
-    // Ask for notification permissions (important for iOS)
-    await _firebaseMessaging.requestPermission(
-      alert: true,
-      sound: true,
-      badge: true,
-    );
+    _isInitializing = true; // Set the lock
 
-    final String? token = await _firebaseMessaging.getToken();
-    debugPrint('TOKEN RECEIVED $token');
-    debugPrint('📌 FCM Token: $token');
+    try {
+      ///
+      ///Check if device is Simulator (Push notifications only work on Physical Device)
+      ///(Push notifications only work on Physical Device)
+      ///
+      if (await isIOSSimulator()) {
+        debugPrint('⚠️ iOS Simulator detected — skipping FCM init');
+        return;
+      }
 
-    if (token != null) {
-      // Send token to your server
-      // ignore: use_build_context_synchronously
-      await sendTokenToServer(context, userId, token);
-    }
+      debugPrint('🔔 Initializing Notifications for user: $userId');
 
-    // Foreground messages
-    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-      //Perform any action you want
-      debugPrint(
-        '📩 Foreground Notification: ${message.notification?.title} - ${message.notification?.body}',
-      );
-    });
+      // 1. Capture the permission settings
+      NotificationSettings settings = await _firebaseMessaging
+          .requestPermission(alert: true, sound: true, badge: true);
 
-    // App opened from terminated state
-    await FirebaseMessaging.instance.getInitialMessage().then((message) {
-      if (message != null) {
-        //Perform any action you want
-        debugPrint(
-          '📩 Notification caused app launch: ${message.notification?.body}',
+      // 2. Check if permission was granted
+      if (settings.authorizationStatus == AuthorizationStatus.denied) {
+        debugPrint('🚫 User denied notification permissions.');
+        return; // EXIT HERE before getting token
+      }
+
+      // Optional: Handle "Provisional" (iOS quiet notifications) if you want to allow them
+      if (settings.authorizationStatus == AuthorizationStatus.notDetermined) {
+        debugPrint('⚪ Notification permission not determined.');
+        return;
+      }
+
+      debugPrint('✅ Notification permission granted.');
+
+      final String? token = await _firebaseMessaging.getToken();
+      debugPrint('TOKEN RECEIVED $token');
+      debugPrint('📌 FCM Token: $token');
+
+      if (token != null) {
+        // Send token to your server
+        // ignore: use_build_context_synchronously
+        await sendTokenToServer(
+          context,
+          userId: userId,
+          token: token,
+          userLat: userLat,
+          userLng: userLng,
         );
       }
-    });
 
-    // App in background and user taps notification
-    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
-      debugPrint('📩 Notification clicked: ${message.notification?.body}');
-    });
+      // Foreground messages
+      FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+        //Perform any action you want
+        debugPrint(
+          '📩 Foreground Notification: ${message.notification?.title} - ${message.notification?.body}',
+        );
+      });
+
+      // App opened from terminated state
+      await FirebaseMessaging.instance.getInitialMessage().then((message) {
+        if (message != null) {
+          //Perform any action you want
+          debugPrint(
+            '📩 Notification caused app launch: ${message.notification?.body}',
+          );
+        }
+      });
+
+      // App in background and user taps notification
+      FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+        debugPrint('📩 Notification clicked: ${message.notification?.body}');
+      });
+    } catch (e) {
+      debugPrint('❌ FCM Initialization Error: $e');
+    } finally {
+      // 3. IMPORTANT: Unlock the function so it can be called again if needed later
+      _isInitializing = false;
+    }
   }
 
   Future<void> initAPNSToken() async {
@@ -78,13 +122,20 @@ class PushNotificationsService {
 
   //Save token against user id in server
   Future<void> sendTokenToServer(
-    BuildContext context,
-    String userId,
-    String token,
-  ) async {
+    BuildContext context, {
+    required String userId,
+    required String token,
+    double? userLat,
+    double? userLng,
+  }) async {
     try {
       if (_session.userType == UserType.user) {
-        await _userRepo.sendToken(userId: userId, token: token);
+        await _userRepo.sendToken(
+          userId: userId,
+          token: token,
+          userLat: userLat,
+          userLng: userLng,
+        );
       } else {
         await _doctorRepo.sendToken(vendorId: userId, token: token);
       }
@@ -129,7 +180,11 @@ class PushNotificationsService {
   ///
   ///Initialize
   ///
-  Future<void> initFCM({required BuildContext context}) async {
+  Future<void> initFCM({
+    required BuildContext context,
+    double? userLat,
+    double? userLng,
+  }) async {
     debugPrint('IN INIT FCM');
     String id = '';
     if (_session.userType == UserType.user) {
@@ -140,7 +195,7 @@ class PushNotificationsService {
       id = _session.vendor?.id ?? '';
     }
     debugPrint('Initializing FCM for user ID: $id');
-    initialize(context, id);
+    initialize(context, userId: id, userLat: userLat, userLng: userLng);
   }
 
   Future<bool> isIOSSimulator() async {

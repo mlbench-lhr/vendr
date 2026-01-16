@@ -56,6 +56,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
   bool _isCardExpanded = false;
   bool _isRouteSet = false;
   bool _isUserLocationSet = false;
+  bool _isNearbyVendorsLoaded = false;
 
   // final List<VendorModel> vendors = List<VendorModel>.from(initialVendors);
   List<VendorModel> nearbyVendors = [];
@@ -73,20 +74,24 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
     super.initState();
     sessionController.addListener(_onSessionChanged);
     WidgetsBinding.instance.addPostFrameCallback((_) => _initializeMap());
-
-    ///
-    ///Initialize Push Notifications
-    ///
-    PushNotificationsService().initFCM(context: context);
   }
 
   Future<void> _initializeMap() async {
     _polylinePoints = PolylinePoints(apiKey: KeyConstants.googleApiKey);
     // Get user location after the first frame
-    await checkLocationPermission();
-    await _getUserLocation();
-    getNearbyVendors();
-    _loadAssets();
+    await _initializeUserLocation();
+  }
+
+  Future<void> _initializeUserLocation() async {
+    if (!_isUserLocationSet && !_isNearbyVendorsLoaded) {
+      await checkLocationPermission();
+      await _getUserLocation();
+      setState(() {
+        _isNearbyVendorsLoaded = true;
+      });
+      await getNearbyVendors();
+      _loadAssets();
+    }
   }
 
   Future<void> getNearbyVendors() async {
@@ -96,6 +101,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
           location: _userLocation,
           maxDistance: 5, //km
         );
+    if (!mounted) return;
     setState(() {
       nearbyVendors = vendorsResponse;
       debugPrint('👨🏻 ${nearbyVendors.length} Vendor(s) found:');
@@ -109,6 +115,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
   LocationPermission _locationPermissionStatus = LocationPermission.denied;
   Future<void> checkLocationPermission() async {
     var status = await Geolocator.checkPermission();
+    if (!mounted) return;
     setState(() => _locationPermissionStatus = status);
     permissionGranted =
         _locationPermissionStatus == LocationPermission.always ||
@@ -118,6 +125,9 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
     if (!permissionGranted) {
       //show bottom sheet here
       await _showLocationPermissionSheet();
+    } else {
+      //
+      _initializeUserLocation();
     }
   }
 
@@ -224,8 +234,18 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
       );
 
       updateUserLocation(LatLng(position.latitude, position.longitude));
-
       _moveCameraToUser();
+
+      ///
+      ///Initialize Push Notifications
+      ///
+      if (context.mounted) {
+        PushNotificationsService().initFCM(
+          context: context,
+          userLat: _userLocation!.latitude,
+          userLng: _userLocation!.longitude,
+        );
+      }
     } catch (e) {
       debugPrint('Error while fetching location: $e');
     }
@@ -253,7 +273,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
       clearPolylines();
       return;
     }
-
+    if (!mounted) return;
     setState(() {
       _isRouteSet = true;
     });
@@ -340,6 +360,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
 
   void updateUserLocation(LatLng newLocation) {
     if (_userLocation == newLocation) return;
+    if (!mounted) return;
     setState(() {
       _userLocation = newLocation;
       _isUserLocationSet = true;
@@ -349,6 +370,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
   void selectVendor(int index) {
     if (index < 0 || index >= nearbyVendors.length) return;
     if (_selectedVendorIndex == index) return;
+    if (!mounted) return;
     setState(() {
       _selectedVendorIndex = index;
     });
@@ -356,6 +378,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
 
   Future<void> unselectVendor() async {
     if (_selectedVendorIndex == null && _polylines.isEmpty) return;
+    if (!mounted) return;
     setState(() {
       _selectedVendorIndex = null;
       _polylines.clear();
@@ -373,6 +396,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
   }
 
   void addOrReplacePolyline(Polyline polyline) {
+    if (!mounted) return;
     setState(() {
       _polylines.removeWhere((p) => p.polylineId == polyline.polylineId);
       _polylines.add(polyline);
@@ -381,6 +405,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
 
   void clearPolylines() {
     if (_polylines.isEmpty) return;
+    if (!mounted) return;
     setState(() {
       _polylines.clear();
       _isRouteSet = false;
@@ -726,6 +751,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
             LatLng(selected.lat!, selected.lng!),
             _selectedVendorIndex ?? 0,
           );
+          if (!mounted) return;
           setState(() => _isCardExpanded = false);
         } else {
           context.flushBarErrorMessage(message: 'Location not Defined');
