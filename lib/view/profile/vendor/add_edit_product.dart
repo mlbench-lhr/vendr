@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:vendr/app/components/my_button.dart';
 import 'package:vendr/app/components/my_dialog.dart';
@@ -583,6 +584,7 @@ class _ServingSectionState extends State<ServingSection> {
                   child: MyTextField(
                     prefixIcon: Icon(Icons.attach_money, size: 20.w),
                     controller: priceController,
+                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                     onChanged: (value) {
                       // setState(() {
                       //   selectedPrice = value;

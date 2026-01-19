@@ -50,13 +50,13 @@ class _AddReviewBottomSheetState extends State<AddReviewBottomSheet> {
         rating: rating.toInt(),
         context: context,
       );
-
+      widget.onSuccess.call();
       // ✅ close only on success (safe)
       Future.delayed(const Duration(milliseconds: 300), () {
         if (!success) {
           return;
         }
-        widget.onSuccess.call();
+        // widget.onSuccess.call();
         if (!mounted) return;
         Navigator.of(context, rootNavigator: true).pop(true);
         if (!widget.parentContext.mounted) return;

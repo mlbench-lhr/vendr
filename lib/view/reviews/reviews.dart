@@ -194,7 +194,12 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
       bottomNavigationBar: widget.isVendor
           ? const SizedBox.shrink()
           : Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 24.h),
+              padding: EdgeInsets.only(
+                left: 16.w,
+                right: 16.w,
+                top: 24.h,
+                bottom: 36.h,
+              ),
               child: MyButton(
                 label: 'Write Review',
                 onPressed: () async {
@@ -207,7 +212,10 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
                     child: AddReviewBottomSheet(
                       vendorId: widget.vendorId!,
                       parentContext: context,
-                      onSuccess: _fetchData,
+                      onSuccess: () {
+                        debugPrint('O N  S U C C E S S C A L L E D');
+                        _fetchData();
+                      },
                     ),
                   );
                 },

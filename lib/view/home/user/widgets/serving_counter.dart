@@ -22,6 +22,12 @@ class _ServingCounterState extends State<ServingCounter> {
   void initState() {
     super.initState();
     _controller = FixedExtentScrollController(initialItem: selectedIndex);
+    //if count is 1, disable increment button
+    if (widget.servingsLength == 1) {
+      setState(() {
+        incrementSymbolColor = Colors.white24;
+      });
+    }
   }
 
   Color incrementSymbolColor = Colors.white70;
