@@ -115,6 +115,7 @@ class VendorLocationService {
       'menuCount': v.menu?.length ?? 0,
       'hoursADay': VendorHomeService.getVendorWorkingHoursToday(
         vendorHours: v.hours,
+        isUserSide: true,
       ),
       'latitude': pos.latitude,
       'longitude': pos.longitude,

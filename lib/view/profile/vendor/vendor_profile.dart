@@ -10,6 +10,7 @@ import 'package:vendr/services/common/location_service.dart';
 import 'package:vendr/services/common/session_manager/session_controller.dart';
 import 'package:vendr/services/vendor/vendor_profile_service.dart';
 import 'package:vendr/view/profile/widgets/delete_account_dialog.dart';
+import 'package:vendr/view/profile/widgets/logout_account_dialog.dart';
 import 'package:vendr/view/profile/widgets/profile_menu_tile.dart';
 
 class VendorProfileScreen extends StatefulWidget {
@@ -168,7 +169,10 @@ class _VendorProfileScreenState extends State<VendorProfileScreen> {
                   label: 'Log Out',
                   onPressed: () {
                     debugPrint('Logout button pressed');
-                    AuthService.logout(context);
+                    showDialog<void>(
+                      context: context,
+                      builder: (_) => LogoutAccountDialog(),
+                    );
                     VendorLocationService().stopSharing();
                   },
                 ),

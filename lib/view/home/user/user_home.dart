@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -24,6 +25,7 @@ import 'package:vendr/services/common/session_manager/session_controller.dart';
 import 'package:vendr/services/user/user_home_service.dart';
 import 'package:vendr/services/user/user_profile_service.dart';
 import 'package:vendr/view/home/user/widgets/location_permission_required.dart';
+import 'package:vendr/view/home/user/widgets/user_location_marker.dart';
 import 'package:vendr/view/home/user/widgets/vendor_card.dart';
 import 'package:vendr/view/home/vendor/vendor_home.dart';
 
@@ -35,6 +37,19 @@ class UserHomeScreen extends StatefulWidget {
 }
 
 class _UserHomeScreenState extends State<UserHomeScreen> {
+  // ============================================================
+  // CONFIGURATION - Adjust these values if marker direction is wrong
+  // ============================================================
+
+  /// Offset to adjust marker rotation direction
+  /// Try these values if marker faces wrong direction:
+  /// - 0: Icon faces UP (North) by default
+  /// - 90: Icon faces RIGHT (East) by default
+  /// - 180: Icon faces DOWN (South) by default
+  /// - 270 or -90: Icon faces LEFT (West) by default
+  static const double _iconRotationOffset =
+      180.0; // CHANGED: Add 180° to flip direction
+
   final _userHomeService = UserHomeService();
   final _locationService = VendorLocationService();
   StreamSubscription? _liveSub;
@@ -45,14 +60,20 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
   final sessionController = SessionController();
   UserModel? get user => SessionController().user;
 
+  final Map<String, LatLng> _animatedPositions = {};
+  final Map<String, Timer> _markerTimers = {};
+  final Map<String, LatLng> _lastKnownPositions = {};
+  final Map<String, double> _markerRotations = {};
+  final Map<String, double> _targetRotations = {};
+
   BitmapDescriptor? _customMarker;
   BitmapDescriptor? _movingMarker;
 
   String _mapStyle = '';
   bool _assetsLoaded = false;
-
   bool _isCardExpanded = false;
   bool _isRouteSet = false;
+  bool _isDrawingRoute = false;
   bool _isUserLocationSet = false;
   bool _isNearbyVendorsLoaded = false;
   bool _isInitializingLocation = false;
@@ -66,26 +87,246 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
   VendorModel? get selectedVendor => (_selectedVendorIndex != null)
       ? nearbyVendors[_selectedVendorIndex!]
       : null;
-  Set<Polyline> get polylines => Set.unmodifiable(_polylines);
+
+  bool permissionGranted = false;
+  LocationPermission _locationPermissionStatus = LocationPermission.denied;
 
   @override
   void initState() {
     super.initState();
-    sessionController.addListener(_onSessionChanged);
     WidgetsBinding.instance.addPostFrameCallback((_) => _initializeMap());
-
     _liveSub = _locationService.onUpdate.listen((_) {
-      if (mounted) setState(() {});
+      if (mounted) _handleLiveLocationUpdate();
     });
   }
 
   @override
   void dispose() {
-    sessionController.removeListener(_onSessionChanged);
     _liveSub?.cancel();
     _locationService.stopListening();
+    for (final timer in _markerTimers.values) {
+      timer.cancel();
+    }
+    _markerTimers.clear();
+    _animatedPositions.clear();
+    _lastKnownPositions.clear();
+    _markerRotations.clear();
+    _targetRotations.clear();
     super.dispose();
   }
+
+  // ============================================================
+  // BEARING & ROTATION CALCULATIONS - FIXED
+  // ============================================================
+
+  /// Calculates bearing from one point to another
+  /// Returns degrees clockwise from North (0-360)
+  /// Applies rotation offset to match icon's default facing direction
+  double _calculateBearing(LatLng from, LatLng to) {
+    final double lat1 = from.latitude * math.pi / 180.0;
+    final double lat2 = to.latitude * math.pi / 180.0;
+    final double lon1 = from.longitude * math.pi / 180.0;
+    final double lon2 = to.longitude * math.pi / 180.0;
+    final double dLon = lon2 - lon1;
+
+    final double y = math.sin(dLon) * math.cos(lat2);
+    final double x =
+        math.cos(lat1) * math.sin(lat2) -
+        math.sin(lat1) * math.cos(lat2) * math.cos(dLon);
+
+    double bearing = math.atan2(y, x) * 180.0 / math.pi;
+
+    // Normalize to 0-360
+    bearing = (bearing + 360) % 360;
+
+    // Apply rotation offset to correct icon direction
+    bearing = (bearing + _iconRotationOffset) % 360;
+
+    return bearing;
+  }
+
+  double _normalizeRotationDelta(double from, double to) {
+    double delta = to - from;
+    while (delta > 180) delta -= 360;
+    while (delta < -180) delta += 360;
+    return delta;
+  }
+
+  double _getMarkerRotation(String vendorId) {
+    return _markerRotations[vendorId] ?? 0.0;
+  }
+
+  double _roundToOneDecimal(double value) {
+    return double.parse(value.toStringAsFixed(1));
+  }
+
+  // ============================================================
+  // LIVE LOCATION UPDATES
+  // ============================================================
+
+  void _handleLiveLocationUpdate() {
+    if (_userLocation == null) return;
+
+    final liveVendors = _locationService.getLiveVendorsNear(_userLocation!, 5);
+
+    for (final lv in liveVendors) {
+      final vendorId = lv['vendorId'] as String? ?? '';
+      if (vendorId.isEmpty) continue;
+
+      final newLat = (lv['latitude'] as num?)?.toDouble();
+      final newLng = (lv['longitude'] as num?)?.toDouble();
+
+      if (newLat == null || newLng == null) continue;
+
+      final newPosition = LatLng(newLat, newLng);
+      final oldPosition =
+          _animatedPositions[vendorId] ?? _lastKnownPositions[vendorId];
+
+      if (oldPosition == null) {
+        _animatedPositions[vendorId] = newPosition;
+        _lastKnownPositions[vendorId] = newPosition;
+        _markerRotations[vendorId] = 0.0;
+        continue;
+      }
+
+      if (_hasPositionChanged(oldPosition, newPosition)) {
+        final newBearing = _calculateBearing(oldPosition, newPosition);
+        _targetRotations[vendorId] = newBearing;
+        _lastKnownPositions[vendorId] = newPosition;
+
+        _animateMarkerSmoothly(
+          vendorId: vendorId,
+          from: oldPosition,
+          to: newPosition,
+        );
+      }
+    }
+
+    // Also update nearby vendors that are live
+    for (final vendor in nearbyVendors) {
+      if (vendor.id == null) continue;
+
+      if (_locationService.isLive(vendor.id!)) {
+        final liveLat = _locationService.getLat(vendor.id!);
+        final liveLng = _locationService.getLng(vendor.id!);
+
+        if (liveLat == null || liveLng == null) continue;
+
+        final newPosition = LatLng(liveLat, liveLng);
+        final oldPosition =
+            _animatedPositions[vendor.id!] ?? _lastKnownPositions[vendor.id!];
+
+        if (oldPosition == null) {
+          _animatedPositions[vendor.id!] = newPosition;
+          _lastKnownPositions[vendor.id!] = newPosition;
+          _markerRotations[vendor.id!] = 0.0;
+          continue;
+        }
+
+        if (_hasPositionChanged(oldPosition, newPosition)) {
+          final newBearing = _calculateBearing(oldPosition, newPosition);
+          _targetRotations[vendor.id!] = newBearing;
+          _lastKnownPositions[vendor.id!] = newPosition;
+
+          _animateMarkerSmoothly(
+            vendorId: vendor.id!,
+            from: oldPosition,
+            to: newPosition,
+          );
+        }
+      }
+    }
+
+    if (mounted) setState(() {});
+  }
+
+  bool _hasPositionChanged(LatLng oldPos, LatLng newPos) {
+    const double threshold = 0.00001;
+    return (oldPos.latitude - newPos.latitude).abs() > threshold ||
+        (oldPos.longitude - newPos.longitude).abs() > threshold;
+  }
+
+  // ============================================================
+  // MARKER ANIMATION
+  // ============================================================
+
+  void _animateMarkerSmoothly({
+    required String vendorId,
+    required LatLng from,
+    required LatLng to,
+    int durationMs = 1000,
+  }) {
+    _markerTimers[vendorId]?.cancel();
+
+    const int frameRate = 16;
+    final int totalFrames = (durationMs / frameRate).round();
+    int currentFrame = 0;
+
+    final double startRotation = _markerRotations[vendorId] ?? 0.0;
+    final double targetRotation = _targetRotations[vendorId] ?? startRotation;
+    final double rotationDelta = _normalizeRotationDelta(
+      startRotation,
+      targetRotation,
+    );
+
+    _markerTimers[vendorId] = Timer.periodic(
+      const Duration(milliseconds: frameRate),
+      (timer) {
+        currentFrame++;
+        final double t = currentFrame / totalFrames;
+
+        if (t >= 1.0) {
+          _animatedPositions[vendorId] = to;
+          _markerRotations[vendorId] = targetRotation;
+          timer.cancel();
+          _markerTimers.remove(vendorId);
+          if (mounted) setState(() {});
+          return;
+        }
+
+        final double easedT = _easeInOutCubic(t);
+
+        final double interpolatedLat =
+            from.latitude + (to.latitude - from.latitude) * easedT;
+        final double interpolatedLng =
+            from.longitude + (to.longitude - from.longitude) * easedT;
+        _animatedPositions[vendorId] = LatLng(interpolatedLat, interpolatedLng);
+
+        double newRotation = startRotation + rotationDelta * easedT;
+        newRotation = (newRotation + 360) % 360;
+        _markerRotations[vendorId] = newRotation;
+
+        if (mounted) setState(() {});
+      },
+    );
+  }
+
+  double _easeInOutCubic(double t) {
+    return t < 0.5
+        ? 4 * t * t * t
+        : 1 - (-2 * t + 2) * (-2 * t + 2) * (-2 * t + 2) / 2;
+  }
+
+  LatLng? _getAnimatedPosition(String vendorId) {
+    if (_animatedPositions.containsKey(vendorId)) {
+      return _animatedPositions[vendorId]!;
+    }
+
+    final liveLat = _locationService.getLat(vendorId);
+    final liveLng = _locationService.getLng(vendorId);
+
+    if (liveLat != null && liveLng != null) {
+      final pos = LatLng(liveLat, liveLng);
+      _animatedPositions[vendorId] = pos;
+      return pos;
+    }
+
+    return null;
+  }
+
+  // ============================================================
+  // INITIALIZATION
+  // ============================================================
 
   Future<void> _initializeMap() async {
     _polylinePoints = PolylinePoints(apiKey: KeyConstants.googleApiKey);
@@ -95,13 +336,12 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
   Future<void> _initializeUserLocation() async {
     if (_isInitializingLocation || _isNearbyVendorsLoaded) return;
     _isInitializingLocation = true;
+
     try {
       await checkLocationPermission();
       await _getUserLocation();
       if (!mounted) return;
-      setState(() {
-        _isNearbyVendorsLoaded = true;
-      });
+      setState(() => _isNearbyVendorsLoaded = true);
       _locationService.startListening();
       await getNearbyVendors();
       await _loadAssets();
@@ -111,27 +351,35 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
   }
 
   Future<void> getNearbyVendors() async {
-    setState(() {
-      _isNearbyVendorsLoaded = true;
-    });
+    setState(() => _isNearbyVendorsLoaded = true);
+
     final List<VendorModel> vendorsResponse = await _userHomeService
         .getNearbyVendors(
           context: context,
           location: _userLocation,
           maxDistance: 5,
         );
+
     if (!mounted) return;
-    setState(() {
-      nearbyVendors = vendorsResponse;
-      debugPrint('👨🏻 ${nearbyVendors.length} Vendor(s) found:');
-      for (var initVendr in nearbyVendors) {
-        debugPrint('ID: ${initVendr.id} Name: ${initVendr.name}');
+
+    setState(() => nearbyVendors = vendorsResponse);
+
+    for (final vendor in nearbyVendors) {
+      if (vendor.id != null && vendor.lat != null && vendor.lng != null) {
+        final isMoving = _locationService.isLive(vendor.id!);
+        final position = LatLng(vendor.lat!, vendor.lng!);
+
+        if (isMoving) {
+          _animatedPositions[vendor.id!] = position;
+          _lastKnownPositions[vendor.id!] = position;
+          _markerRotations[vendor.id!] = 0.0;
+        } else {
+          _animatedPositions[vendor.id!] = position;
+        }
       }
-    });
+    }
   }
 
-  bool permissionGranted = false;
-  LocationPermission _locationPermissionStatus = LocationPermission.denied;
   Future<void> checkLocationPermission() async {
     var status = await Geolocator.checkPermission();
     if (!mounted) return;
@@ -140,11 +388,9 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
         _locationPermissionStatus == LocationPermission.always ||
         _locationPermissionStatus == LocationPermission.whileInUse;
 
-    debugPrint('Location Status: $permissionGranted');
     if (!permissionGranted) {
       await _showLocationPermissionSheet();
     }
-    // Removed: else { _initializeUserLocation(); }
   }
 
   Future<void> _showLocationPermissionSheet() async {
@@ -160,28 +406,76 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
     checkLocationPermission();
   }
 
-  void _onSessionChanged() {
-    if (!mounted) return;
-    setState(() {});
+  // void _onSessionChanged() {
+  //   if (!mounted) return;
+  //   reloadUserMarker(); // ✅ Reload marker with new image
+  //   setState(() {});
+  // }
+
+  // ============================================================
+  // USER MARKER CREATION
+  // ============================================================
+
+  // BitmapDescriptor? _userMarker;
+
+  // Future<void> _loadUserMarker() async {
+  //   if (_userLocation == null || user == null) return;
+
+  //   final name = user?.name?.split(' ').first ?? 'You';
+
+  //   _userMarker = await createCustomMarker(
+  //     user?.imageUrl, // profile image URL
+  //     name, // label
+  //   );
+
+  //   if (mounted) setState(() {});
+  // }
+
+  /// Draws a simple person icon as fallback
+  void _drawPersonIcon(Canvas canvas, double center, double borderWidth) {
+    final iconPaint = Paint()
+      ..color = Colors.white
+      ..style = PaintingStyle.fill;
+
+    // Draw head (circle)
+    canvas.drawCircle(Offset(center, center - 10), 14, iconPaint);
+
+    // Draw body (rounded rectangle / oval)
+    final bodyRect = RRect.fromRectAndRadius(
+      Rect.fromCenter(
+        center: Offset(center, center + 18),
+        width: 32,
+        height: 28,
+      ),
+      const Radius.circular(10),
+    );
+    canvas.drawRRect(bodyRect, iconPaint);
   }
 
+  // Future<void> reloadUserMarker() async {
+  //   await _loadUserMarker();
+  //   if (mounted) setState(() {});
+  // }
+
+  // ============================================================
+  // ASSET LOADING
+  // ============================================================
   Future<void> _loadAssets() async {
-    await _loadMapStyle();
-    await _loadCustomMarker();
-    await _loadMovingMarker();
-    if (!mounted) return;
-    setState(() => _assetsLoaded = true);
+    await Future.wait([
+      _loadMapStyle(),
+      _loadCustomMarker(),
+      _loadMovingMarker(),
+      // _loadUserMarker(), // 👈 IMPORTANT
+    ]);
+
+    if (mounted) setState(() => _assetsLoaded = true);
   }
 
   Future<void> _loadMapStyle() async {
     try {
       final stylePath = Assets.json.mapStyles.nightTheme;
-      debugPrint("Loading map style from: $stylePath");
       _mapStyle = await rootBundle.loadString(stylePath);
-      debugPrint("Map style loaded successfully!");
-    } catch (e) {
-      debugPrint("Could not load map style: $e");
-    }
+    } catch (_) {}
   }
 
   Future<void> _loadCustomMarker({
@@ -222,9 +516,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
       _customMarker = BitmapDescriptor.fromBytes(
         byteData!.buffer.asUint8List(),
       );
-    } catch (e) {
-      debugPrint('Could not load custom circular marker: $e');
-    }
+    } catch (_) {}
   }
 
   Future<void> _loadMovingMarker({
@@ -240,34 +532,43 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
 
       final recorder = ui.PictureRecorder();
       final canvas = Canvas(recorder);
-      final paint = Paint();
 
-      canvas.drawCircle(
-        Offset(circleSize / 2, circleSize / 2),
-        circleSize / 2,
-        paint..color = const Color(0xFF4CAF50),
-      );
+      final double center = circleSize / 2;
 
+      // Draw circular background
+      final backgroundPaint = Paint()
+        ..color = const Color(0xFF21242B)
+        ..style = PaintingStyle.fill;
+      canvas.drawCircle(Offset(center, center), center, backgroundPaint);
+
+      // Draw green border
+      final borderPaint = Paint()
+        ..color = const Color(0xFF4CAF50)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 3;
+      canvas.drawCircle(Offset(center, center), center - 2, borderPaint);
+
+      // Draw the truck icon centered
+      final double imageOffset = (circleSize - imageSize) / 2;
       final src = Rect.fromLTWH(
         0,
         0,
         fi.image.width.toDouble(),
         fi.image.height.toDouble(),
       );
-      final double offset = (circleSize - imageSize) / 2;
-      final dst = Rect.fromLTWH(offset, offset, imageSize, imageSize);
+      final dst = Rect.fromLTWH(imageOffset, imageOffset, imageSize, imageSize);
       canvas.drawImageRect(fi.image, src, dst, Paint());
 
       final picture = recorder.endRecording();
       final img = await picture.toImage(circleSize.toInt(), circleSize.toInt());
       final byteData = await img.toByteData(format: ui.ImageByteFormat.png);
 
-      _movingMarker = BitmapDescriptor.fromBytes(
-        byteData!.buffer.asUint8List(),
-      );
-    } catch (e) {
-      debugPrint('Could not load moving marker: $e');
-    }
+      if (byteData != null) {
+        _movingMarker = BitmapDescriptor.fromBytes(
+          byteData.buffer.asUint8List(),
+        );
+      }
+    } catch (_) {}
   }
 
   Future<void> _getUserLocation() async {
@@ -295,14 +596,11 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
           userLng: _userLocation!.longitude,
         );
       }
-    } catch (e) {
-      debugPrint('Error while fetching location: $e');
-    }
+    } catch (_) {}
   }
 
   Future<void> _moveCameraToUser() async {
     if (_userLocation == null) return;
-    debugPrint('📍USER LAT LNG ARE :$_userLocation');
     final controller = await _controller.future;
     controller.animateCamera(
       CameraUpdate.newCameraPosition(
@@ -314,16 +612,17 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
     );
   }
 
+  // ============================================================
+  // ROUTE DRAWING
+  // ============================================================
+
   Future<void> _drawRouteToVendor(LatLng vendor, int index) async {
-    debugPrint('_isDirectionSet $_isRouteSet');
+    if (_isDrawingRoute) return;
+
     if (_isRouteSet) {
-      clearPolylines();
+      _clearPolylinesInternal();
       return;
     }
-    if (!mounted) return;
-    setState(() {
-      _isRouteSet = true;
-    });
 
     final user = _userLocation;
     if (user == null) {
@@ -333,7 +632,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
       return;
     }
 
-    clearPolylines();
+    _isDrawingRoute = true;
 
     try {
       final result = await _polylinePoints.getRouteBetweenCoordinates(
@@ -344,52 +643,84 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
         ),
       );
 
+      if (!mounted) return;
+
       if (result.points.isEmpty) {
-        addOrReplacePolyline(
+        setState(() {
+          _polylines.clear();
+          _polylines.add(
+            Polyline(
+              polylineId: PolylineId('straight_$index'),
+              points: [user, vendor],
+              width: 3,
+              color: Colors.grey,
+              patterns: [PatternItem.dash(10), PatternItem.gap(6)],
+            ),
+          );
+          _isRouteSet = true;
+        });
+      } else {
+        final coords = result.points
+            .map((p) => LatLng(p.latitude, p.longitude))
+            .toList();
+
+        setState(() {
+          _polylines.clear();
+          _polylines.add(
+            Polyline(
+              polylineId: PolylineId('route_$index'),
+              points: coords,
+              width: 5,
+              color: Colors.blue,
+            ),
+          );
+          _isRouteSet = true;
+        });
+      }
+
+      final controller = await _controller.future;
+
+      LatLngBounds bounds = LatLngBounds(
+        southwest: LatLng(
+          math.min(user.latitude, vendor.latitude),
+          math.min(user.longitude, vendor.longitude),
+        ),
+        northeast: LatLng(
+          math.max(user.latitude, vendor.latitude),
+          math.max(user.longitude, vendor.longitude),
+        ),
+      );
+
+      controller.animateCamera(CameraUpdate.newLatLngBounds(bounds, 100));
+    } catch (e) {
+      if (!mounted) return;
+
+      setState(() {
+        _polylines.clear();
+        _polylines.add(
           Polyline(
-            polylineId: PolylineId('straight_$index'),
+            polylineId: PolylineId('fallback_$index'),
             points: [user, vendor],
             width: 3,
             color: Colors.grey,
             patterns: [PatternItem.dash(10), PatternItem.gap(6)],
           ),
         );
-      } else {
-        final coords = result.points
-            .map((p) => LatLng(p.latitude, p.longitude))
-            .toList();
-        addOrReplacePolyline(
-          Polyline(
-            polylineId: PolylineId('route_$index'),
-            points: coords,
-            width: 5,
-            color: Colors.blue,
-          ),
-        );
-      }
-      final controller = await _controller.future;
-      controller.animateCamera(CameraUpdate.newLatLngZoom(vendor, 15));
-    } catch (e) {
-      debugPrint('Error creating route: $e');
+        _isRouteSet = true;
+      });
+
+      try {
+        final controller = await _controller.future;
+        controller.animateCamera(CameraUpdate.newLatLngZoom(vendor, 15));
+      } catch (_) {}
+    } finally {
+      _isDrawingRoute = false;
     }
   }
 
-  Future<void> _zoomMapToBounds(LatLng user, LatLng vendor) async {
-    final controller = await _controller.future;
-
-    final bounds = LatLngBounds(
-      southwest: LatLng(
-        user.latitude < vendor.latitude ? user.latitude : vendor.latitude,
-        user.longitude < vendor.longitude ? user.longitude : vendor.longitude,
-      ),
-      northeast: LatLng(
-        user.latitude > vendor.latitude ? user.latitude : vendor.latitude,
-        user.longitude > vendor.longitude ? user.longitude : vendor.longitude,
-      ),
-    );
-
-    controller.animateCamera(CameraUpdate.newLatLngBounds(bounds, 100));
-  }
+  // ============================================================
+  // STATE MANAGEMENT
+  // ============================================================
 
   void updateUserLocation(LatLng newLocation) {
     if (_userLocation == newLocation) return;
@@ -413,14 +744,16 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
   Future<void> unselectVendor() async {
     if (_selectedVendorIndex == null &&
         _selectedLiveVendor == null &&
-        _polylines.isEmpty)
+        _polylines.isEmpty) {
       return;
+    }
     if (!mounted) return;
     setState(() {
       _selectedVendorIndex = null;
       _selectedLiveVendor = null;
       _polylines.clear();
       _isCardExpanded = false;
+      _isRouteSet = false;
     });
   }
 
@@ -432,16 +765,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
     }
   }
 
-  void addOrReplacePolyline(Polyline polyline) {
-    if (!mounted) return;
-    setState(() {
-      _polylines.removeWhere((p) => p.polylineId == polyline.polylineId);
-      _polylines.add(polyline);
-    });
-  }
-
-  void clearPolylines() {
-    if (_polylines.isEmpty) return;
+  void _clearPolylinesInternal() {
     if (!mounted) return;
     setState(() {
       _polylines.clear();
@@ -449,15 +773,20 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
     });
   }
 
-  /// Build markers with priority: Live > Fixed
-  /// Builds all markers for the map.
-  /// Priority: Live vendor location > Fixed vendor location.
-  /// Small card and info window display only vendor name and type.
+  void clearPolylines() {
+    if (_polylines.isEmpty && !_isRouteSet) return;
+    _clearPolylinesInternal();
+  }
+
+  // ============================================================
+  // MARKER BUILDING
+  // ============================================================
+
   Set<Marker> buildMarkers({BitmapDescriptor? customMarker}) {
     final Set<Marker> markers = {};
     final Set<String> liveVendorIds = {};
 
-    // Collect all live vendor IDs near the user
+    // Collect live vendor IDs
     if (_userLocation != null) {
       final liveVendors = _locationService.getLiveVendorsNear(
         _userLocation!,
@@ -469,7 +798,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
       }
     }
 
-    // Add backend vendors (fixed)
+    // Build markers for nearby vendors
     for (var i = 0; i < nearbyVendors.length; i++) {
       final vendor = nearbyVendors[i];
       if (vendor.id == null) continue;
@@ -477,15 +806,32 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
       double? lat;
       double? lng;
       BitmapDescriptor icon;
+      double rotation = 0.0;
+      bool isLive = liveVendorIds.contains(vendor.id);
 
-      // Use live location if available, otherwise fixed backend location
-      if (liveVendorIds.contains(vendor.id)) {
-        lat = _locationService.getLat(vendor.id!);
-        lng = _locationService.getLng(vendor.id!);
+      if (isLive) {
+        // LIVE VENDOR
+        final animatedPos = _getAnimatedPosition(vendor.id!);
+
+        if (animatedPos != null) {
+          lat = animatedPos.latitude;
+          lng = animatedPos.longitude;
+        } else {
+          lat = _locationService.getLat(vendor.id!);
+          lng = _locationService.getLng(vendor.id!);
+
+          if (lat != null && lng != null) {
+            _animatedPositions[vendor.id!] = LatLng(lat, lng);
+            _lastKnownPositions[vendor.id!] = LatLng(lat, lng);
+          }
+        }
+
+        rotation = _getMarkerRotation(vendor.id!);
         icon =
             _movingMarker ??
             BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen);
       } else {
+        // STATIC VENDOR
         lat = vendor.lat;
         lng = vendor.lng;
         icon = customMarker ?? BitmapDescriptor.defaultMarker;
@@ -498,31 +844,53 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
           markerId: MarkerId(vendor.id!),
           position: LatLng(lat, lng),
           icon: icon,
+          anchor: const Offset(0.5, 0.5),
+          rotation: isLive ? rotation : 0.0,
+          flat: isLive,
+          zIndex: isLive ? 2.0 : 1.0,
           onTap: () => toggleVendorSelection(i),
           infoWindow: InfoWindow(
             title: vendor.name,
-            snippet: vendor.vendorType, // Only show name + type
+            snippet: vendor.vendorType,
           ),
         ),
       );
     }
 
-    // Add live-only vendors (not in backend list)
+    // Add live vendors not in nearbyVendors list
     if (_userLocation != null) {
       final liveVendors = _locationService.getLiveVendorsNear(
         _userLocation!,
         5,
       );
+
       for (final lv in liveVendors) {
         final id = lv['vendorId'] as String? ?? '';
         if (id.isEmpty) continue;
 
-        // Skip if already added from backend
+        // Skip if already processed
         if (nearbyVendors.any((v) => v.id == id)) continue;
 
-        final lat = (lv['latitude'] as num?)?.toDouble();
-        final lng = (lv['longitude'] as num?)?.toDouble();
+        double? lat;
+        double? lng;
+
+        final animatedPos = _getAnimatedPosition(id);
+        if (animatedPos != null) {
+          lat = animatedPos.latitude;
+          lng = animatedPos.longitude;
+        } else {
+          lat = (lv['latitude'] as num?)?.toDouble();
+          lng = (lv['longitude'] as num?)?.toDouble();
+
+          if (lat != null && lng != null) {
+            _animatedPositions[id] = LatLng(lat, lng);
+            _lastKnownPositions[id] = LatLng(lat, lng);
+          }
+        }
+
         if (lat == null || lng == null) continue;
+
+        final rotation = _getMarkerRotation(id);
 
         markers.add(
           Marker(
@@ -533,6 +901,10 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                 BitmapDescriptor.defaultMarkerWithHue(
                   BitmapDescriptor.hueGreen,
                 ),
+            anchor: const Offset(0.5, 0.5),
+            rotation: rotation,
+            flat: true,
+            zIndex: 2.0,
             onTap: () {
               setState(() {
                 _selectedLiveVendor = lv;
@@ -548,22 +920,28 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
       }
     }
 
-    // Add user marker
-    if (_userLocation != null) {
-      markers.add(
-        Marker(
-          markerId: const MarkerId('user'),
-          position: _userLocation!,
-          icon: BitmapDescriptor.defaultMarkerWithHue(
-            BitmapDescriptor.hueAzure,
-          ),
-          infoWindow: const InfoWindow(title: 'Your Location'),
-        ),
-      );
-    }
+    // // Add user location marker with profile image
+    // if (_userLocation != null) {
+    //   markers.add(
+    //     Marker(
+    //       markerId: const MarkerId('user'),
+    //       position: _userLocation!,
+    //       icon:
+    //           _userMarker ??
+    //           BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueAzure),
+    //       anchor: const Offset(0.5, 0.9), // bottom center
+    //       zIndex: 10,
+    //       infoWindow: const InfoWindow(title: 'You'),
+    //     ),
+    //   );
+    // }
 
     return markers;
   }
+
+  // ============================================================
+  // UI BUILD METHODS
+  // ============================================================
 
   @override
   Widget build(BuildContext context) {
@@ -577,10 +955,8 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
           visible: _selectedVendorIndex == null && _selectedLiveVendor == null,
           child: FloatingActionButton(
             backgroundColor: context.colors.buttonPrimary,
-            onPressed: () {
-              _moveCameraToUser();
-            },
-            child: Icon(Icons.my_location_sharp, color: Colors.white),
+            onPressed: _moveCameraToUser,
+            child: const Icon(Icons.my_location_sharp, color: Colors.white),
           ),
         ),
       ),
@@ -645,7 +1021,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
       height: MediaQuery.sizeOf(context).height,
       child: Stack(
         children: [
-          Center(child: LoadingWidget(color: Colors.white70)),
+          const Center(child: LoadingWidget(color: Colors.white70)),
           _buildGoogleMap(),
           Align(
             alignment: Alignment.topCenter,
@@ -677,10 +1053,8 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
               _buildUserGreeting(),
               const Spacer(),
               GestureDetector(
-                onTap: () {
-                  UserHomeService.gotoNotifications(context);
-                },
-                child: NotificationsBtn(),
+                onTap: () => UserHomeService.gotoNotifications(context),
+                child: const NotificationsBtn(),
               ),
             ],
           ),
@@ -699,7 +1073,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
         zoom: 15,
       ),
       markers: buildMarkers(customMarker: _customMarker),
-      polylines: polylines,
+      polylines: _polylines,
       myLocationEnabled: true,
       zoomControlsEnabled: false,
       compassEnabled: false,
@@ -710,19 +1084,14 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
         await Future.delayed(const Duration(milliseconds: 200));
         if (_mapStyle.isNotEmpty) controller.setMapStyle(_mapStyle);
       },
-      onTap: (pos) {
-        unselectVendor();
-      },
+      onTap: (_) => unselectVendor(),
     );
   }
 
   Widget _buildSearchField() {
     return GestureDetector(
       onTap: () {
-        if (!_isUserLocationSet) {
-          debugPrint('❌ USER LOCATION NOT SET');
-          return;
-        }
+        if (!_isUserLocationSet) return;
         openVendorSearch(userLocation: _userLocation!);
       },
       child: AbsorbPointer(
@@ -745,9 +1114,18 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
             (v) => v.id == searchedVendor.id,
           );
           if (!vendorAlreadyLoaded) {
-            debugPrint('Not loaded');
             nearbyVendors.add(searchedVendor);
-            debugPrint('Added to list');
+
+            if (searchedVendor.lat != null && searchedVendor.lng != null) {
+              _animatedPositions[searchedVendor.id!] = LatLng(
+                searchedVendor.lat!,
+                searchedVendor.lng!,
+              );
+              _lastKnownPositions[searchedVendor.id!] = LatLng(
+                searchedVendor.lat!,
+                searchedVendor.lng!,
+              );
+            }
           }
 
           final index = nearbyVendors.indexWhere(
@@ -755,11 +1133,15 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
           );
           if (index != -1) {
             selectVendor(index);
-            debugPrint('VENDOR IS NOW SELECTED');
 
             double? lat;
             double? lng;
-            if (_locationService.isLive(searchedVendor.id!)) {
+
+            final animatedPos = _getAnimatedPosition(searchedVendor.id!);
+            if (animatedPos != null) {
+              lat = animatedPos.latitude;
+              lng = animatedPos.longitude;
+            } else if (_locationService.isLive(searchedVendor.id!)) {
               lat = _locationService.getLat(searchedVendor.id!);
               lng = _locationService.getLng(searchedVendor.id!);
             } else {
@@ -768,9 +1150,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
             }
 
             if (_userLocation != null && lat != null && lng != null) {
-              debugPrint('DRAWING ROUTE');
-              _drawRouteToVendor(LatLng(lat, lng), index);
-              debugPrint('ROUTE DRAWN NOW!');
+              await _drawRouteToVendor(LatLng(lat, lng), index);
             }
           }
         },
@@ -780,9 +1160,24 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
   }
 
   Widget _buildUserVendorCard() {
-    // Live-only vendor
     if (_selectedLiveVendor != null) {
       final lv = _selectedLiveVendor!;
+
+      final animatedPos = _getAnimatedPosition(lv['vendorId'] ?? '');
+      final lat = animatedPos?.latitude ?? (lv['latitude'] as num?)?.toDouble();
+      final lng =
+          animatedPos?.longitude ?? (lv['longitude'] as num?)?.toDouble();
+
+      double distance = 0.0;
+      if (_userLocation != null && lat != null && lng != null) {
+        distance = _calculateDistance(
+          _userLocation!.latitude,
+          _userLocation!.longitude,
+          lat,
+          lng,
+        );
+      }
+
       return VendorCard(
         vendorId: lv['vendorId'] ?? '',
         isExpanded: _isCardExpanded,
@@ -791,7 +1186,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
           if (!mounted) return;
           setState(() => _isCardExpanded = !_isCardExpanded);
         },
-        distance: 0,
+        distance: _roundToOneDecimal(distance),
         vendorName: lv['name'] ?? '',
         imageUrl: lv['profileImage'] ?? '',
         vendorAddress: '',
@@ -799,24 +1194,48 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
         menuLength: lv['menuCount'] ?? 0,
         hoursADay: (lv['hoursADay'] ?? 0).toString(),
         onGetDirection: () async {
-          final lat = (lv['latitude'] as num).toDouble();
-          final lng = (lv['longitude'] as num).toDouble();
-          await _drawRouteToVendor(LatLng(lat, lng), 0);
-          if (!mounted) return;
-          setState(() => _isCardExpanded = false);
+          if (lat != null && lng != null) {
+            await _drawRouteToVendor(LatLng(lat, lng), 0);
+            if (!mounted) return;
+            setState(() => _isCardExpanded = false);
+          } else {
+            context.flushBarErrorMessage(
+              message: 'Vendor location not available',
+            );
+          }
         },
       );
     }
 
-    // Backend vendor
     final selected = selectedVendor;
     if (selected == null) return const SizedBox.shrink();
 
-    double? lat = selected.lat;
-    double? lng = selected.lng;
-    if (_locationService.isLive(selected.id!)) {
+    double? lat;
+    double? lng;
+
+    final animatedPos = _getAnimatedPosition(selected.id!);
+    if (animatedPos != null) {
+      lat = animatedPos.latitude;
+      lng = animatedPos.longitude;
+    } else if (_locationService.isLive(selected.id!)) {
       lat = _locationService.getLat(selected.id!);
       lng = _locationService.getLng(selected.id!);
+    } else {
+      lat = selected.lat;
+      lng = selected.lng;
+    }
+
+    double distance = selected.distanceInKm ?? 0.0;
+    if (_locationService.isLive(selected.id!) &&
+        _userLocation != null &&
+        lat != null &&
+        lng != null) {
+      distance = _calculateDistance(
+        _userLocation!.latitude,
+        _userLocation!.longitude,
+        lat,
+        lng,
+      );
     }
 
     return VendorCard(
@@ -827,7 +1246,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
         if (!mounted) return;
         setState(() => _isCardExpanded = !_isCardExpanded);
       },
-      distance: selected.distanceInKm ?? 0.0,
+      distance: _roundToOneDecimal(distance),
       vendorName: selected.name,
       imageUrl: selected.profileImage ?? '',
       vendorAddress: selected.address ?? '',
@@ -846,6 +1265,27 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
         }
       },
     );
+  }
+
+  double _calculateDistance(
+    double lat1,
+    double lng1,
+    double lat2,
+    double lng2,
+  ) {
+    const double earthRadius = 6371.0;
+    final double dLat = (lat2 - lat1) * math.pi / 180.0;
+    final double dLng = (lng2 - lng1) * math.pi / 180.0;
+
+    final double a =
+        math.sin(dLat / 2) * math.sin(dLat / 2) +
+        math.cos(lat1 * math.pi / 180.0) *
+            math.cos(lat2 * math.pi / 180.0) *
+            math.sin(dLng / 2) *
+            math.sin(dLng / 2);
+
+    final double c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a));
+    return earthRadius * c;
   }
 }
 
