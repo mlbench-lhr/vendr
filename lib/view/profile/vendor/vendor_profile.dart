@@ -6,6 +6,7 @@ import 'package:vendr/app/components/my_scaffold.dart';
 import 'package:vendr/app/utils/extensions/context_extensions.dart';
 import 'package:vendr/model/vendor/vendor_model.dart';
 import 'package:vendr/services/common/auth_service.dart';
+import 'package:vendr/services/common/location_service.dart';
 import 'package:vendr/services/common/session_manager/session_controller.dart';
 import 'package:vendr/services/vendor/vendor_profile_service.dart';
 import 'package:vendr/view/profile/widgets/delete_account_dialog.dart';
@@ -168,6 +169,7 @@ class _VendorProfileScreenState extends State<VendorProfileScreen> {
                   onPressed: () {
                     debugPrint('Logout button pressed');
                     AuthService.logout(context);
+                    VendorLocationService().stopSharing();
                   },
                 ),
               ),

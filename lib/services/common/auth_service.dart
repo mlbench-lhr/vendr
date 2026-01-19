@@ -12,6 +12,7 @@ import 'package:vendr/model/user/user_model.dart';
 import 'package:vendr/model/vendor/vendor_model.dart';
 import 'package:vendr/repository/user_auth_repo.dart';
 import 'package:vendr/repository/vendor_auth_repo.dart';
+import 'package:vendr/services/common/location_service.dart';
 import 'package:vendr/services/common/session_manager/session_controller.dart';
 import 'package:vendr/view/auth/widgets/account_verification_sheet.dart';
 
@@ -539,6 +540,7 @@ class AuthService {
       } else {
         debugPrint('📍 TO BE IMPLEMENTED');
         // await _vendorAuthRepo.deleteUserAccount();
+        VendorLocationService().stopSharing();
       }
       if (context.mounted) {
         logout(context);
