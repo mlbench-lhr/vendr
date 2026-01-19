@@ -11,7 +11,7 @@ NotificationModel _$NotificationModelFromJson(Map<String, dynamic> json) =>
       id: json['_id'] as String,
       title: json['title'] as String,
       body: json['body'] as String,
-      image: json['image'] as String,
+      image: json['image'] as String?,
       isRead: json['is_read'] as bool,
       createdAt: DateTime.parse(json['created_at'] as String),
     );

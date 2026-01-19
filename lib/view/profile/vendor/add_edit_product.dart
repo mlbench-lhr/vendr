@@ -585,6 +585,7 @@ class _ServingSectionState extends State<ServingSection> {
                     prefixIcon: Icon(Icons.attach_money, size: 20.w),
                     controller: priceController,
                     inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                    maxLength: 6,
                     onChanged: (value) {
                       // setState(() {
                       //   selectedPrice = value;

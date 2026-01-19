@@ -67,6 +67,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                       imageUrl: notification.image,
                       title: notification.title,
                       description: notification.body,
+                      timeStamp: notification.createdAt,
                     ),
                   );
                 },

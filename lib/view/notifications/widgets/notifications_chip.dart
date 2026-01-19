@@ -6,11 +6,13 @@ class NotificationsChip extends StatelessWidget {
   final String? imageUrl;
   final String title;
   final String description;
+  final DateTime timeStamp;
   const NotificationsChip({
     super.key,
     this.imageUrl,
     required this.title,
     required this.description,
+    required this.timeStamp,
   });
 
   @override
@@ -51,7 +53,24 @@ class NotificationsChip extends StatelessWidget {
             ],
           ),
         ),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [Text(formatTime(timeStamp)), Text(formatDate(timeStamp))],
+        ),
       ],
     );
+  }
+
+  String formatDate(DateTime dateTime) {
+    return '${dateTime.day.toString().padLeft(2, '0')}/'
+        '${dateTime.month.toString().padLeft(2, '0')}/'
+        '${dateTime.year}';
+  }
+
+  // Returns time in hh:mm (24-hour) format
+  String formatTime(DateTime dateTime) {
+    return '${dateTime.hour.toString().padLeft(2, '0')}:'
+        '${dateTime.minute.toString().padLeft(2, '0')}';
   }
 }

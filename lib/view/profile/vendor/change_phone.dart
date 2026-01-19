@@ -20,7 +20,6 @@ class ChangePhoneNumberScreen extends StatefulWidget {
 class _ChangePhoneNumberScreenState extends State<ChangePhoneNumberScreen> {
   final _pinputController = TextEditingController();
   final _phoneController = TextEditingController();
-  bool isSubmitted = false;
   @override
   Widget build(BuildContext context) {
     return MyScaffold(
@@ -40,14 +39,12 @@ class _ChangePhoneNumberScreenState extends State<ChangePhoneNumberScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              isSubmitted
-                  ? 'Enter your new phone number below.'
-                  : 'Just enter your old phone number so we can send you a verification code to continue.',
+              'Just enter your new phone number so we can send you a verification code to continue.',
               style: context.typography.bodySmall.copyWith(),
             ),
             24.height,
             Text(
-              isSubmitted ? 'New Phone Number' : 'Phone Number',
+              'New Phone Number',
               style: context.typography.title.copyWith(fontSize: 18.sp),
             ),
             10.height,
@@ -57,49 +54,49 @@ class _ChangePhoneNumberScreenState extends State<ChangePhoneNumberScreen> {
                 // Allows digits (0-9) and the plus sign (+)
                 FilteringTextInputFormatter.allow(RegExp(r'[0-9+]')),
               ],
-              hint: 'Enter old phone number',
+              hint: 'Enter new phone number',
               suffixIcon: Icon(Icons.phone_outlined),
               controller: _phoneController,
             ),
 
-            if (!isSubmitted) ...[
-              10.height,
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  Text(
-                    'Resend OTP',
+            10.height,
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                GestureDetector(
+                  onTap: () {
+                    //send otp
+                  },
+                  child: Text(
+                    'Send OTP',
                     style: context.typography.body.copyWith(
                       color: context.colors.buttonPrimary,
                       fontSize: 12.sp,
                       fontWeight: FontWeight.w800,
                     ),
                   ),
-                ],
-              ),
-              32.height,
-              Center(child: MyPinput(controller: _pinputController)),
-            ],
+                ),
+              ],
+            ),
+            32.height,
+            Center(child: MyPinput(controller: _pinputController)),
 
             const Spacer(),
             MyButton(
-              label: isSubmitted ? 'Update' : 'Submit',
+              label: 'Verify',
               onPressed: () {
-                if (!isSubmitted) {
-                  setState(() {
-                    isSubmitted = true;
-                  });
-                  _phoneController.clear();
-                } else {
-                  context.flushBarSuccessMessage(
-                    message: 'Phone number updated successfully!',
-                  );
-                }
+                verifyPhoneOTP(context);
               },
             ),
           ],
         ),
       ),
+    );
+  }
+
+  void verifyPhoneOTP(BuildContext context) {
+    return context.flushBarSuccessMessage(
+      message: 'Phone number updated successfully!',
     );
   }
 }

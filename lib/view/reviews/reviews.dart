@@ -43,14 +43,14 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
   @override
   void initState() {
     super.initState();
-    _fetchData();
+    fetchData();
 
     _scrollController.addListener(() {
       if (_scrollController.position.pixels >=
               _scrollController.position.maxScrollExtent - 100 &&
           !_isLoading &&
           _hasMore) {
-        _fetchData();
+        fetchData();
       }
     });
   }
@@ -58,9 +58,8 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
   // ============================
   // FETCH + PAGINATION (MERGED)
   // ============================
-  Future<void> _fetchData() async {
+  Future<void> fetchData() async {
     if (_isLoading || !_hasMore) return;
-    debugPrint("F E T C H  D A T A  C A L L E D");
     setState(() => _isLoading = true);
 
     ReviewsModel? response;
@@ -212,9 +211,11 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
                     child: AddReviewBottomSheet(
                       vendorId: widget.vendorId!,
                       parentContext: context,
-                      onSuccess: () {
-                        debugPrint('O N  S U C C E S S C A L L E D');
-                        _fetchData();
+                      onSuccess: () async {
+                        setState(() {
+                          _hasMore = true;
+                        });
+                        await fetchData();
                       },
                     ),
                   );
