@@ -23,9 +23,7 @@ class UserNotificationsRepository {
       },
     };
 
-    debugPrint('😀😀😀😀😀😀');
     debugPrint('DATA FOR TOKEN: $data');
-    debugPrint('😀😀😀😀😀😀');
 
     return api.post(url: AppUrl.saveTokenUser, data: data);
   }

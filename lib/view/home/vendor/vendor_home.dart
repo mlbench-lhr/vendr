@@ -128,13 +128,14 @@ class _VendorHomeScreenState extends State<VendorHomeScreen> {
                           ),
                         ],
                       ),
-                      const Spacer(),
-                      GestureDetector(
-                        onTap: () {
-                          UserHomeService.gotoNotifications(context);
-                        },
-                        child: NotificationsBtn(),
-                      ),
+                      //TODO: Notifications icon removed as vendors isn't recieveing any notifications
+                      // const Spacer(),
+                      // GestureDetector(
+                      //   onTap: () {
+                      //     UserHomeService.gotoNotifications(context);
+                      //   },
+                      //   child: NotificationsBtn(),
+                      // ),
                     ],
                   ),
 

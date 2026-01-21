@@ -63,12 +63,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                   final notification = notifications[index];
                   return Padding(
                     padding: EdgeInsets.only(bottom: 20.h),
-                    child: NotificationsChip(
-                      imageUrl: notification.image,
-                      title: notification.title,
-                      description: notification.body,
-                      timeStamp: notification.createdAt,
-                    ),
+                    child: NotificationsChip(notification: notification),
                   );
                 },
               );

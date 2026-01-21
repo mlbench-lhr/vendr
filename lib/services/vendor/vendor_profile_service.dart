@@ -62,6 +62,7 @@ class VendorProfileService {
     String? shopAddress,
     double? lat,
     double? lng,
+    String? phone,
     VoidCallback? onSuccess,
   }) async {
     final VendorModel? vendor = _sessionController.vendor;
@@ -76,6 +77,7 @@ class VendorProfileService {
         'shop_address': shopAddress,
       if (lat != null && vendor?.lat != lat) 'lat': lat,
       if (lng != null && vendor?.lng != lng) 'lng': lng,
+      if (phone != null && vendor?.phone != phone) 'phone': phone,
     };
     try {
       await _vendorAuthRepo.updateVendorProfile(data);
