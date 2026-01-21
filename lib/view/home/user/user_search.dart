@@ -63,7 +63,8 @@ class _UserSearchScreenState extends State<UserSearchScreen> {
           context: context,
           query: query,
           userLocation: widget.userLocation,
-          searchRadius: searchRadius,
+          // searchRadius: searchRadius,
+          searchRadius: 999999999999,
         );
 
         if (!mounted) return;
