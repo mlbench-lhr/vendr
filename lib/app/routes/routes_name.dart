@@ -21,6 +21,7 @@ class RoutesName {
   static const String vendorProfile = 'vendor_profile_screen';
   static const String userProfile = 'user_profile_screen';
   static const String userEditProfile = 'user_edit_profile_screen';
+  static const String userlocationProfile = 'user_location_profile_screen';
   static const String vendorMyMenu = 'vendor_my_menu_screen';
 
   //Favorites
@@ -45,4 +46,6 @@ class RoutesName {
   //Common
   static const String languages = 'languages_screen';
   static const String reviews = 'reviews_screen';
+  static const String liveChat = 'live_chat_screen';
+  static const String vendorChatScreen = 'vendor_chat_screen';
 }

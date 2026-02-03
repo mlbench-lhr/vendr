@@ -31,7 +31,7 @@ class _AddReviewBottomSheetState extends State<AddReviewBottomSheet> {
   bool isLoading = false;
 
   Future<void> _submitReview() async {
-    // if (isLoading) return;
+    if (isLoading) return;
 
     final msg = feedbackController.text.trim();
     if (rating == 0 || msg.isEmpty) {

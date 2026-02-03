@@ -53,6 +53,13 @@ class VendorAuthRepository {
     return _apiServices.post(url: AppUrl.uploadProduct, data: data);
   }
 
+  ///Add Vendor Review
+  Future<Map<String, dynamic>> addVendorReview(
+    Map<String, dynamic> data,
+  ) async {
+    return _apiServices.post(url: AppUrl.addVendorReview, data: data);
+  }
+
   //Upload product
   Future<Map<String, dynamic>> editProduct(
     String productId,

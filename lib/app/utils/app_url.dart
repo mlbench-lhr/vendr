@@ -58,6 +58,7 @@ class AppUrl {
   static const String deleteProduct = '$baseUrl/auth/vendor/menu';
   static const String getVendorReviews = '$baseUrl/auth/vendor/reviews';
   static const String addUserReview = '$baseUrl/auth/reviews';
+  static const String addVendorReview = '$baseUrl/auth/user/rating';
   static const String searchVendors = '$baseUrl/auth/vendors/search';
   static const String getNotifications = '$baseUrl/auth/notifications';
   static const String editProduct =

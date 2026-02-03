@@ -23,6 +23,13 @@ class MyTextField extends StatelessWidget {
     this.maxLines,
     this.onSubmitted,
     this.inputFormatters,
+
+    // ✅ New optional colors
+    this.textColor,
+    this.hintColor,
+    this.fillColor,
+    this.borderColor,
+    this.focusedBorderColor,
   });
 
   final TextEditingController? controller;
@@ -43,8 +50,21 @@ class MyTextField extends StatelessWidget {
   final List<TextInputFormatter>? inputFormatters;
   final int? maxLines;
 
+  // ✅ Custom colors
+  final Color? textColor;
+  final Color? hintColor;
+  final Color? fillColor;
+  final Color? borderColor;
+  final Color? focusedBorderColor;
+
   @override
   Widget build(BuildContext context) {
+    final defaultBorderColor =
+        borderColor ?? context.colors.inputBorder.withValues(alpha: 0.10);
+
+    final defaultFocusedBorderColor =
+        focusedBorderColor ?? context.colors.inputBorder;
+
     return TextField(
       onSubmitted: onSubmitted,
       inputFormatters: inputFormatters,
@@ -59,10 +79,18 @@ class MyTextField extends StatelessWidget {
       maxLength: maxLength,
       onChanged: onChanged,
       maxLines: maxLines ?? 1,
+
+      // ✅ Custom text color
+      style: TextStyle(color: textColor ?? context.colors.textPrimary),
+
       decoration: InputDecoration(
         hintText: !label ? hint : null,
         labelText: label ? hint : null,
         errorText: errorText,
+
+        // ✅ Hint color
+        hintStyle: TextStyle(color: hintColor ?? context.colors.textSecondary),
+
         prefixIcon: prefixIcon,
         suffixIcon: suffixIcon != null
             ? Padding(
@@ -70,31 +98,34 @@ class MyTextField extends StatelessWidget {
                 child: suffixIcon,
               )
             : null,
+
+        filled: true,
+        fillColor: fillColor ?? context.colors.inputBackground,
+
         contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
+
         border: OutlineInputBorder(
-          borderSide: BorderSide(
-            color: context.colors.inputBorder.withValues(alpha: 0.10),
-          ),
+          borderSide: BorderSide(color: defaultBorderColor),
           borderRadius: BorderRadius.circular(borderRadius.sp),
         ),
+
         enabledBorder: OutlineInputBorder(
-          borderSide: BorderSide(
-            color: context.colors.inputBorder.withValues(alpha: 0.10),
-          ),
+          borderSide: BorderSide(color: defaultBorderColor),
           borderRadius: BorderRadius.circular(borderRadius.sp),
         ),
+
+        focusedBorder: OutlineInputBorder(
+          borderSide: BorderSide(color: defaultFocusedBorderColor),
+          borderRadius: BorderRadius.circular(borderRadius.sp),
+        ),
+
         errorBorder: OutlineInputBorder(
           borderSide: BorderSide(color: context.colors.error),
           borderRadius: BorderRadius.circular(borderRadius.sp),
         ),
+
         focusedErrorBorder: OutlineInputBorder(
           borderSide: BorderSide(color: context.colors.error),
-          borderRadius: BorderRadius.circular(borderRadius.sp),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderSide: BorderSide(
-            color: context.colors.inputBorder.withValues(),
-          ),
           borderRadius: BorderRadius.circular(borderRadius.sp),
         ),
       ),

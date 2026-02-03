@@ -5,16 +5,15 @@ import 'package:vendr/app/components/my_button.dart';
 import 'package:vendr/app/components/my_dropdown.dart';
 import 'package:vendr/app/components/my_form_text_field.dart';
 import 'package:vendr/app/components/my_scaffold.dart';
-import 'package:vendr/app/styles/app_radiuses.dart';
 import 'package:vendr/app/utils/app_constants.dart';
 import 'package:vendr/app/utils/extensions/context_extensions.dart';
 import 'package:vendr/app/utils/extensions/flush_bar_extension.dart';
 import 'package:vendr/app/utils/extensions/general_extensions.dart';
 import 'package:vendr/app/utils/extensions/validations_exception.dart';
 import 'package:vendr/env.dart';
-import 'package:vendr/services/common/location_service.dart';
 import 'package:vendr/services/common/session_manager/session_controller.dart';
 import 'package:vendr/services/vendor/vendor_profile_service.dart';
+import 'package:vendr/view/profile/vendor/widgets/switch_container.dart';
 import 'package:vendr/view/profile/widgets/address_autocomplete.dart';
 import 'package:vendr/view/profile/widgets/profile_image_picker.dart';
 
@@ -28,7 +27,6 @@ class VendorEditProfileScreen extends StatefulWidget {
 
 class _VendorEditProfileScreenState extends State<VendorEditProfileScreen> {
   final _vendorProfileService = VendorProfileService();
-  final _locationService = VendorLocationService();
   final formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _addressController = TextEditingController();
@@ -38,13 +36,42 @@ class _VendorEditProfileScreenState extends State<VendorEditProfileScreen> {
   LatLng? selectedLatLng;
 
   bool isLoading = false;
-  bool _isLocationLoading = false;
   late String? _imageUrl;
+
+  // Permit and Review settings
+  bool _hasPermit = false;
+  bool _withPermit = false;
+  late bool _initialHasPermit;
+  late bool _initialWithPermit;
+
+  // Initial values for change detection
+  late String _initialName;
+  late String _initialAddress;
+  late String _initialVendorType;
+  late double _initialLat;
+  late double _initialLng;
+  late String? _initialImageUrl;
 
   @override
   void initState() {
     setDataFromSession();
+    // Add listeners to rebuild when values change
+    _nameController.addListener(_onValueChanged);
+    _addressController.addListener(_onValueChanged);
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    _nameController.removeListener(_onValueChanged);
+    _addressController.removeListener(_onValueChanged);
+    _nameController.dispose();
+    _addressController.dispose();
+    super.dispose();
+  }
+
+  void _onValueChanged() {
+    if (mounted) setState(() {});
   }
 
   final _session = SessionController();
@@ -56,39 +83,39 @@ class _VendorEditProfileScreenState extends State<VendorEditProfileScreen> {
       _addressController.text = address ?? '';
       _lat = vendor.lat ?? 0;
       _lng = vendor.lng ?? 0;
-      _selectedVendorType = vendor.vendorType;
+      // Handle case where saved vendor type is not in current vendorTypes list
+      _selectedVendorType =
+          TypeAndCategoryConstants.vendorTypes.contains(vendor.vendorType)
+          ? vendor.vendorType
+          : '';
       _imageUrl = vendor.profileImage;
+      _hasPermit = vendor.hasPermit ?? false;
+      _withPermit = vendor.withPermit ?? false;
+
+      // Store initial values for change detection
+      _initialName = vendor.name;
+      _initialAddress = address ?? '';
+      _initialVendorType = _selectedVendorType;
+      _initialLat = vendor.lat ?? 0;
+      _initialLng = vendor.lng ?? 0;
+      _initialImageUrl = vendor.profileImage;
+      _initialHasPermit = _hasPermit;
+      _initialWithPermit = _withPermit;
+
       debugPrint('here ${vendor.profileImage}');
     });
   }
 
-  /// Toggle location sharing ON/OFF
-  Future<void> _toggleLocationSharing() async {
-    if (_isLocationLoading) return;
-
-    setState(() => _isLocationLoading = true);
-
-    try {
-      if (_locationService.isSharing) {
-        await _locationService.stopSharing();
-        debugPrint('🛑 Location sharing stopped');
-      } else {
-        await _locationService.startSharing();
-        debugPrint('✅ Location sharing started');
-      }
-    } catch (e) {
-      debugPrint('❌ Location error: $e');
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error: ${e.toString()}'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    }
-
-    if (mounted) setState(() => _isLocationLoading = false);
+  /// Check if any value has changed from initial
+  bool get _hasChanges {
+    return _nameController.text != _initialName ||
+        _addressController.text != _initialAddress ||
+        _selectedVendorType != _initialVendorType ||
+        _lat != _initialLat ||
+        _lng != _initialLng ||
+        _imageUrl != _initialImageUrl ||
+        _hasPermit != _initialHasPermit ||
+        _withPermit != _initialWithPermit;
   }
 
   @override
@@ -118,7 +145,9 @@ class _VendorEditProfileScreenState extends State<VendorEditProfileScreen> {
                     readOnly: isLoading,
                     initialUrl: _imageUrl,
                     onImageChanged: (url) {
-                      _imageUrl = url;
+                      setState(() {
+                        _imageUrl = url;
+                      });
                       debugPrint('url: $url');
                       debugPrint('_imageUrl: $_imageUrl');
                     },
@@ -200,12 +229,48 @@ class _VendorEditProfileScreenState extends State<VendorEditProfileScreen> {
                       return null;
                     },
                   ),
+                  SizedBox(height: 16.h),
+                  Text(
+                    'Do you have a permit?',
+                    style: context.typography.title.copyWith(fontSize: 18.sp),
+                  ),
+                  SizedBox(height: 16.h),
+                  SwitchContainer(
+                    activeValue: 'Yes',
+                    inactiveValue: 'No',
+                    switchValue: _hasPermit,
+                    name: '',
+                    onStatusChanged: (value) {
+                      setState(() {
+                        _hasPermit = value;
+                      });
+                    },
+                  ),
+                  SizedBox(height: 16.h),
+                  Text(
+                    'Review Settings',
+                    style: context.typography.title.copyWith(fontSize: 18.sp),
+                  ),
+                  SizedBox(height: 16.h),
+                  SwitchContainer(
+                    isEnabled: _hasPermit,
+                    activeValue: '',
+                    inactiveValue: '',
+                    switchValue: _withPermit,
+                    name: 'Enable Reviews',
+                    onStatusChanged: (value) {
+                      setState(() {
+                        _withPermit = value;
+                        if (!_hasPermit) {
+                          _withPermit = false;
+                        }
+                      });
+                    },
+                  ),
 
                   ///
                   ///END: Address autocomplete
                   ///
-                  SizedBox(height: 16.h),
-                  _buildLocationToggle(),
                   SizedBox(height: 16.h),
                   Text(
                     'Type',
@@ -234,40 +299,55 @@ class _VendorEditProfileScreenState extends State<VendorEditProfileScreen> {
                   SizedBox(height: 24.h),
                   MyButton(
                     isLoading: isLoading,
-                    label: 'Save',
-                    onPressed: () async {
-                      if (!formKey.currentState!.validate()) return;
-                      if (_addressController.text.isNotEmpty &&
-                          (_lat == 0 || _lng == 0)) {
-                        context.flushBarErrorMessage(
-                          message:
-                              'Please enter a valid address or leave the field empty.',
-                        );
-                        return;
-                      }
+                    label: 'Update',
+                    onPressed: _hasChanges && !isLoading
+                        ? () async {
+                            if (isLoading) return;
+                            if (!formKey.currentState!.validate()) return;
+                            if (_addressController.text.isNotEmpty &&
+                                (_lat == 0 || _lng == 0)) {
+                              context.flushBarErrorMessage(
+                                message:
+                                    'Please enter a valid address or leave the field empty.',
+                              );
+                              return;
+                            }
 
-                      if (mounted) {
-                        setState(() => isLoading = true);
-                      }
+                            if (mounted) {
+                              setState(() => isLoading = true);
+                            }
 
-                      await _vendorProfileService.updateVendorProfile(
-                        context,
-                        name: _nameController.text,
-                        shopAddress: _addressController.text,
-                        lat: _lat,
-                        lng: _lng,
-                        vendorType: _selectedVendorType,
-                        imageUrl: _imageUrl,
-                        onSuccess: () {
-                          context.flushBarSuccessMessage(
-                            message: 'Profile updated successfully!',
-                          );
-                        },
-                      );
-                      if (mounted) {
-                        setState(() => isLoading = false);
-                      }
-                    },
+                            await _vendorProfileService.updateVendorProfile(
+                              context,
+                              name: _nameController.text,
+                              shopAddress: _addressController.text,
+                              lat: _lat,
+                              lng: _lng,
+                              vendorType: _selectedVendorType,
+                              imageUrl: _imageUrl,
+                              hasPermit: _hasPermit,
+                              withPermit: _withPermit,
+                              onSuccess: () {
+                                // Update initial values after successful save
+                                _initialName = _nameController.text;
+                                _initialAddress = _addressController.text;
+                                _initialVendorType = _selectedVendorType;
+                                _initialLat = _lat;
+                                _initialLng = _lng;
+                                _initialImageUrl = _imageUrl;
+                                _initialHasPermit = _hasPermit;
+                                _initialWithPermit = _withPermit;
+                                Navigator.pop(context);
+                                context.flushBarSuccessMessage(
+                                  message: 'Profile updated successfully!',
+                                );
+                              },
+                            );
+                            if (mounted) {
+                              setState(() => isLoading = false);
+                            }
+                          }
+                        : null,
                   ),
                   SizedBox(height: 16.h),
                 ],
@@ -275,66 +355,6 @@ class _VendorEditProfileScreenState extends State<VendorEditProfileScreen> {
             ),
           ),
         ),
-      ),
-    );
-  }
-
-  Widget _buildLocationToggle() {
-    final isSharing = _locationService.isSharing;
-
-    return Container(
-      padding: EdgeInsets.all(12.w),
-      decoration: BoxDecoration(
-        color: isSharing ? Colors.green.withOpacity(0.2) : Colors.white12,
-        borderRadius: BorderRadius.circular(AppRadiuses.mediumRadius),
-        border: Border.all(color: isSharing ? Colors.green : Colors.white24),
-      ),
-      child: Row(
-        children: [
-          Icon(
-            isSharing ? Icons.location_on : Icons.location_off,
-            color: isSharing ? Colors.green : Colors.white70,
-            size: 24.w,
-          ),
-          SizedBox(width: 12.w),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Live Location',
-                  style: context.typography.body.copyWith(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 14.sp,
-                  ),
-                ),
-                Text(
-                  isSharing
-                      ? 'Customers can see you on map'
-                      : 'Share your location to be visible',
-                  style: context.typography.bodySmall.copyWith(
-                    fontSize: 11.sp,
-                    color: Colors.white70,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          _isLocationLoading
-              ? SizedBox(
-                  width: 24.w,
-                  height: 24.w,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    color: Colors.white,
-                  ),
-                )
-              : Switch(
-                  value: isSharing,
-                  onChanged: (_) => _toggleLocationSharing(),
-                  activeColor: Colors.green,
-                ),
-        ],
       ),
     );
   }

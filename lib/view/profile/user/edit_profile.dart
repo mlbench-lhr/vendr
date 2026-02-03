@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:vendr/app/components/my_button.dart';
 import 'package:vendr/app/components/my_form_text_field.dart';
 import 'package:vendr/app/components/my_scaffold.dart';
+import 'package:vendr/app/components/my_text_field.dart';
 import 'package:vendr/app/utils/extensions/context_extensions.dart';
 import 'package:vendr/app/utils/extensions/flush_bar_extension.dart';
 import 'package:vendr/app/utils/extensions/validations_exception.dart';
@@ -25,10 +26,27 @@ class _UserEditProfileScreenState extends State<UserEditProfileScreen> {
   bool isLoading = false;
   late String? _imageUrl;
 
+  // Initial values for change detection
+  late String _initialName;
+  late String? _initialImageUrl;
+
   @override
   void initState() {
     setDataFromSession();
+    // Add listener to rebuild when values change
+    _nameController.addListener(_onValueChanged);
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    _nameController.removeListener(_onValueChanged);
+    _nameController.dispose();
+    super.dispose();
+  }
+
+  void _onValueChanged() {
+    if (mounted) setState(() {});
   }
 
   final _session = SessionController();
@@ -39,8 +57,18 @@ class _UserEditProfileScreenState extends State<UserEditProfileScreen> {
     setState(() {
       _nameController.text = userName;
       _imageUrl = image;
+
+      // Store initial values for change detection
+      _initialName = userName;
+      _initialImageUrl = image;
       debugPrint('here ${user.imageUrl}');
     });
+  }
+
+  /// Check if any value has changed from initial
+  bool get _hasChanges {
+    return _nameController.text != _initialName ||
+        _imageUrl != _initialImageUrl;
   }
 
   @override
@@ -74,6 +102,8 @@ class _UserEditProfileScreenState extends State<UserEditProfileScreen> {
                       _imageUrl = url;
                       debugPrint('url: $url');
                       debugPrint('_imageUrl: $_imageUrl');
+                      // Trigger rebuild for change detection
+                      if (mounted) setState(() {});
                     },
                   ),
                 ),
@@ -100,26 +130,32 @@ class _UserEditProfileScreenState extends State<UserEditProfileScreen> {
                 const Spacer(),
                 MyButton(
                   isLoading: isLoading,
-                  label: 'Save',
-                  onPressed: () async {
-                    if (!formKey.currentState!.validate()) return;
-                    if (mounted) {
-                      setState(() => isLoading = true);
-                    }
-                    await _userProfileService.updateUserProfile(
-                      context,
-                      name: _nameController.text,
-                      imageUrl: _imageUrl,
-                      onSuccess: () {
-                        context.flushBarSuccessMessage(
-                          message: 'Profile updated successfully!',
-                        );
-                      },
-                    );
-                    if (mounted) {
-                      setState(() => isLoading = false);
-                    }
-                  },
+                  label: 'Update',
+                  onPressed: _hasChanges && !isLoading
+                      ? () async {
+                          if (!formKey.currentState!.validate()) return;
+                          if (mounted) {
+                            setState(() => isLoading = true);
+                          }
+                          await _userProfileService.updateUserProfile(
+                            context,
+                            name: _nameController.text,
+                            imageUrl: _imageUrl,
+                            onSuccess: () {
+                              // Update initial values after successful save
+                              _initialName = _nameController.text;
+                              _initialImageUrl = _imageUrl;
+                              Navigator.pop(context);
+                              context.flushBarSuccessMessage(
+                                message: 'Profile updated successfully!',
+                              );
+                            },
+                          );
+                          if (mounted) {
+                            setState(() => isLoading = false);
+                          }
+                        }
+                      : null,
                 ),
               ],
             ),

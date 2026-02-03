@@ -15,8 +15,13 @@ class UserModel {
     this.newVendorAlert,
     this.distanceBasedAlert,
     this.favoriteVendorAlert,
-
-    //notification settings
+    this.lat,
+    this.lng,
+    this.requestsRemaining,
+    this.requestsLastResetAt,
+    this.language,
+    this.averageRating,
+    this.totalReviews,
   });
 
   factory UserModel.fromJson(Map<String, dynamic> json) =>
@@ -52,6 +57,30 @@ class UserModel {
 
   @JsonKey(name: 'favorite_vendor_alert')
   final bool? favoriteVendorAlert;
+
+  // Location
+  final double? lat;
+  final double? lng;
+
+  // Meetup requests
+  @JsonKey(name: 'requests_remaining')
+  final int? requestsRemaining;
+
+  @JsonKey(
+    name: 'requests_last_reset_at',
+    fromJson: _fromJsonDateTime,
+    toJson: _toJsonDateTime,
+  )
+  final DateTime? requestsLastResetAt;
+
+  // Other
+  final String? language;
+
+  @JsonKey(name: 'average_rating')
+  final double? averageRating;
+
+  @JsonKey(name: 'total_reviews')
+  final int? totalReviews;
 
   // -------- DateTime Converters ----------
   static DateTime? _fromJsonDateTime(dynamic value) {

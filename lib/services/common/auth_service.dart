@@ -136,6 +136,7 @@ class AuthService {
     required String phone,
     required String vendorType,
     required String password,
+    required bool hasPermit,
   }) async {
     try {
       final Map<String, dynamic> data = {
@@ -144,6 +145,7 @@ class AuthService {
         'phone': phone,
         'vendor_type': vendorType,
         'password': password,
+        'has_permit': hasPermit,
       };
 
       // final response =
@@ -344,7 +346,12 @@ class AuthService {
       final response = await _vendorAuthRepo.vendorLogin(data);
       final String accessToken = response['tokens']['accessToken'] as String;
       final String refreshToken = response['tokens']['refreshToken'] as String;
-      final vendorData = response['vendor'] as Map<String, dynamic>;
+      // Handle both 'vendor' and 'user' keys (API returns vendor data under 'user')
+      final vendorData =
+          (response['vendor'] ?? response['user']) as Map<String, dynamic>;
+      debugPrint(
+        '[AuthService] Vendor login - hasPermit from response: ${vendorData['has_permit']}',
+      );
       await _sessionController.saveToken(
         accessToken: accessToken,
         refreshToken: refreshToken,
@@ -371,9 +378,37 @@ class AuthService {
           UserModel.fromJson(response['user'] as Map<String, dynamic>),
         );
       } else if (_sessionController.userType == UserType.vendor) {
+        // Preserve existing permit values before fetching new profile
+        // because GET /profile doesn't return has_permit and with_permit
+        final existingVendor = _sessionController.vendor;
+        final existingHasPermit = existingVendor?.hasPermit;
+        final existingWithPermit = existingVendor?.withPermit;
+        debugPrint(
+          '[$tag] fetchProfile - existing hasPermit: $existingHasPermit',
+        );
+
         final response = await _vendorAuthRepo.getCurrentVendorProfile();
-        await _sessionController.saveVendor(
-          VendorModel.fromJson(response['vendor'] as Map<String, dynamic>),
+        // Handle both 'vendor' and 'user' keys
+        final vendorJson =
+            (response['vendor'] ?? response['user']) as Map<String, dynamic>;
+        debugPrint(
+          '[$tag] fetchProfile - API returned hasPermit: ${vendorJson['has_permit']}',
+        );
+
+        // Merge preserved permit values if API didn't return them
+        if (vendorJson['has_permit'] == null && existingHasPermit != null) {
+          vendorJson['has_permit'] = existingHasPermit;
+          debugPrint(
+            '[$tag] fetchProfile - preserved hasPermit: $existingHasPermit',
+          );
+        }
+        if (vendorJson['with_permit'] == null && existingWithPermit != null) {
+          vendorJson['with_permit'] = existingWithPermit;
+        }
+
+        await _sessionController.saveVendor(VendorModel.fromJson(vendorJson));
+        debugPrint(
+          '[$tag] ✅ Profile fetched - final hasPermit: ${_sessionController.vendor?.hasPermit}',
         );
       }
       debugPrint('[$tag] ✅ Profile fetched');
@@ -510,11 +545,13 @@ class AuthService {
     required BuildContext context,
     required String oldPassword,
     required String newPassword,
+    VoidCallback? onSuccess,
   }) async {
     final data = {'old_password': oldPassword, 'new_password': newPassword};
     try {
       await _userAuthRepo.changePassword(data);
       if (!context.mounted) return;
+      onSuccess?.call();
       context.flushBarSuccessMessage(message: 'Password updated successfully.');
     } catch (e) {
       if (!context.mounted) return;

@@ -79,7 +79,7 @@ class _MenuBottomSheetState extends State<MenuBottomSheet> {
                   ),
                 ),
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     //Serving counter
                     ServingCounter(
@@ -91,7 +91,7 @@ class _MenuBottomSheetState extends State<MenuBottomSheet> {
                           );
                         });
                       },
-                      servingsLength: widget.menuItem.servings.length,
+                      servings: widget.menuItem.servings,
                     ),
                     MenuDetailsImage(imageUrl: widget.menuItem.imageUrl),
                   ],

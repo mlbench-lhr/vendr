@@ -8,6 +8,7 @@ import 'package:vendr/app/components/my_form_text_field.dart';
 import 'package:vendr/app/components/my_scaffold.dart';
 import 'package:vendr/app/utils/app_constants.dart';
 import 'package:vendr/app/utils/extensions/context_extensions.dart';
+import 'package:vendr/app/utils/extensions/flush_bar_extension.dart';
 import 'package:vendr/app/utils/extensions/validations_exception.dart';
 import 'package:vendr/services/common/auth_service.dart';
 import 'package:vendr/services/common/o_auth_service.dart';
@@ -36,6 +37,8 @@ class _VendorSignupScreenState extends State<VendorSignupScreen> {
   final _confirmPasswordController = TextEditingController();
 
   String _selectedVendorType = 'Other'; //Default Vendor type
+
+  bool? _hasPermit; // Permit selection
 
   final FocusNode _passwordFocusNode = FocusNode();
   final FocusNode _confirmPasswordFocusNode = FocusNode();
@@ -306,7 +309,51 @@ class _VendorSignupScreenState extends State<VendorSignupScreen> {
                   return null;
                 },
               ),
-              SizedBox(height: 36.h),
+              SizedBox(height: 24.h),
+              Text(
+                'Do you have a permit?',
+                style: context.typography.title.copyWith(fontSize: 18.sp),
+              ),
+              SizedBox(height: 13.h),
+              Row(
+                children: [
+                  Expanded(
+                    child: RadioListTile<bool>(
+                      title: Text(
+                        'Yes',
+                        style: context.typography.body.copyWith(
+                          fontSize: 12.sp,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      value: true,
+                      groupValue: _hasPermit,
+                      onChanged: (val) => setState(() => _hasPermit = val),
+                      contentPadding: EdgeInsets.zero,
+                      activeColor: Colors.white,
+                      dense: true,
+                    ),
+                  ),
+                  Expanded(
+                    child: RadioListTile<bool>(
+                      title: Text(
+                        'No',
+                        style: context.typography.body.copyWith(
+                          fontSize: 12.sp,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      value: false,
+                      groupValue: _hasPermit,
+                      onChanged: (val) => setState(() => _hasPermit = val),
+                      contentPadding: EdgeInsets.zero,
+                      activeColor: Colors.white,
+                      dense: true,
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 30.h),
               ValueListenableBuilder<bool>(
                 valueListenable: isFormFilled,
                 builder: (_, isFilled, __) {
@@ -316,6 +363,12 @@ class _VendorSignupScreenState extends State<VendorSignupScreen> {
                     onPressed: isFilled && !isLoading
                         ? () async {
                             if (!formKey.currentState!.validate()) return;
+                            if (_hasPermit == null) {
+                              context.flushBarErrorMessage(
+                                message: 'Please select if you have a permit',
+                              );
+                              return;
+                            }
                             setState(() => isLoading = true);
                             await AuthService()
                                 .vendorSignup(
@@ -325,6 +378,7 @@ class _VendorSignupScreenState extends State<VendorSignupScreen> {
                                   phone: _phoneController.text.trim(),
                                   vendorType: _selectedVendorType,
                                   password: _passwordController.text.trim(),
+                                  hasPermit: _hasPermit ?? false,
                                 )
                                 .then((_) {
                                   if (mounted) {

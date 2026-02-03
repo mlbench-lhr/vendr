@@ -54,15 +54,15 @@
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSCameraUsageDescription</key>
-	<string>We need access to your camera to take photos or videos.</string>
+	<string>We use the camera to let you take photos for your profile and upload product images if you are a vendor.</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-	<string>Your live location is required for background tracking.</string>
+	<string>Your location is used in the background to update your position on the map when location sharing is enabled, allowing users to view your location.</string>
 	<key>NSLocationAlwaysUsageDescription</key>
-	<string>Background location needed.</string>
+	<string>Background location access allows the app to continue updating your location during active sessions when you choose to share your live location.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Your location is used to track nearby vendors.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>We need access to your photo library to allow you to select images or upload photos.</string>
+	<string>Photo library access allows you to select existing images from your device to upload to your profile or product listings.</string>
 	<key>PROJECT_ID</key>
 	<string>street-vendr</string>
 	<key>REVERSED_CLIENT_ID</key>

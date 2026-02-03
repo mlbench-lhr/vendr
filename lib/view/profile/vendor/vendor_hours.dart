@@ -47,6 +47,29 @@ class _VendorHoursScreenState extends State<VendorHoursScreen> {
   String _sundayStartTime = '00:00';
   String _sundayEndTime = '00:00';
 
+  // Initial values for change detection
+  bool _initialMondayEnabled = false;
+  String _initialMondayStartTime = '00:00';
+  String _initialMondayEndTime = '00:00';
+  bool _initialTuesdayEnabled = false;
+  String _initialTuesdayStartTime = '00:00';
+  String _initialTuesdayEndTime = '00:00';
+  bool _initialWednesdayEnabled = false;
+  String _initialWednesdayStartTime = '00:00';
+  String _initialWednesdayEndTime = '00:00';
+  bool _initialThursdayEnabled = false;
+  String _initialThursdayStartTime = '00:00';
+  String _initialThursdayEndTime = '00:00';
+  bool _initialFridayEnabled = false;
+  String _initialFridayStartTime = '00:00';
+  String _initialFridayEndTime = '00:00';
+  bool _initialSaturdayEnabled = false;
+  String _initialSaturdayStartTime = '00:00';
+  String _initialSaturdayEndTime = '00:00';
+  bool _initialSundayEnabled = false;
+  String _initialSundayStartTime = '00:00';
+  String _initialSundayEndTime = '00:00';
+
   @override
   void initState() {
     setDataFromSession();
@@ -89,6 +112,63 @@ class _VendorHoursScreenState extends State<VendorHoursScreen> {
     _isSundayEnabled = days.sunday.enabled;
     _sundayStartTime = days.sunday.start;
     _sundayEndTime = days.sunday.end;
+
+    // Store initial values for change detection
+    _initialMondayEnabled = _isMondayEnabled;
+    _initialMondayStartTime = _mondayStartTime;
+    _initialMondayEndTime = _mondayEndTime;
+    _initialTuesdayEnabled = _isTuesdayEnabled;
+    _initialTuesdayStartTime = _tuesdayStartTime;
+    _initialTuesdayEndTime = _tuesdayEndTime;
+    _initialWednesdayEnabled = _isWednesdayEnabled;
+    _initialWednesdayStartTime = _wednesdayStartTime;
+    _initialWednesdayEndTime = _wednesdayEndTime;
+    _initialThursdayEnabled = _isThursdayEnabled;
+    _initialThursdayStartTime = _thursdayStartTime;
+    _initialThursdayEndTime = _thursdayEndTime;
+    _initialFridayEnabled = _isFridayEnabled;
+    _initialFridayStartTime = _fridayStartTime;
+    _initialFridayEndTime = _fridayEndTime;
+    _initialSaturdayEnabled = _isSaturdayEnabled;
+    _initialSaturdayStartTime = _saturdayStartTime;
+    _initialSaturdayEndTime = _saturdayEndTime;
+    _initialSundayEnabled = _isSundayEnabled;
+    _initialSundayStartTime = _sundayStartTime;
+    _initialSundayEndTime = _sundayEndTime;
+  }
+
+  /// Check if any value has changed from initial
+  bool get _hasChanges {
+    // Monday
+    if (_isMondayEnabled != _initialMondayEnabled) return true;
+    if (_mondayStartTime != _initialMondayStartTime) return true;
+    if (_mondayEndTime != _initialMondayEndTime) return true;
+    // Tuesday
+    if (_isTuesdayEnabled != _initialTuesdayEnabled) return true;
+    if (_tuesdayStartTime != _initialTuesdayStartTime) return true;
+    if (_tuesdayEndTime != _initialTuesdayEndTime) return true;
+    // Wednesday
+    if (_isWednesdayEnabled != _initialWednesdayEnabled) return true;
+    if (_wednesdayStartTime != _initialWednesdayStartTime) return true;
+    if (_wednesdayEndTime != _initialWednesdayEndTime) return true;
+    // Thursday
+    if (_isThursdayEnabled != _initialThursdayEnabled) return true;
+    if (_thursdayStartTime != _initialThursdayStartTime) return true;
+    if (_thursdayEndTime != _initialThursdayEndTime) return true;
+    // Friday
+    if (_isFridayEnabled != _initialFridayEnabled) return true;
+    if (_fridayStartTime != _initialFridayStartTime) return true;
+    if (_fridayEndTime != _initialFridayEndTime) return true;
+    // Saturday
+    if (_isSaturdayEnabled != _initialSaturdayEnabled) return true;
+    if (_saturdayStartTime != _initialSaturdayStartTime) return true;
+    if (_saturdayEndTime != _initialSaturdayEndTime) return true;
+    // Sunday
+    if (_isSundayEnabled != _initialSundayEnabled) return true;
+    if (_sundayStartTime != _initialSundayStartTime) return true;
+    if (_sundayEndTime != _initialSundayEndTime) return true;
+
+    return false;
   }
 
   @override
@@ -301,125 +381,152 @@ class _VendorHoursScreenState extends State<VendorHoursScreen> {
                 child: MyButton(
                   label: 'Update',
                   isLoading: isLoading,
-                  onPressed: () async {
-                    Map<String, dynamic> data = {
-                      "days": {
-                        "monday": {
-                          "enabled": _isMondayEnabled,
-                          "start": _mondayStartTime,
-                          "end": _mondayEndTime,
-                        },
-                        "tuesday": {
-                          "enabled": _isTuesdayEnabled,
-                          "start": _tuesdayStartTime,
-                          "end": _tuesdayEndTime,
-                        },
-                        "wednesday": {
-                          "enabled": _isWednesdayEnabled,
-                          "start": _wednesdayStartTime,
-                          "end": _wednesdayEndTime,
-                        },
-                        "thursday": {
-                          "enabled": _isThursdayEnabled,
-                          "start": _thursdayStartTime,
-                          "end": _thursdayEndTime,
-                        },
-                        "friday": {
-                          "enabled": _isFridayEnabled,
-                          "start": _fridayStartTime,
-                          "end": _fridayEndTime,
-                        },
-                        "saturday": {
-                          "enabled": _isSaturdayEnabled,
-                          "start": _saturdayStartTime,
-                          "end": _saturdayEndTime,
-                        },
-                        "sunday": {
-                          "enabled": _isSundayEnabled,
-                          "start": _sundayStartTime,
-                          "end": _sundayEndTime,
-                        },
-                      },
-                    };
-                    debugPrint('Data: $data');
+                  onPressed: _hasChanges && !isLoading
+                      ? () async {
+                          if (isLoading) return;
+                          Map<String, dynamic> data = {
+                            "days": {
+                              "monday": {
+                                "enabled": _isMondayEnabled,
+                                "start": _mondayStartTime,
+                                "end": _mondayEndTime,
+                              },
+                              "tuesday": {
+                                "enabled": _isTuesdayEnabled,
+                                "start": _tuesdayStartTime,
+                                "end": _tuesdayEndTime,
+                              },
+                              "wednesday": {
+                                "enabled": _isWednesdayEnabled,
+                                "start": _wednesdayStartTime,
+                                "end": _wednesdayEndTime,
+                              },
+                              "thursday": {
+                                "enabled": _isThursdayEnabled,
+                                "start": _thursdayStartTime,
+                                "end": _thursdayEndTime,
+                              },
+                              "friday": {
+                                "enabled": _isFridayEnabled,
+                                "start": _fridayStartTime,
+                                "end": _fridayEndTime,
+                              },
+                              "saturday": {
+                                "enabled": _isSaturdayEnabled,
+                                "start": _saturdayStartTime,
+                                "end": _saturdayEndTime,
+                              },
+                              "sunday": {
+                                "enabled": _isSundayEnabled,
+                                "start": _sundayStartTime,
+                                "end": _sundayEndTime,
+                              },
+                            },
+                          };
+                          debugPrint('Data: $data');
 
-                    //Validation
-                    // Validate all enabled days
-                    final checks = [
-                      (
-                        "Monday",
-                        _isMondayEnabled,
-                        _mondayStartTime,
-                        _mondayEndTime,
-                      ),
-                      (
-                        "Tuesday",
-                        _isTuesdayEnabled,
-                        _tuesdayStartTime,
-                        _tuesdayEndTime,
-                      ),
-                      (
-                        "Wednesday",
-                        _isWednesdayEnabled,
-                        _wednesdayStartTime,
-                        _wednesdayEndTime,
-                      ),
-                      (
-                        "Thursday",
-                        _isThursdayEnabled,
-                        _thursdayStartTime,
-                        _thursdayEndTime,
-                      ),
-                      (
-                        "Friday",
-                        _isFridayEnabled,
-                        _fridayStartTime,
-                        _fridayEndTime,
-                      ),
-                      (
-                        "Saturday",
-                        _isSaturdayEnabled,
-                        _saturdayStartTime,
-                        _saturdayEndTime,
-                      ),
-                      (
-                        "Sunday",
-                        _isSundayEnabled,
-                        _sundayStartTime,
-                        _sundayEndTime,
-                      ),
-                    ];
-                    for (final day in checks) {
-                      final dayName = day.$1;
-                      final enabled = day.$2;
-                      final start = day.$3;
-                      final end = day.$4;
+                          //Validation
+                          // Validate all enabled days
+                          final checks = [
+                            (
+                              "Monday",
+                              _isMondayEnabled,
+                              _mondayStartTime,
+                              _mondayEndTime,
+                            ),
+                            (
+                              "Tuesday",
+                              _isTuesdayEnabled,
+                              _tuesdayStartTime,
+                              _tuesdayEndTime,
+                            ),
+                            (
+                              "Wednesday",
+                              _isWednesdayEnabled,
+                              _wednesdayStartTime,
+                              _wednesdayEndTime,
+                            ),
+                            (
+                              "Thursday",
+                              _isThursdayEnabled,
+                              _thursdayStartTime,
+                              _thursdayEndTime,
+                            ),
+                            (
+                              "Friday",
+                              _isFridayEnabled,
+                              _fridayStartTime,
+                              _fridayEndTime,
+                            ),
+                            (
+                              "Saturday",
+                              _isSaturdayEnabled,
+                              _saturdayStartTime,
+                              _saturdayEndTime,
+                            ),
+                            (
+                              "Sunday",
+                              _isSundayEnabled,
+                              _sundayStartTime,
+                              _sundayEndTime,
+                            ),
+                          ];
+                          for (final day in checks) {
+                            final dayName = day.$1;
+                            final enabled = day.$2;
+                            final start = day.$3;
+                            final end = day.$4;
 
-                      if (enabled && _isEndBeforeStart(start, end)) {
-                        context.flushBarErrorMessage(
-                          message:
-                              'Invalid hours for $dayName: End time cannot be before start time.',
-                        );
-                        return;
-                      }
-                    }
-                    //END: Validation
-                    setState(() {
-                      isLoading = true;
-                    });
-                    await _vendorProfileService.updateVendorHours(
-                      context,
-                      data,
-                      () {
-                        context.flushBarSuccessMessage(
-                          message: 'Vendor hours updated successfully!',
-                        );
-                      },
-                    );
-                    if (mounted) {
-                      setState(() => isLoading = false);
-                    }
-                  },
+                            if (enabled && _isEndBeforeStart(start, end)) {
+                              context.flushBarErrorMessage(
+                                message:
+                                    'Invalid hours for $dayName: End time cannot be before start time.',
+                              );
+                              return;
+                            }
+                          }
+                          //END: Validation
+                          setState(() {
+                            isLoading = true;
+                          });
+                          await _vendorProfileService.updateVendorHours(
+                            context,
+                            data,
+                            () {
+                              Navigator.pop(context);
+                              context.flushBarSuccessMessage(
+                                message: 'Vendor hours updated successfully!',
+                              );
+                            },
+                          );
+                          // Update initial values after successful save
+                          _initialMondayEnabled = _isMondayEnabled;
+                          _initialMondayStartTime = _mondayStartTime;
+                          _initialMondayEndTime = _mondayEndTime;
+                          _initialTuesdayEnabled = _isTuesdayEnabled;
+                          _initialTuesdayStartTime = _tuesdayStartTime;
+                          _initialTuesdayEndTime = _tuesdayEndTime;
+                          _initialWednesdayEnabled = _isWednesdayEnabled;
+                          _initialWednesdayStartTime = _wednesdayStartTime;
+                          _initialWednesdayEndTime = _wednesdayEndTime;
+                          _initialThursdayEnabled = _isThursdayEnabled;
+                          _initialThursdayStartTime = _thursdayStartTime;
+                          _initialThursdayEndTime = _thursdayEndTime;
+                          _initialFridayEnabled = _isFridayEnabled;
+                          _initialFridayStartTime = _fridayStartTime;
+                          _initialFridayEndTime = _fridayEndTime;
+                          _initialSaturdayEnabled = _isSaturdayEnabled;
+                          _initialSaturdayStartTime = _saturdayStartTime;
+                          _initialSaturdayEndTime = _saturdayEndTime;
+                          _initialSundayEnabled = _isSundayEnabled;
+                          _initialSundayStartTime = _sundayStartTime;
+                          _initialSundayEndTime = _sundayEndTime;
+
+                          if (mounted) {
+                            setState(() => isLoading = false);
+                          }
+                        }
+                      : null,
                 ),
               ),
             ),

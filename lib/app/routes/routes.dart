@@ -16,9 +16,12 @@ import 'package:vendr/view/home/user/menu.dart';
 import 'package:vendr/view/home/user/user_home.dart';
 import 'package:vendr/view/home/user/user_search.dart';
 import 'package:vendr/view/home/vendor/vendor_home.dart';
+import 'package:vendr/view/live_chat/live_chat.dart';
+import 'package:vendr/view/live_chat/vendor/vendor_chat.dart';
 import 'package:vendr/view/notifications/notifications_screen.dart';
 import 'package:vendr/view/profile/languages.dart';
 import 'package:vendr/view/profile/user/edit_profile.dart';
+import 'package:vendr/view/profile/vendor/location_profile.dart';
 import 'package:vendr/view/profile/user/notification_prefernces.dart';
 import 'package:vendr/view/profile/user/user_favorites.dart';
 import 'package:vendr/view/profile/user/user_profile.dart';
@@ -27,7 +30,6 @@ import 'package:vendr/view/profile/vendor/add_edit_product.dart';
 import 'package:vendr/view/profile/vendor/change_email.dart';
 import 'package:vendr/view/profile/vendor/change_phone.dart';
 import 'package:vendr/view/profile/vendor/edit_profile.dart';
-import 'package:vendr/view/profile/vendor/location.dart';
 import 'package:vendr/view/profile/vendor/my_menu.dart';
 import 'package:vendr/view/profile/vendor/vendor_hours.dart';
 import 'package:vendr/view/profile/vendor/vendor_profile.dart';
@@ -57,11 +59,12 @@ class Routes {
     RoutesName.notificationPerefrences: (_) =>
         const NotificationPreferncesScreen(),
     RoutesName.vendorEditProfile: (_) => const VendorEditProfileScreen(),
+    RoutesName.vendorLocation: (_) => const VendrLocationProfile(),
     RoutesName.vendorHours: (_) => const VendorHoursScreen(),
-    RoutesName.vendorLocation: (_) => const VendorLocationScreen(),
     RoutesName.languages: (_) => const LanguagesScreen(),
     RoutesName.vendorChangePhoneNumber: (_) => const ChangePhoneNumberScreen(),
     RoutesName.vendorChangeEmail: (_) => const ChangeEmailScreen(),
+    RoutesName.vendorChatScreen: (_) => const VendorChatScreen(),
   };
 
   static Route<dynamic> generateRoute(RouteSettings settings) {
@@ -96,6 +99,34 @@ class Routes {
           builder: (_) => NewPasswordScreen(
             email: args['email'] as String,
             otp: args['otp'],
+          ),
+        );
+      case RoutesName.liveChat:
+        final args = _getArgs(
+          settings,
+          requiredKeys: [
+            'chatId',
+            'isChatClosed',
+            'initialMessage',
+            'senderName',
+            'receiverId',
+            'vendorName',
+            'vendorImage',
+          ],
+        );
+        return MaterialPageRoute(
+          builder: (_) => LiveChatScreen(
+            chatId: args['chatId'] as String,
+            vendorName: args['vendorName'] as String,
+            vendorImage: args['vendorImage'] as String,
+            isChatClosed: args['isChatClosed'] as bool,
+            initialMessage: args['initialMessage'] as String,
+            senderName: args['senderName'] as String,
+            receiverId: args['receiverId'] as String,
+            hasPermit: args['hasPermit'] as bool? ?? false,
+            userId: args['userId'] as String?,
+            userAverageRating:
+                (args['userAverageRating'] as num?)?.toDouble() ?? 0.0,
           ),
         );
 

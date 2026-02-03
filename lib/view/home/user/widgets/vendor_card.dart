@@ -19,7 +19,9 @@ import 'package:vendr/services/user/user_home_service.dart';
 import 'package:vendr/services/user/user_profile_service.dart';
 import 'package:vendr/services/vendor/vendor_home_service.dart';
 import 'package:vendr/view/home/user/widgets/menu_bottom_sheet.dart';
+import 'package:vendr/view/home/user/widgets/small_badge.dart';
 import 'package:vendr/view/home/vendor/vendor_home.dart';
+import 'package:vendr/app/routes/routes_name.dart';
 
 class VendorCard extends StatefulWidget {
   final bool isExpanded;
@@ -36,6 +38,7 @@ class VendorCard extends StatefulWidget {
   final String? hoursADay;
   final VoidCallback? onGetDirection;
   final Widget Function(BuildContext context)? expandedBuilder;
+  final bool hasPermit;
 
   const VendorCard({
     super.key,
@@ -53,6 +56,7 @@ class VendorCard extends StatefulWidget {
     this.onGetDirection,
     required this.imageUrl,
     required this.vendorId,
+    this.hasPermit = false,
   });
 
   @override
@@ -189,12 +193,16 @@ class _VendorCardState extends State<VendorCard> {
                 left: 0,
                 right: 0,
                 child: Center(
-                  child: SizedBox(
-                    width: 320.w,
-                    child: MyButton(
-                      label: "Get Direction",
-                      onPressed: widget.onGetDirection,
-                    ),
+                  child: Column(
+                    children: [
+                      SizedBox(
+                        width: 310.w,
+                        child: MyButton(
+                          label: "Get Direction",
+                          onPressed: widget.onGetDirection,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),
@@ -247,14 +255,34 @@ class _VendorCardState extends State<VendorCard> {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        CircleAvatar(
-          backgroundColor: context.colors.buttonPrimary,
-          radius: 23.r,
-          child: CircleAvatar(
-            radius: 21.r,
-            backgroundColor: context.colors.primary,
-            backgroundImage: NetworkImage(widget.imageUrl),
-          ),
+        Stack(
+          alignment: Alignment.bottomRight,
+          children: [
+            CircleAvatar(
+              backgroundColor: context.colors.buttonPrimary,
+              radius: 23.r,
+              child: CircleAvatar(
+                radius: 21.r,
+                backgroundColor: context.colors.primary,
+                backgroundImage: widget.imageUrl.isNotEmpty
+                    ? NetworkImage(widget.imageUrl)
+                    : null,
+                child: widget.imageUrl.isEmpty
+                    ? Icon(Icons.person, color: Colors.white, size: 24.w)
+                    : null,
+              ),
+            ),
+            // Small badge for collapsed card - only show if vendor has permit
+            if (widget.hasPermit)
+              Positioned(
+                right: 0,
+                bottom: 0,
+                child: CustomPaint(
+                  size: Size(26 * 0.525, 26 * 0.525),
+                  painter: SmallRPSCustomPainter(radius: 21.0),
+                ),
+              ),
+          ],
         ),
         SizedBox(width: 10.w),
 
@@ -263,6 +291,8 @@ class _VendorCardState extends State<VendorCard> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
                 widget.vendorName,
                 style: context.typography.label.copyWith(
                   fontSize: 18.sp,
@@ -311,14 +341,65 @@ class _VendorCardState extends State<VendorCard> {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        CircleAvatar(
-          backgroundColor: context.colors.buttonPrimary,
-          radius: 42.r,
-          child: CircleAvatar(
-            radius: widget.isExpanded ? 40.r : 21.r,
-            backgroundColor: context.colors.primary,
-            backgroundImage: NetworkImage(widget.imageUrl),
-          ),
+        Stack(
+          alignment: Alignment.bottomRight,
+          children: [
+            CircleAvatar(
+              radius: 42.r,
+              backgroundColor: Colors.blue,
+              child: CircleAvatar(
+                backgroundColor: context.colors.buttonPrimary,
+                radius: widget.isExpanded ? 40.r : 21.r,
+                backgroundImage: widget.imageUrl.isNotEmpty
+                    ? NetworkImage(widget.imageUrl)
+                    : null,
+                child: widget.imageUrl.isEmpty
+                    ? Icon(Icons.person, color: Colors.white, size: 40.w)
+                    : null,
+              ),
+            ),
+            // Custom Octagon Badge - dynamically sized, only show if vendor has permit
+            if (widget.hasPermit)
+              Positioned(
+                right: 0,
+                bottom: 0,
+                child: CustomPaint(
+                  size: Size(
+                    26 * (widget.isExpanded ? 1.0 : 0.525),
+                    26 * (widget.isExpanded ? 1.0 : 0.525),
+                  ),
+                  painter: SmallRPSCustomPainter(
+                    radius: widget.isExpanded ? 40.0 : 21.0,
+                  ),
+                ),
+              ),
+          ],
+        ),
+        SizedBox(width: 20.w),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SizedBox(
+              width: 125.w,
+              child: Padding(
+                padding: EdgeInsets.only(top: 10.h),
+                child: Text(
+                  widget.vendorName,
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 2,
+                  style: context.typography.title.copyWith(
+                    fontSize: 20.sp,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ),
+            SizedBox(height: 4.h),
+            Text(
+              widget.vendorType,
+              style: context.typography.label.copyWith(fontSize: 12.sp),
+            ),
+          ],
         ),
         const Spacer(),
         Padding(
@@ -410,65 +491,72 @@ class _VendorCardState extends State<VendorCard> {
         CardVendorHoursHeading(vendorHours: selectedVendorDetails!.hours),
         SizedBox(height: 16.h),
         if (selectedVendorDetails?.hours != null) ...[
-          Wrap(
-            spacing: 10.w,
-            runSpacing: 10.w,
-            children: [
-              VendorHoursCard(
-                day: 'Monday',
-                startTime: selectedVendorDetails?.hours!.days.monday.start,
-                endTime: selectedVendorDetails?.hours!.days.monday.end,
-                isEnabled:
-                    selectedVendorDetails?.hours!.days.monday.enabled ?? false,
-              ),
-              VendorHoursCard(
-                day: 'Tuesday',
-                // startTime: '09:00 AM',
-                // endTime: '06:00 PM',
-                startTime: selectedVendorDetails?.hours!.days.tuesday.start,
-                endTime: selectedVendorDetails?.hours!.days.tuesday.end,
-                isEnabled:
-                    selectedVendorDetails?.hours!.days.tuesday.enabled ?? false,
-              ),
-              VendorHoursCard(
-                day: 'Wednesday',
-                startTime: selectedVendorDetails?.hours!.days.wednesday.start,
-                endTime: selectedVendorDetails?.hours!.days.wednesday.end,
-                isEnabled:
-                    selectedVendorDetails?.hours!.days.wednesday.enabled ??
-                    false,
-              ),
-              VendorHoursCard(
-                day: 'Thursday',
-                startTime: selectedVendorDetails?.hours!.days.thursday.start,
-                endTime: selectedVendorDetails?.hours!.days.thursday.end,
-                isEnabled:
-                    selectedVendorDetails?.hours!.days.thursday.enabled ??
-                    false,
-              ),
-              VendorHoursCard(
-                day: 'Friday',
-                startTime: selectedVendorDetails?.hours!.days.friday.start,
-                endTime: selectedVendorDetails?.hours!.days.friday.end,
-                isEnabled:
-                    selectedVendorDetails?.hours!.days.friday.enabled ?? false,
-              ),
-              VendorHoursCard(
-                day: 'Saturday',
-                startTime: selectedVendorDetails?.hours!.days.saturday.start,
-                endTime: selectedVendorDetails?.hours!.days.saturday.end,
-                isEnabled:
-                    selectedVendorDetails?.hours!.days.saturday.enabled ??
-                    false,
-              ),
-              VendorHoursCard(
-                day: 'Sunday',
-                startTime: selectedVendorDetails?.hours!.days.sunday.start,
-                endTime: selectedVendorDetails?.hours!.days.sunday.end,
-                isEnabled:
-                    selectedVendorDetails?.hours!.days.sunday.enabled ?? false,
-              ),
-            ],
+          Container(
+            padding: EdgeInsets.all(12.w),
+            decoration: BoxDecoration(
+              color: Colors.white12,
+              borderRadius: BorderRadius.circular(AppRadiuses.mediumRadius),
+            ),
+            child: Column(
+              children: [
+                VendorHoursRow(
+                  day: 'Monday',
+                  startTime: selectedVendorDetails?.hours!.days.monday.start,
+                  endTime: selectedVendorDetails?.hours!.days.monday.end,
+                  isEnabled:
+                      selectedVendorDetails?.hours!.days.monday.enabled ??
+                      false,
+                ),
+                VendorHoursRow(
+                  day: 'Tuesday',
+                  startTime: selectedVendorDetails?.hours!.days.tuesday.start,
+                  endTime: selectedVendorDetails?.hours!.days.tuesday.end,
+                  isEnabled:
+                      selectedVendorDetails?.hours!.days.tuesday.enabled ??
+                      false,
+                ),
+                VendorHoursRow(
+                  day: 'Wednesday',
+                  startTime: selectedVendorDetails?.hours!.days.wednesday.start,
+                  endTime: selectedVendorDetails?.hours!.days.wednesday.end,
+                  isEnabled:
+                      selectedVendorDetails?.hours!.days.wednesday.enabled ??
+                      false,
+                ),
+                VendorHoursRow(
+                  day: 'Thursday',
+                  startTime: selectedVendorDetails?.hours!.days.thursday.start,
+                  endTime: selectedVendorDetails?.hours!.days.thursday.end,
+                  isEnabled:
+                      selectedVendorDetails?.hours!.days.thursday.enabled ??
+                      false,
+                ),
+                VendorHoursRow(
+                  day: 'Friday',
+                  startTime: selectedVendorDetails?.hours!.days.friday.start,
+                  endTime: selectedVendorDetails?.hours!.days.friday.end,
+                  isEnabled:
+                      selectedVendorDetails?.hours!.days.friday.enabled ??
+                      false,
+                ),
+                VendorHoursRow(
+                  day: 'Saturday',
+                  startTime: selectedVendorDetails?.hours!.days.saturday.start,
+                  endTime: selectedVendorDetails?.hours!.days.saturday.end,
+                  isEnabled:
+                      selectedVendorDetails?.hours!.days.saturday.enabled ??
+                      false,
+                ),
+                VendorHoursRow(
+                  day: 'Sunday',
+                  startTime: selectedVendorDetails?.hours!.days.sunday.start,
+                  endTime: selectedVendorDetails?.hours!.days.sunday.end,
+                  isEnabled:
+                      selectedVendorDetails?.hours!.days.sunday.enabled ??
+                      false,
+                ),
+              ],
+            ),
           ),
           SizedBox(height: 14.h),
         ],
@@ -488,29 +576,34 @@ class _VendorCardState extends State<VendorCard> {
       children: [
         Row(
           children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SizedBox(
-                  width: 125.w,
-                  child: Text(
-                    widget.vendorName,
-                    overflow: TextOverflow.ellipsis,
-                    maxLines: 3,
-                    style: context.typography.title.copyWith(
-                      fontSize: 20.sp,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-                SizedBox(height: 4.h),
-                Text(
-                  widget.vendorType,
-                  style: context.typography.label.copyWith(fontSize: 12.sp),
-                ),
-              ],
-            ),
             const Spacer(),
+            _actionButton(
+              color: Colors.blue,
+              icon: Icons.chat_bubble_outline,
+              label: 'Chat',
+              onPressed: () {
+                final userId = _sessionController.user?.id ?? '';
+                final vendorId = widget.vendorId;
+                // Generate a unique chat ID based on user and vendor IDs
+                final chatId = '${userId}_$vendorId';
+
+                Navigator.pushNamed(
+                  context,
+                  RoutesName.liveChat,
+                  arguments: {
+                    'chatId': chatId,
+                    'vendorName': widget.vendorName,
+                    'vendorImage': widget.imageUrl,
+                    'isChatClosed': false,
+                    'initialMessage': 'Hello! I would like to chat with you.',
+                    'senderName': _sessionController.user?.name ?? 'User',
+                    'receiverId': vendorId,
+                    'hasPermit': widget.hasPermit,
+                  },
+                );
+              },
+            ),
+            SizedBox(width: 12.w),
             _actionButton(
               icon: Icons.call_outlined,
               label: 'Call',
@@ -567,6 +660,7 @@ class _VendorCardState extends State<VendorCard> {
 
   Widget _actionButton({
     IconData? icon,
+    Color? color,
     String? label,
     VoidCallback? onPressed,
   }) {
@@ -575,7 +669,7 @@ class _VendorCardState extends State<VendorCard> {
       child: Container(
         padding: EdgeInsets.symmetric(vertical: 8.w, horizontal: 14.w),
         decoration: BoxDecoration(
-          color: const Color(0xFF2E323D),
+          color: color ?? const Color(0xFF2E323D),
           borderRadius: BorderRadius.circular(AppRadiuses.mediumRadius),
         ),
         child: Row(
@@ -627,7 +721,7 @@ class _VendorCardState extends State<VendorCard> {
               ),
               Text(
                 widget.vendorAddress,
-                maxLines: 3,
+                maxLines: 2,
                 overflow: TextOverflow.ellipsis,
                 style: context.typography.bodySmall.copyWith(fontSize: 12.sp),
               ),
@@ -737,7 +831,7 @@ Widget _infoItem(
             ),
             Text(
               subtitle,
-              maxLines: 1,
+              maxLines: 2,
               overflow: TextOverflow.ellipsis,
               style: context.typography.label.copyWith(fontSize: 10.sp),
             ),
@@ -819,7 +913,7 @@ class CardVendorHoursHeading extends StatelessWidget {
             isUserSide: true,
             vendorHours: vendorHours,
           ),
-          style: context.typography.body.copyWith(fontSize: 14.sp),
+          style: TextStyle(fontSize: 14.sp),
         ),
       ],
     );

@@ -21,6 +21,10 @@ class UserProfileService {
     Navigator.pushNamed(context, RoutesName.userFavorites);
   }
 
+  static void gotoUserLocationProfile(BuildContext context) {
+    Navigator.pushNamed(context, RoutesName.userlocationProfile);
+  }
+
   static void gotoNotificationPreferences(BuildContext context) {
     Navigator.pushNamed(context, RoutesName.notificationPerefrences);
   }

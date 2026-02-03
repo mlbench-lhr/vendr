@@ -20,6 +20,10 @@ class VendorHomeService {
     );
   }
 
+  static void gotoChat(BuildContext context) {
+    Navigator.pushNamed(context, RoutesName.vendorChatScreen);
+  }
+
   // Future<Map<String, dynamic>> getVendorReviews(
   //   BuildContext context, {
   //   required String productId,
@@ -47,6 +51,25 @@ class VendorHomeService {
         ErrorHandler.handle(context, e, serviceName: tag);
       }
       return null;
+    }
+  }
+
+  /// Submit a review for a user (Vendor action after meetup)
+  Future<bool> submitUserReview({
+    required BuildContext context,
+    required String message,
+    required String userId,
+    required int rating,
+  }) async {
+    try {
+      final data = {'message': message, 'rating': rating, 'userId': userId};
+      await _vendorAuthRepo.addVendorReview(data);
+      return true;
+    } catch (e) {
+      if (context.mounted) {
+        ErrorHandler.handle(context, e, serviceName: tag);
+      }
+      return false;
     }
   }
 

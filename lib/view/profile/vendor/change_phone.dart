@@ -21,6 +21,7 @@ class _ChangePhoneNumberScreenState extends State<ChangePhoneNumberScreen> {
   final _pinputController = TextEditingController();
   final _phoneController = TextEditingController();
   bool isSubmitted = false;
+  bool isLoading = false;
   @override
   Widget build(BuildContext context) {
     return MyScaffold(
@@ -84,18 +85,21 @@ class _ChangePhoneNumberScreenState extends State<ChangePhoneNumberScreen> {
             const Spacer(),
             MyButton(
               label: isSubmitted ? 'Update' : 'Submit',
-              onPressed: () {
-                if (!isSubmitted) {
-                  setState(() {
-                    isSubmitted = true;
-                  });
-                  _phoneController.clear();
-                } else {
-                  context.flushBarSuccessMessage(
-                    message: 'Phone number updated successfully!',
-                  );
-                }
-              },
+              onPressed: isLoading
+                  ? null
+                  : () {
+                      if (isLoading) return;
+                      if (!isSubmitted) {
+                        setState(() {
+                          isSubmitted = true;
+                        });
+                        _phoneController.clear();
+                      } else {
+                        context.flushBarSuccessMessage(
+                          message: 'Phone number updated successfully!',
+                        );
+                      }
+                    },
             ),
           ],
         ),

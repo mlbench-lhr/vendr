@@ -185,7 +185,8 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                     isLoading: isLoading,
                     onPressed:
                         pinController.text.length < 4 ||
-                            emailController.text.trim().isEmpty
+                            emailController.text.trim().isEmpty ||
+                            isLoading
                         ? null
                         : () async {
                             if (!formKey.currentState!.validate()) return;

@@ -1,20 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:vendr/model/vendor/vendor_model.dart';
 
 class ServingCounter extends StatefulWidget {
   const ServingCounter({
     super.key,
     required this.onServingChanged,
-    required this.servingsLength,
+    required this.servings,
   });
   final ValueChanged<int> onServingChanged;
-  final int servingsLength;
+  final List<ServingModel> servings;
   @override
   State<ServingCounter> createState() => _ServingCounterState();
 }
 
 class _ServingCounterState extends State<ServingCounter> {
-  final List<int> units = [1, 2, 5, 10];
-
   late FixedExtentScrollController _controller;
   int selectedIndex = 0;
 
@@ -28,7 +27,7 @@ class _ServingCounterState extends State<ServingCounter> {
   Color decrementSymbolColor = Colors.white24;
 
   void increment() {
-    if (selectedIndex < widget.servingsLength - 1) {
+    if (selectedIndex < widget.servings.length - 1) {
       selectedIndex++;
       _controller.animateToItem(
         selectedIndex,
@@ -39,7 +38,7 @@ class _ServingCounterState extends State<ServingCounter> {
         widget.onServingChanged(selectedIndex);
 
         //change color to disabled
-        if (selectedIndex == widget.servingsLength - 1) {
+        if (selectedIndex == widget.servings.length - 1) {
           incrementSymbolColor = Colors.white24;
         }
         decrementSymbolColor = Colors.white70; //restore increment symbol
@@ -69,7 +68,7 @@ class _ServingCounterState extends State<ServingCounter> {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: 120,
+      width: 150,
       child: Column(
         mainAxisSize: MainAxisSize.min, // ⭐ IMPORTANT
         children: [
@@ -92,18 +91,26 @@ class _ServingCounterState extends State<ServingCounter> {
               itemExtent: 40, // reduced
               onSelectedItemChanged: (index) {
                 selectedIndex = index;
+                widget.onServingChanged(index);
                 setState(() {});
               },
               perspective: 0.003,
               diameterRatio: 1.3,
               childDelegate: ListWheelChildBuilderDelegate(
-                childCount: widget.servingsLength,
+                childCount: widget.servings.length,
                 builder: (context, index) {
                   final isSelected = index == selectedIndex;
+                  final serving = widget.servings[index];
+                  final displayText = serving.servingQuantity.isNotEmpty
+                      ? serving.servingQuantity
+                      : 'Serving ${index + 1}';
 
-                  return Center(
+                  return Align(
+                    alignment: Alignment.centerLeft,
                     child: Text(
-                      "${units[index]}",
+                      displayText,
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 1,
                       style: TextStyle(
                         fontSize: isSelected ? 26 : 20,
                         color: isSelected

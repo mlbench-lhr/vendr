@@ -21,12 +21,19 @@ class $AssetsIconsGen {
   /// File path: assets/icons/cart_logo.svg
   SvgGenImage get cartLogo => const SvgGenImage('assets/icons/cart_logo.svg');
 
+  /// File path: assets/icons/chat.svg
+  SvgGenImage get chat => const SvgGenImage('assets/icons/chat.svg');
+
   /// File path: assets/icons/google_icon.svg
   SvgGenImage get googleIcon =>
       const SvgGenImage('assets/icons/google_icon.svg');
 
   /// File path: assets/icons/profile.svg
   SvgGenImage get profile => const SvgGenImage('assets/icons/profile.svg');
+
+  /// File path: assets/icons/send_message.svg
+  SvgGenImage get sendMessage =>
+      const SvgGenImage('assets/icons/send_message.svg');
 
   /// File path: assets/icons/shop.svg
   SvgGenImage get shop => const SvgGenImage('assets/icons/shop.svg');
@@ -47,8 +54,10 @@ class $AssetsIconsGen {
   List<dynamic> get values => [
     appleLogo,
     cartLogo,
+    chat,
     googleIcon,
     profile,
+    sendMessage,
     shop,
     userPlaceholder,
     vendrTextLogo,
@@ -58,6 +67,9 @@ class $AssetsIconsGen {
 
 class $AssetsImagesGen {
   const $AssetsImagesGen();
+
+  /// File path: assets/images/bg.png
+  AssetGenImage get bg => const AssetGenImage('assets/images/bg.png');
 
   /// File path: assets/images/bike.png
   AssetGenImage get bike => const AssetGenImage('assets/images/bike.png');
@@ -83,6 +95,7 @@ class $AssetsImagesGen {
 
   /// List of all assets
   List<AssetGenImage> get values => [
+    bg,
     bike,
     blocksPattern,
     disconnected,

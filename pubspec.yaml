@@ -30,6 +30,7 @@ environment:
 dependencies:
   another_flushbar: 1.12.31-dev.1
   cached_network_image: 3.4.1
+  cloud_firestore: ^6.1.2
   device_info_plus: ^12.3.0
   envied: 1.1.1
   file_picker: 10.2.0

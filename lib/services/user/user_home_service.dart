@@ -47,7 +47,7 @@ class UserHomeService {
   Future<List<VendorModel>> getNearbyVendors({
     required BuildContext context,
     required LatLng? location,
-    double maxDistance = 5, // kilometers
+    required double maxDistance, // kilometers
   }) async {
     if (location == null) {
       debugPrint('❌ User location is null');

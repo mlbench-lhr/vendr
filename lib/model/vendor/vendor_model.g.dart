@@ -31,6 +31,8 @@ VendorModel _$VendorModelFromJson(Map<String, dynamic> json) => VendorModel(
   lat: (json['lat'] as num?)?.toDouble(),
   lng: (json['lng'] as num?)?.toDouble(),
   distanceInKm: (json['distance_in_km'] as num?)?.toDouble(),
+  hasPermit: json['has_permit'] as bool?,
+  withPermit: json['with_permit'] as bool?,
 );
 
 Map<String, dynamic> _$VendorModelToJson(VendorModel instance) =>
@@ -53,6 +55,8 @@ Map<String, dynamic> _$VendorModelToJson(VendorModel instance) =>
       'menus': instance.menu,
       'reviews': instance.reviews,
       'distance_in_km': instance.distanceInKm,
+      'has_permit': instance.hasPermit,
+      'with_permit': instance.withPermit,
     };
 
 MenuItemModel _$MenuItemModelFromJson(Map<String, dynamic> json) =>

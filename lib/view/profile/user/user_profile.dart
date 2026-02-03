@@ -94,6 +94,7 @@ class _UserProfileState extends State<UserProfileScreen> {
                   UserProfileService.gotoUserEditProfile(context);
                 },
               ),
+
               // LocationMenuTile(
               //   title: 'Location',
               //   icon: Icons.my_location_outlined,
@@ -105,6 +106,13 @@ class _UserProfileState extends State<UserProfileScreen> {
                   Geolocator.openAppSettings();
                 },
               ),
+              // ProfileMenuTile(
+              //   title: 'Location',
+              //   icon: Icons.location_on_outlined,
+              //   onTap: () {
+              //     UserProfileService.gotoUserLocationProfile(context);
+              //   },
+              // ),
               ProfileMenuTile(
                 title: 'Favorite Venders',
                 icon: Icons.star_border_outlined,

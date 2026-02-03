@@ -93,25 +93,28 @@ class _NotificationPreferncesScreenState
             MyButton(
               isLoading: isLoading,
               label: 'Save',
-              onPressed: () async {
-                if (mounted) {
-                  setState(() => isLoading = true);
-                }
-                await _userProfileService.updateUserProfile(
-                  context,
-                  newVendorAlert: newVendorAlert,
-                  favoriteVendorAlert: favoriteVendorAlert,
-                  distanceBasedAlert: distanceBasedAlert,
-                  onSuccess: () {
-                    context.flushBarSuccessMessage(
-                      message: 'Settings updated successfully!',
-                    );
-                  },
-                );
-                if (mounted) {
-                  setState(() => isLoading = false);
-                }
-              },
+              onPressed: isLoading
+                  ? null
+                  : () async {
+                      if (mounted) {
+                        setState(() => isLoading = true);
+                      }
+                      await _userProfileService.updateUserProfile(
+                        context,
+                        newVendorAlert: newVendorAlert,
+                        favoriteVendorAlert: favoriteVendorAlert,
+                        distanceBasedAlert: distanceBasedAlert,
+                        onSuccess: () {
+                          Navigator.pop(context);
+                          context.flushBarSuccessMessage(
+                            message: 'Settings updated successfully!',
+                          );
+                        },
+                      );
+                      if (mounted) {
+                        setState(() => isLoading = false);
+                      }
+                    },
             ),
           ],
         ),

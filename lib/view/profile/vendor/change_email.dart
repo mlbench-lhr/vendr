@@ -19,6 +19,7 @@ class _ChangeEmailScreenState extends State<ChangeEmailScreen> {
   final _pinputController = TextEditingController();
   final _emailController = TextEditingController();
   bool isSubmitted = false;
+  bool isLoading = false;
   @override
   Widget build(BuildContext context) {
     return MyScaffold(
@@ -78,6 +79,7 @@ class _ChangeEmailScreenState extends State<ChangeEmailScreen> {
             MyButton(
               label: isSubmitted ? 'Update' : 'Submit',
               onPressed: () {
+                if (isLoading) return;
                 if (!isSubmitted) {
                   setState(() {
                     isSubmitted = true;

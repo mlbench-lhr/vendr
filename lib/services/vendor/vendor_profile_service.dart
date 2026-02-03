@@ -62,6 +62,8 @@ class VendorProfileService {
     String? shopAddress,
     double? lat,
     double? lng,
+    bool? hasPermit,
+    bool? withPermit,
     VoidCallback? onSuccess,
   }) async {
     final VendorModel? vendor = _sessionController.vendor;
@@ -76,17 +78,36 @@ class VendorProfileService {
         'shop_address': shopAddress,
       if (lat != null && vendor?.lat != lat) 'lat': lat,
       if (lng != null && vendor?.lng != lng) 'lng': lng,
+      if (hasPermit != null && vendor?.hasPermit != hasPermit)
+        'has_permit': hasPermit,
+      if (withPermit != null && vendor?.withPermit != withPermit)
+        'with_permit': withPermit,
     };
     try {
-      await _vendorAuthRepo.updateVendorProfile(data);
+      final response = await _vendorAuthRepo.updateVendorProfile(data);
 
+      // Get the has_permit and with_permit from update response
+      final updateVendorData = response['vendor'] as Map<String, dynamic>?;
+      final updatedHasPermit = updateVendorData?['has_permit'] as bool?;
+      final updatedWithPermit = updateVendorData?['with_permit'] as bool?;
+
+      // Fetch full profile to get hours, menus, reviews etc.
+      // We need to get the raw JSON response to merge with permit values
       if (context.mounted) {
-        await AuthService().fetchProfile(context);
+        final profileResponse = await _vendorAuthRepo.getCurrentVendorProfile();
+        final profileVendorJson =
+            profileResponse['vendor'] as Map<String, dynamic>;
+
+        // Merge permit values from update response since GET /profile doesn't return them
+        profileVendorJson['has_permit'] = updatedHasPermit;
+        profileVendorJson['with_permit'] = updatedWithPermit;
+
+        await _sessionController.saveVendor(
+          VendorModel.fromJson(profileVendorJson),
+        );
+        debugPrint('[$tag] ✅ Profile updated with permit values');
       }
 
-      // await _sessionController.saveVendor(
-      //   VendorModel.fromJson(response['vendor'] as Map<String, dynamic>),
-      // );
       onSuccess?.call();
     } catch (e) {
       if (context.mounted) ErrorHandler.handle(context, e, serviceName: tag);

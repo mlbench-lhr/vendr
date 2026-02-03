@@ -162,6 +162,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
           label: 'Submit',
           isLoading: isLoading,
           onPressed: () async {
+            if (isLoading) return;
             if (!formKey.currentState!.validate()) return;
             if (mounted) {
               setState(() => isLoading = true);
@@ -170,6 +171,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
               context: context,
               oldPassword: oldPasswordController.text,
               newPassword: newPasswordController.text,
+              onSuccess: () => Navigator.pop(context),
             );
             if (mounted) {
               setState(() => isLoading = false);

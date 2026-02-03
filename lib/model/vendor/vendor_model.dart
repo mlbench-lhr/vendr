@@ -23,6 +23,8 @@ class VendorModel {
     this.lat,
     this.lng,
     this.distanceInKm,
+    this.hasPermit,
+    this.withPermit,
   });
 
   factory VendorModel.fromJson(Map<String, dynamic> json) =>
@@ -70,6 +72,12 @@ class VendorModel {
 
   @JsonKey(name: 'distance_in_km')
   final double? distanceInKm;
+
+  @JsonKey(name: 'has_permit')
+  final bool? hasPermit;
+
+  @JsonKey(name: 'with_permit')
+  final bool? withPermit;
 }
 
 //

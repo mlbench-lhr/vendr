@@ -12,9 +12,9 @@ import 'package:vendr/services/common/location_service.dart';
 import 'package:vendr/services/common/push_notifications_service.dart';
 import 'package:vendr/services/common/reviews_service.dart';
 import 'package:vendr/services/common/session_manager/session_controller.dart';
-import 'package:vendr/services/user/user_home_service.dart';
 import 'package:vendr/services/vendor/vendor_home_service.dart';
 import 'package:vendr/services/vendor/vendor_profile_service.dart';
+import 'package:vendr/view/home/vendor/widgets/custom_badge.dart';
 
 class VendorHomeScreen extends StatefulWidget {
   const VendorHomeScreen({super.key});
@@ -26,37 +26,68 @@ class VendorHomeScreen extends StatefulWidget {
 class _VendorHomeScreenState extends State<VendorHomeScreen> {
   List<MenuItemModel> menuItems = [];
   List<SingleReviewModel> reviews = [];
+  bool _hasPermit = false;
 
   final sessionController = SessionController();
   final _locationService = VendorLocationService();
 
+  void _loadDataFromSession() {
+    final vendor = sessionController.vendor;
+    if (vendor != null) {
+      setState(() {
+        _hasPermit = vendor.hasPermit ?? false;
+        debugPrint('✅ _loadDataFromSession - Vendor: ${vendor.name}');
+        debugPrint('✅ _loadDataFromSession - hasPermit: $_hasPermit');
+        debugPrint(
+          '✅ _loadDataFromSession - Raw permit value: ${vendor.hasPermit}',
+        );
+      });
+    } else {
+      debugPrint('⚠️ _loadDataFromSession - Vendor is null!');
+    }
+  }
+
   @override
   void initState() {
     super.initState();
+    _loadDataFromSession();
     sessionController.addListener(_onSessionChanged);
     PushNotificationsService().initFCM(context: context);
     _autoStartLocationSharing();
   }
 
   void _onSessionChanged() {
-    if (mounted) setState(() {});
+    if (mounted) {
+      final vendor = sessionController.vendor;
+      if (vendor != null) {
+        final newPermitValue = vendor.hasPermit ?? false;
+        debugPrint('🔄 Session changed - Previous hasPermit: $_hasPermit');
+        debugPrint('🔄 Session changed - New hasPermit: $newPermitValue');
+        debugPrint(
+          '🔄 Session changed - Raw permit value: ${vendor.hasPermit}',
+        );
+
+        setState(() {
+          _hasPermit = newPermitValue;
+        });
+      } else {
+        debugPrint('⚠️ _onSessionChanged - Vendor is null!');
+      }
+    }
   }
 
   @override
   void dispose() {
     sessionController.removeListener(_onSessionChanged);
     VendorLocationService().stopSharing();
-
     super.dispose();
   }
 
   Future<void> _autoStartLocationSharing() async {
-    // Small delay to ensure everything is initialized
     await Future.delayed(const Duration(milliseconds: 500));
 
     if (!mounted) return;
 
-    // Only auto-start if not already sharing
     if (!_locationService.isSharing) {
       try {
         await _locationService.startSharing();
@@ -64,7 +95,6 @@ class _VendorHomeScreenState extends State<VendorHomeScreen> {
         if (mounted) setState(() {});
       } catch (e) {
         debugPrint('⚠️ Auto-start failed: $e');
-        // Don't show error - user can manually toggle if needed
       }
     }
   }
@@ -73,13 +103,25 @@ class _VendorHomeScreenState extends State<VendorHomeScreen> {
   Widget build(BuildContext context) {
     final vendor = sessionController.vendor;
 
-    // Safety check
     if (vendor == null) {
       return MyScaffold(
         body: Center(
           child: Text('Loading...', style: TextStyle(color: Colors.white)),
         ),
       );
+    }
+
+    // Update local state from session controller on every build
+    // This ensures UI is always in sync
+    if (_hasPermit != (vendor.hasPermit ?? false)) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          setState(() {
+            _hasPermit = vendor.hasPermit ?? false;
+            debugPrint('🔄 Build sync - Updated hasPermit to: $_hasPermit');
+          });
+        }
+      });
     }
 
     if (vendor.menu != null) {
@@ -105,35 +147,43 @@ class _VendorHomeScreenState extends State<VendorHomeScreen> {
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      VendorAvatar(vendorProfileImage: vendor.profileImage),
+                      VendorAvatar(
+                        vendorProfileImage: vendor.profileImage,
+                        // Use value directly from vendor, not from state
+                        hasPermit: vendor.hasPermit ?? false,
+                      ),
                       12.width,
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          8.height,
-                          Text(
-                            vendor.name,
-                            style: context.typography.title.copyWith(
-                              fontWeight: FontWeight.w700,
-                              fontSize: 20.sp,
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            8.height,
+                            Text(
+                              vendor.name,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: context.typography.title.copyWith(
+                                fontWeight: FontWeight.w700,
+                                fontSize: 20.sp,
+                              ),
                             ),
-                          ),
-                          SizedBox(height: 4.h),
-                          Text(
-                            vendor.vendorType,
-                            style: context.typography.body.copyWith(
-                              fontSize: 14.sp,
+                            SizedBox(height: 4.h),
+                            Text(
+                              vendor.vendorType,
+                              style: context.typography.body.copyWith(
+                                fontSize: 14.sp,
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                       const Spacer(),
                       GestureDetector(
                         onTap: () {
-                          UserHomeService.gotoNotifications(context);
+                          VendorHomeService.gotoChat(context);
                         },
-                        child: NotificationsBtn(),
+                        child: ChatButton(),
                       ),
                     ],
                   ),
@@ -153,53 +203,60 @@ class _VendorHomeScreenState extends State<VendorHomeScreen> {
                   VendorHoursHeading(),
                   SizedBox(height: 16.h),
                   if (vendor.hours != null) ...[
-                    Wrap(
-                      spacing: 10.w,
-                      runSpacing: 10.w,
-                      children: [
-                        VendorHoursCard(
-                          day: 'Monday',
-                          startTime: vendor.hours!.days.monday.start,
-                          endTime: vendor.hours!.days.monday.end,
-                          isEnabled: vendor.hours!.days.monday.enabled,
+                    Container(
+                      padding: EdgeInsets.all(12.w),
+                      decoration: BoxDecoration(
+                        color: Colors.white12,
+                        borderRadius: BorderRadius.circular(
+                          AppRadiuses.mediumRadius,
                         ),
-                        VendorHoursCard(
-                          day: 'Tuesday',
-                          startTime: vendor.hours!.days.tuesday.start,
-                          endTime: vendor.hours!.days.tuesday.end,
-                          isEnabled: vendor.hours!.days.tuesday.enabled,
-                        ),
-                        VendorHoursCard(
-                          day: 'Wednesday',
-                          startTime: vendor.hours!.days.wednesday.start,
-                          endTime: vendor.hours!.days.wednesday.end,
-                          isEnabled: vendor.hours!.days.wednesday.enabled,
-                        ),
-                        VendorHoursCard(
-                          day: 'Thursday',
-                          startTime: vendor.hours!.days.thursday.start,
-                          endTime: vendor.hours!.days.thursday.end,
-                          isEnabled: vendor.hours!.days.thursday.enabled,
-                        ),
-                        VendorHoursCard(
-                          day: 'Friday',
-                          startTime: vendor.hours!.days.friday.start,
-                          endTime: vendor.hours!.days.friday.end,
-                          isEnabled: vendor.hours!.days.friday.enabled,
-                        ),
-                        VendorHoursCard(
-                          day: 'Saturday',
-                          startTime: vendor.hours!.days.saturday.start,
-                          endTime: vendor.hours!.days.saturday.end,
-                          isEnabled: vendor.hours!.days.saturday.enabled,
-                        ),
-                        VendorHoursCard(
-                          day: 'Sunday',
-                          startTime: vendor.hours!.days.sunday.start,
-                          endTime: vendor.hours!.days.sunday.end,
-                          isEnabled: vendor.hours!.days.sunday.enabled,
-                        ),
-                      ],
+                      ),
+                      child: Column(
+                        children: [
+                          VendorHoursRow(
+                            day: 'Monday',
+                            startTime: vendor.hours!.days.monday.start,
+                            endTime: vendor.hours!.days.monday.end,
+                            isEnabled: vendor.hours!.days.monday.enabled,
+                          ),
+                          VendorHoursRow(
+                            day: 'Tuesday',
+                            startTime: vendor.hours!.days.tuesday.start,
+                            endTime: vendor.hours!.days.tuesday.end,
+                            isEnabled: vendor.hours!.days.tuesday.enabled,
+                          ),
+                          VendorHoursRow(
+                            day: 'Wednesday',
+                            startTime: vendor.hours!.days.wednesday.start,
+                            endTime: vendor.hours!.days.wednesday.end,
+                            isEnabled: vendor.hours!.days.wednesday.enabled,
+                          ),
+                          VendorHoursRow(
+                            day: 'Thursday',
+                            startTime: vendor.hours!.days.thursday.start,
+                            endTime: vendor.hours!.days.thursday.end,
+                            isEnabled: vendor.hours!.days.thursday.enabled,
+                          ),
+                          VendorHoursRow(
+                            day: 'Friday',
+                            startTime: vendor.hours!.days.friday.start,
+                            endTime: vendor.hours!.days.friday.end,
+                            isEnabled: vendor.hours!.days.friday.enabled,
+                          ),
+                          VendorHoursRow(
+                            day: 'Saturday',
+                            startTime: vendor.hours!.days.saturday.start,
+                            endTime: vendor.hours!.days.saturday.end,
+                            isEnabled: vendor.hours!.days.saturday.enabled,
+                          ),
+                          VendorHoursRow(
+                            day: 'Sunday',
+                            startTime: vendor.hours!.days.sunday.start,
+                            endTime: vendor.hours!.days.sunday.end,
+                            isEnabled: vendor.hours!.days.sunday.enabled,
+                          ),
+                        ],
+                      ),
                     ),
                   ] else
                     Padding(
@@ -300,7 +357,7 @@ Widget _buildReviewsList(List<SingleReviewModel> reviews) {
         );
 }
 
-class VendorHoursCard extends StatelessWidget {
+class VendorHoursRow extends StatelessWidget {
   String formatTo12Hour(String time) {
     final parts = time.split(':');
     int hour = int.parse(parts[0]);
@@ -312,7 +369,7 @@ class VendorHoursCard extends StatelessWidget {
     return '${hour.toString().padLeft(2, '0')}:$minute $period';
   }
 
-  const VendorHoursCard({
+  const VendorHoursRow({
     super.key,
     required this.day,
     this.startTime,
@@ -327,71 +384,44 @@ class VendorHoursCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.symmetric(vertical: 12.w, horizontal: 16.w),
-      decoration: BoxDecoration(
-        color: isEnabled ? Colors.white12 : Colors.red,
-        borderRadius: BorderRadius.circular(AppRadiuses.mediumRadius),
-      ),
-      height: 92.h,
-      width: 104.w,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        mainAxisAlignment: MainAxisAlignment.center,
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 8.h),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(
             day,
             style: context.typography.body.copyWith(
               fontWeight: FontWeight.w600,
               fontSize: 12.sp,
+              color: isEnabled ? null : Colors.red,
             ),
           ),
-          SizedBox(height: 6.h),
           isEnabled
               ? Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        CircleAvatar(
-                          radius: 4.r,
-                          backgroundColor: Colors.green,
-                        ),
-                        Container(
-                          color: Colors.white60,
-                          width: 2.5.w,
-                          height: 24.h,
-                        ),
-                        CircleAvatar(radius: 4.r, backgroundColor: Colors.red),
-                      ],
+                    Text(
+                      formatTo12Hour(startTime ?? ''),
+                      style: TextStyle(fontSize: 12.sp),
                     ),
-                    SizedBox(width: 4.w),
-                    Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          formatTo12Hour(startTime ?? ''),
-                          style: context.typography.bodySmall.copyWith(
-                            fontSize: 12.sp,
-                          ),
-                        ),
-                        SizedBox(height: 8.h),
-                        Text(
-                          formatTo12Hour(endTime ?? ''),
-                          style: context.typography.bodySmall.copyWith(
-                            fontSize: 12.sp,
-                          ),
-                        ),
-                      ],
+                    SizedBox(width: 8.w),
+                    CircleAvatar(radius: 4.r, backgroundColor: Colors.green),
+                    SizedBox(width: 20.w),
+                    Text(
+                      formatTo12Hour(endTime ?? ''),
+                      style: TextStyle(fontSize: 12.sp),
                     ),
+                    SizedBox(width: 8.w),
+                    CircleAvatar(radius: 4.r, backgroundColor: Colors.red),
                   ],
                 )
               : Text(
-                  'Off',
+                  'Closed',
                   style: context.typography.body.copyWith(
                     fontSize: 14.sp,
                     fontWeight: FontWeight.w600,
+                    color: Colors.red,
                   ),
                 ),
         ],
@@ -547,42 +577,77 @@ class LocationSection extends StatelessWidget {
 }
 
 class VendorAvatar extends StatelessWidget {
-  const VendorAvatar({super.key, this.vendorProfileImage});
+  const VendorAvatar({
+    super.key,
+    this.vendorProfileImage,
+    this.hasPermit = false,
+  });
   final String? vendorProfileImage;
+  final bool hasPermit;
 
   @override
   Widget build(BuildContext context) {
+    // Debug print to track when widget rebuilds
+    debugPrint('🎨 VendorAvatar rebuild - hasPermit: $hasPermit');
+
     return GestureDetector(
       onTap: () {
         VendorHomeService.gotoVendorProfile(context);
       },
-      child: CircleAvatar(
-        radius: 40.r,
-        backgroundColor: Colors.white70,
-        child: CircleAvatar(
-          backgroundColor: context.colors.buttonPrimary,
-          radius: 38.r,
-          backgroundImage: vendorProfileImage != null
-              ? NetworkImage(vendorProfileImage!)
-              : null,
-          child: vendorProfileImage != null
-              ? null
-              : Icon(Icons.person, color: Colors.white, size: 40.w),
-        ),
+      child: Stack(
+        alignment: Alignment.bottomRight,
+        children: [
+          CircleAvatar(
+            radius: 40.r,
+            backgroundColor: Colors.blue,
+            child: CircleAvatar(
+              backgroundColor: context.colors.buttonPrimary,
+              radius: 36.r,
+              backgroundImage: vendorProfileImage != null
+                  ? NetworkImage(vendorProfileImage!)
+                  : null,
+              child: vendorProfileImage != null
+                  ? null
+                  : Icon(Icons.person, color: Colors.white, size: 40.w),
+            ),
+          ),
+          // Badge visibility debug
+          if (hasPermit)
+            Positioned(
+              right: 0,
+              bottom: 0,
+              child: Builder(
+                builder: (context) {
+                  debugPrint('✨ Rendering badge - hasPermit is TRUE');
+                  return CustomPaint(
+                    size: const Size(26, 26),
+                    painter: RPSCustomPainter(),
+                  );
+                },
+              ),
+            )
+          else
+            Builder(
+              builder: (context) {
+                debugPrint('⚠️ Badge hidden - hasPermit is FALSE');
+                return const SizedBox.shrink();
+              },
+            ),
+        ],
       ),
     );
   }
 }
 
-class NotificationsBtn extends StatelessWidget {
-  const NotificationsBtn({super.key});
+class ChatButton extends StatelessWidget {
+  const ChatButton({super.key});
 
   @override
   Widget build(BuildContext context) {
     return CircleAvatar(
       radius: 20.r,
-      backgroundColor: Colors.white24,
-      child: Icon(Icons.notifications_outlined, color: Colors.white),
+      backgroundColor: Colors.blue,
+      child: Icon(Icons.chat_bubble_outline, color: Colors.white),
     );
   }
 }

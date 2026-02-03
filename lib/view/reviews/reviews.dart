@@ -191,28 +191,29 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
                 ],
               ),
       ),
-      bottomNavigationBar: widget.isVendor
-          ? const SizedBox.shrink()
-          : Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 24.h),
-              child: MyButton(
-                label: 'Write Review',
-                onPressed: () async {
-                  await MyBottomSheet.show(
-                    context,
-                    isDismissible: true,
-                    isScrollControlled: true,
-                    enableDrag: true,
-                    backgroundColor: context.colors.primary,
-                    child: AddReviewBottomSheet(
-                      vendorId: widget.vendorId!,
-                      parentContext: context,
-                      onSuccess: _fetchData,
-                    ),
-                  );
-                },
-              ),
-            ),
+      bottomNavigationBar:
+          // widget.isVendor ?
+          const SizedBox.shrink(),
+      // : Padding(
+      //     padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 24.h),
+      //     child: MyButton(
+      //       label: 'Write Review',
+      //       onPressed: () async {
+      //         await MyBottomSheet.show(
+      //           context,
+      //           isDismissible: true,
+      //           isScrollControlled: true,
+      //           enableDrag: true,
+      //           backgroundColor: context.colors.primary,
+      //           child: AddReviewBottomSheet(
+      //             vendorId: widget.vendorId!,
+      //             parentContext: context,
+      //             onSuccess: _fetchData,
+      //           ),
+      //         );
+      //       },
+      //     ),
+      //   ),
     );
   }
 

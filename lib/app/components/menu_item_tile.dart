@@ -27,27 +27,7 @@ class MenuItemTile extends StatelessWidget {
           clipBehavior: Clip.none,
           alignment: Alignment.topCenter,
           children: [
-            Positioned(
-              top: -40,
-              child: CircleAvatar(
-                radius: 45.r,
-                backgroundColor: Colors.white70,
-                child: CircleAvatar(
-                  radius: 44.r,
-                  backgroundColor: Colors.white,
-                  backgroundImage: imageUrl != null
-                      ? NetworkImage(imageUrl!)
-                      : null,
-                  child: imageUrl == null
-                      ? Icon(
-                          Icons.restaurant_menu,
-                          size: 32,
-                          color: context.colors.primary.withValues(alpha: 0.5),
-                        )
-                      : null,
-                ),
-              ),
-            ),
+            // Background container (rendered first, so it's behind)
             Container(
               width: 105.w,
               height: 140.h,
@@ -70,12 +50,34 @@ class MenuItemTile extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    price,
+                    "\$${price}",
                     style: context.typography.body.copyWith(
                       color: context.colors.buttonPrimary,
                     ),
                   ),
                 ],
+              ),
+            ),
+            // Image circle (rendered on top)
+            Positioned(
+              top: -40,
+              child: CircleAvatar(
+                radius: 45.r,
+                backgroundColor: Colors.white70,
+                child: CircleAvatar(
+                  radius: 44.r,
+                  backgroundColor: Colors.white,
+                  backgroundImage: imageUrl != null
+                      ? NetworkImage(imageUrl!)
+                      : null,
+                  child: imageUrl == null
+                      ? Icon(
+                          Icons.restaurant_menu,
+                          size: 32,
+                          color: context.colors.primary.withValues(alpha: 0.5),
+                        )
+                      : null,
+                ),
               ),
             ),
           ],

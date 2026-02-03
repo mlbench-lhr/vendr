@@ -19,6 +19,15 @@ UserModel _$UserModelFromJson(Map<String, dynamic> json) => UserModel(
   newVendorAlert: json['new_vendor_alert'] as bool?,
   distanceBasedAlert: json['distance_based_alert'] as bool?,
   favoriteVendorAlert: json['favorite_vendor_alert'] as bool?,
+  lat: (json['lat'] as num?)?.toDouble(),
+  lng: (json['lng'] as num?)?.toDouble(),
+  requestsRemaining: (json['requests_remaining'] as num?)?.toInt(),
+  requestsLastResetAt: UserModel._fromJsonDateTime(
+    json['requests_last_reset_at'],
+  ),
+  language: json['language'] as String?,
+  averageRating: (json['average_rating'] as num?)?.toDouble(),
+  totalReviews: (json['total_reviews'] as num?)?.toInt(),
 );
 
 Map<String, dynamic> _$UserModelToJson(UserModel instance) => <String, dynamic>{
@@ -32,6 +41,15 @@ Map<String, dynamic> _$UserModelToJson(UserModel instance) => <String, dynamic>{
   'new_vendor_alert': instance.newVendorAlert,
   'distance_based_alert': instance.distanceBasedAlert,
   'favorite_vendor_alert': instance.favoriteVendorAlert,
+  'lat': instance.lat,
+  'lng': instance.lng,
+  'requests_remaining': instance.requestsRemaining,
+  'requests_last_reset_at': UserModel._toJsonDateTime(
+    instance.requestsLastResetAt,
+  ),
+  'language': instance.language,
+  'average_rating': instance.averageRating,
+  'total_reviews': instance.totalReviews,
 };
 
 FavoriteVendorModel _$FavoriteVendorModelFromJson(Map<String, dynamic> json) =>

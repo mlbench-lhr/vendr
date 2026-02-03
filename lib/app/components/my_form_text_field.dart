@@ -29,6 +29,9 @@ class MyFormTextField extends StatelessWidget {
     this.focusNode,
     this.backgroundColor,
     this.onFieldSubmitted,
+    this.hintColor,
+    this.textColor,
+    this.cursorColor,
   });
 
   final TextEditingController? controller;
@@ -55,22 +58,28 @@ class MyFormTextField extends StatelessWidget {
   final bool isDark;
   final FocusNode? focusNode;
   final Color? backgroundColor;
+  final Color? hintColor;
+  final Color? textColor;
+  final Color? cursorColor;
 
   @override
   Widget build(BuildContext context) {
     return TextFormField(
       onFieldSubmitted: onFieldSubmitted,
       style: TextStyle(
-        color: isDark ? context.colors.textOnDark : context.colors.textOnLight,
+        color:
+            textColor ??
+            (isDark ? context.colors.textOnDark : context.colors.textOnLight),
       ),
+
       focusNode: focusNode,
       onChanged: onChanged,
       controller: controller,
       initialValue: initialValue,
       enabled: !readOnly,
-      cursorColor: isDark
-          ? context.colors.inputIcon
-          : context.colors.inputIconLight,
+      cursorColor:
+          cursorColor ??
+          (isDark ? context.colors.inputIcon : context.colors.inputIconLight),
       textCapitalization: textCapitalization,
       textInputAction: textInputAction,
       textAlign: textAlign,
@@ -90,9 +99,11 @@ class MyFormTextField extends StatelessWidget {
         hintStyle: context.typography.body.copyWith(
           fontSize: 14.sp,
           fontWeight: FontWeight.w500,
-          color: isDark
-              ? context.colors.inputBorder
-              : context.colors.textOnLight,
+          color:
+              hintColor ??
+              (isDark
+                  ? context.colors.inputBorder
+                  : context.colors.textOnLight),
         ),
         suffixIcon: suffixIcon != null
             ? Padding(

@@ -12,7 +12,8 @@ enum StorageKey {
   refreshToken('refresh_token'),
   userType('user_type'),
   user('user'),
-  vendor('vendor');
+  vendor('vendor'),
+  distanceFilter('distance_filter');
 
   const StorageKey(this.value);
   final String value;
@@ -29,6 +30,7 @@ class SessionController extends ChangeNotifier {
   VendorModel? _vendor;
   UserModel? _user;
   UserType? userType;
+  double _distanceFilter = 5.0; // Default 5km
 
   String? get token => _token;
   String? get refreshToken =>
@@ -36,6 +38,7 @@ class SessionController extends ChangeNotifier {
   UserModel? get user => _user;
   VendorModel? get vendor => _vendor;
   bool get isLoggedIn => _token != null;
+  double get distanceFilter => _distanceFilter;
 
   bool _initialized = false;
   Future<void>? _initFuture;
@@ -59,6 +62,7 @@ class SessionController extends ChangeNotifier {
       try {
         final vendorJson = jsonDecode(vendorString) as Map<String, dynamic>;
         _vendor = VendorModel.fromJson(vendorJson);
+        log('Vendor loaded from storage - hasPermit: ${_vendor?.hasPermit}');
       } catch (e) {
         log('Failed to decode user: $e');
         _vendor = null;
@@ -82,6 +86,15 @@ class SessionController extends ChangeNotifier {
     }
     if (_token != null) {
       log('Token loaded: $_token');
+    }
+
+    // Load distance filter preference
+    final distanceStr = await _localStorage.readValue(
+      StorageKey.distanceFilter.value,
+    );
+    if (distanceStr != null) {
+      _distanceFilter = double.tryParse(distanceStr) ?? 5.0;
+      log('Distance filter loaded: $_distanceFilter km');
     }
 
     _initialized = true;
@@ -113,7 +126,7 @@ class SessionController extends ChangeNotifier {
     final encoded = jsonEncode(vendor.toJson());
     await _localStorage.setValue(StorageKey.vendor.value, encoded);
     notifyListeners();
-    log('Vendor saved: ${vendor.id}');
+    log('Vendor saved: ${vendor.id} - hasPermit: ${vendor.hasPermit}');
   }
 
   Future<void> saveUser(UserModel user) async {
@@ -122,6 +135,56 @@ class SessionController extends ChangeNotifier {
     final encoded = jsonEncode(user.toJson());
     await _localStorage.setValue(StorageKey.user.value, encoded);
     log('User saved: ${user.id}');
+  }
+
+  Future<void> saveDistanceFilter(double distance) async {
+    _distanceFilter = distance;
+    await _localStorage.setValue(
+      StorageKey.distanceFilter.value,
+      distance.toString(),
+    );
+    log('Distance filter saved: $distance km');
+  }
+
+  /// Decrements the user's remaining meetup requests by 1
+  /// Each user gets 10 requests per day (default from API)
+  /// This only updates locally - the server resets to 10 daily
+  Future<bool> decrementRequestsRemaining() async {
+    if (_user == null) {
+      log('Cannot decrement requests: user is null');
+      return false;
+    }
+
+    final currentRequests = _user!.requestsRemaining ?? 0;
+    if (currentRequests <= 0) {
+      log('Cannot decrement requests: already at 0');
+      return false;
+    }
+
+    // Create a new UserModel with decremented requests
+    final updatedUser = UserModel(
+      id: _user!.id,
+      email: _user!.email,
+      name: _user!.name,
+      imageUrl: _user!.imageUrl,
+      createdAt: _user!.createdAt,
+      updatedAt: _user!.updatedAt,
+      favoriteVendors: _user!.favoriteVendors,
+      newVendorAlert: _user!.newVendorAlert,
+      distanceBasedAlert: _user!.distanceBasedAlert,
+      favoriteVendorAlert: _user!.favoriteVendorAlert,
+      lat: _user!.lat,
+      lng: _user!.lng,
+      requestsRemaining: currentRequests - 1,
+      requestsLastResetAt: _user!.requestsLastResetAt,
+      language: _user!.language,
+      averageRating: _user!.averageRating,
+      totalReviews: _user!.totalReviews,
+    );
+
+    await saveUser(updatedUser);
+    log('Requests remaining decremented to: ${currentRequests - 1}');
+    return true;
   }
 
   //   Future<void> saveUser(UserModel user) async {

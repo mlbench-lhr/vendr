@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:vendr/app/components/my_button.dart';
 import 'package:vendr/app/components/my_scaffold.dart';
 import 'package:vendr/app/utils/extensions/context_extensions.dart';
@@ -9,6 +8,7 @@ import 'package:vendr/services/common/auth_service.dart';
 import 'package:vendr/services/common/location_service.dart';
 import 'package:vendr/services/common/session_manager/session_controller.dart';
 import 'package:vendr/services/vendor/vendor_profile_service.dart';
+import 'package:vendr/view/home/vendor/widgets/custom_badge.dart';
 import 'package:vendr/view/profile/widgets/delete_account_dialog.dart';
 import 'package:vendr/view/profile/widgets/logout_account_dialog.dart';
 import 'package:vendr/view/profile/widgets/profile_menu_tile.dart';
@@ -21,16 +21,27 @@ class VendorProfileScreen extends StatefulWidget {
 }
 
 class _VendorProfileScreenState extends State<VendorProfileScreen> {
+  bool _hasPermit = false;
   final sessionController = SessionController();
+
+  void DataFromSession() {
+    final vendor = sessionController.vendor!;
+    setState(() {
+      _hasPermit = vendor.hasPermit ?? false;
+    });
+  }
 
   @override
   void initState() {
     super.initState();
+    DataFromSession();
     sessionController.addListener(_onSessionChanged);
   }
 
   void _onSessionChanged() {
-    if (mounted) setState(() {});
+    if (mounted) {
+      DataFromSession();
+    }
   }
 
   @override
@@ -58,19 +69,34 @@ class _VendorProfileScreenState extends State<VendorProfileScreen> {
           padding: EdgeInsets.symmetric(vertical: 16.w),
           child: ListView(
             children: [
-              CircleAvatar(
-                radius: 40.r,
-                backgroundColor: context.colors.buttonPrimary,
-                child: CircleAvatar(
-                  backgroundColor: context.colors.buttonPrimary,
-                  radius: 38.r,
-                  backgroundImage: vendor.profileImage != null
-                      ? NetworkImage(vendor.profileImage!)
-                      : null,
-                  child: vendor.profileImage != null
-                      ? null
-                      : Icon(Icons.person, color: Colors.white, size: 40.w),
-                ),
+              Stack(
+                alignment: Alignment.center,
+                children: [
+                  CircleAvatar(
+                    radius: 40.r,
+                    backgroundColor: Colors.blue,
+                    child: CircleAvatar(
+                      backgroundColor: context.colors.buttonPrimary,
+                      radius: 36.r,
+                      backgroundImage: vendor.profileImage != null
+                          ? NetworkImage(vendor.profileImage!)
+                          : null,
+                      child: vendor.profileImage != null
+                          ? null
+                          : Icon(Icons.person, color: Colors.white, size: 40.w),
+                    ),
+                  ),
+                  // Custom Octagon Badge
+                  if (_hasPermit)
+                    Positioned(
+                      left: 220,
+                      bottom: 0,
+                      child: CustomPaint(
+                        size: const Size(26, 26),
+                        painter: RPSCustomPainter(),
+                      ),
+                    ),
+                ],
               ),
               SizedBox(height: 16.h),
               Text(
@@ -101,13 +127,22 @@ class _VendorProfileScreenState extends State<VendorProfileScreen> {
               //     VendorProfileService.gotoVendorLocation(context);
               //   },
               // ),
+              // TODO: Later Add Location Button
+              // ProfileMenuTile(
+              //   title: 'Location',
+              //   icon: Icons.location_on_outlined,
+              //   onTap: () {
+              //     Geolocator.openAppSettings();
+              //   },
+              // ),
               ProfileMenuTile(
                 title: 'Location',
                 icon: Icons.location_on_outlined,
                 onTap: () {
-                  Geolocator.openAppSettings();
+                  VendorProfileService.gotoVendorLocation(context);
                 },
               ),
+
               ProfileMenuTile(
                 title: 'Vendor Hours',
                 icon: Icons.alarm_outlined,
